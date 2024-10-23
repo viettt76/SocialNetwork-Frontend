@@ -1,0 +1,195 @@
+@import '~/styles/variables';
+
+.write-post {
+    width: 100%;
+    box-shadow: 0 0 0.4rem 0 $box-shadow;
+    margin-bottom: 2rem;
+    border-radius: 0.8rem;
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1.8rem;
+
+    .avatar {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        border: 0.1rem solid $border;
+    }
+
+    .input {
+        font-size: 1.6rem;
+        padding: 0.8rem 1.6rem;
+        background-color: $background-color-medium-gray;
+        border-radius: 2rem;
+        flex: 1;
+        margin-left: 1rem;
+        cursor: pointer;
+
+        &:hover {
+            background-color: $background-color-gray;
+        }
+    }
+}
+
+.modal-post {
+    .modal-header {
+        font-size: 1.6rem;
+
+        .modal-title {
+            text-align: center;
+            flex: 1;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+    }
+
+    .avatar {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        border: 0.1rem solid $border;
+        margin-right: 1rem;
+    }
+
+    .name {
+        font-size: 1.5rem;
+    }
+
+    .visibility {
+        font-size: 1.3rem;
+    }
+
+    .post-input {
+        margin-top: 1rem;
+        min-height: 12rem;
+        font-size: 2rem;
+        width: 100%;
+        border: none;
+        outline: none;
+        resize: none;
+
+        &::-webkit-scrollbar {
+            width: 0.8rem;
+        }
+        &::-webkit-scrollbar-track {
+            background: #fff;
+            border-radius: 0.4rem;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 0.4rem;
+        }
+    }
+
+    .images-layout-wrapper {
+        border: 0.1rem solid $border;
+        padding: 0.8rem;
+        border-radius: 0.6rem;
+        position: relative;
+
+        .images-layout {
+            display: grid;
+            gap: 0.1rem;
+
+            &.layout-1 {
+                grid: auto;
+            }
+            &.layout-2 {
+                grid: 30rem / 50% 50%;
+            }
+            &.layout-3 {
+                grid-template-rows: 30rem 30rem;
+                grid-template-columns: 50% 50%;
+                .image-wrapper:first-child {
+                    grid-area: 1 / 1 / span 2 / span 1;
+                }
+            }
+            &.layout-4 {
+                grid: 30rem 30rem / 50% 50%;
+            }
+
+            &.layout-remaining {
+                grid: 30rem 30rem / 50% 50%;
+
+                .overlay {
+                    background: rgba(0, 0, 0, 0.5);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 2.4rem;
+                }
+            }
+
+            .image-wrapper {
+                overflow: hidden;
+                max-height: 60rem;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    object-position: center;
+                }
+            }
+        }
+
+        .image-btn-wrapper {
+            position: absolute;
+            top: 1.6rem;
+            left: 1.8rem;
+            display: flex;
+
+            .btn {
+                font-size: 1.6rem;
+                padding: 0.4rem 1.2rem;
+                background-color: #fff;
+                border-radius: 0.4rem;
+                cursor: pointer;
+                border: 0.1rem solid $border;
+
+                & + .btn {
+                    margin-left: 1.2rem;
+                }
+            }
+        }
+
+        .close-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 3.2rem;
+            height: 3.2rem;
+            font-size: 2rem;
+            background-color: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 1.6rem;
+            right: 1.8rem;
+            cursor: pointer;
+            border: 0.1rem solid $border;
+        }
+    }
+
+    .post-btn {
+        width: 100%;
+        font-size: 1.6rem;
+        background-color: #0866ff;
+        color: #fff;
+        padding: 0.6rem;
+        border-radius: 0.6rem;
+        border: none;
+        outline: none;
+
+        &:hover {
+            background-color: #0c63ef;
+        }
+
+        &:disabled {
+            background-color: #e4e6eb;
+            color: #c2c6cb;
+            cursor: not-allowed;
+        }
+    }
+}

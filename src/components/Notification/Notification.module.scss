@@ -1,0 +1,55 @@
+@use '~/styles/variables' as *;
+
+.notification-wrapper {
+    display: none;
+    position: fixed;
+    top: 5.4rem;
+    right: 2.6rem;
+    background-color: #fff;
+    width: 36rem;
+    max-height: 46rem;
+    box-shadow: 0 0 0.6rem 0 $box-shadow;
+    padding: 0.8rem 0.8rem;
+    border-radius: 0.8rem;
+    overflow-y: auto;
+
+    &.show-notification {
+        display: block;
+    }
+
+    .notification-item {
+        display: flex;
+        border-radius: 0.8rem;
+        padding: 0.8rem;
+        cursor: pointer;
+
+        &:hover {
+            background-color: $background-color-gray;
+        }
+
+        .notification-avatar {
+            border: 0.1rem solid $border;
+            border-radius: 50%;
+            width: 5.6rem;
+            height: 5.6rem;
+            margin-right: 1rem;
+        }
+
+        .notification-content-time {
+            .notification-content {
+                font-size: 1.5rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+            }
+
+            .notification-time {
+                font-size: 1.3rem;
+                color: $main-color;
+                font-weight: 600;
+            }
+        }
+    }
+}

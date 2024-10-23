@@ -1,0 +1,77 @@
+@import '~/styles/variables';
+
+.friends-list-wrapper {
+    margin-top: 2rem;
+    width: 28rem;
+    margin-right: 2.6rem;
+    overflow-y: hidden;
+    max-height: 84vh;
+    position: sticky;
+    right: 0;
+    top: 7.6rem;
+
+    &:hover {
+        overflow-y: scroll;
+
+        &::-webkit-scrollbar {
+            width: 0.8rem;
+        }
+        &::-webkit-scrollbar-track {
+            background: #fff;
+            border-radius: 0.4rem;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 0.4rem;
+        }
+    }
+
+    .title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        margin-bottom: 0.6rem;
+        margin-left: 0.8rem;
+    }
+
+    .friend {
+        display: flex;
+        align-items: center;
+        padding: 0.8rem;
+        cursor: pointer;
+        border-radius: 0.8rem;
+
+        &:hover {
+            background-color: $background-color-gray;
+        }
+
+        .friend-avatar {
+            position: relative;
+
+            img {
+                width: 2.8rem;
+                height: 2.8rem;
+                border-radius: 50%;
+                margin-right: 0.6rem;
+                border: 1px solid $border;
+            }
+
+            &.is-online::before {
+                content: '';
+                display: block;
+                background-color: green;
+                width: 0.8rem;
+                height: 0.8rem;
+                position: absolute;
+                border-radius: 50%;
+                bottom: 0;
+                right: 0.8rem;
+            }
+        }
+
+        .friend-name {
+            font-size: 1.6rem;
+            font-weight: 500;
+        }
+    }
+}

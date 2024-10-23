@@ -1,0 +1,51 @@
+@import '~/styles/variables';
+
+.header {
+    padding: 0.8rem 2.6rem 0.8rem 1.6rem;
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 999;
+    margin-left: 7.6rem;
+    margin-right: 16rem;
+
+    .action-user {
+        border-radius: 50%;
+        background-color: $background-color-medium-gray;
+        width: 4rem;
+        height: 4rem;
+        cursor: pointer;
+        margin-left: 1.2rem;
+        position: relative;
+
+        .number-of-notifications {
+            position: absolute;
+            top: -0.6rem;
+            right: -0.4rem;
+            background-color: rgb(228, 30, 63);
+            font-size: 1.2rem;
+            color: #fff;
+            width: 1.9rem;
+            height: 1.9rem;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .action-user-icon {
+            width: 2.1rem;
+            user-select: none;
+        }
+    }
+}
+
+@media (max-width: 739px) {
+    .header {
+        .search-wrapper {
+            .search-input {
+                display: none;
+            }
+        }
+    }
+}

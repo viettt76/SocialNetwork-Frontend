@@ -1,0 +1,115 @@
+.post-content-wrapper {
+    border: 1px solid #ddd;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: #fff;
+    margin-bottom: 16px;
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.avatar-user {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.post-username {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.post-content {
+    margin-bottom: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.post-images {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.post-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #eee;
+    padding-top: 8px;
+    font-size: 14px;
+    color: #555;
+}
+
+.post-reactions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.post-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    svg {
+        margin-right: 4px;
+    }
+}
+
+.profile-page-wrapper {
+    padding: 16px;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 16px;
+    object-fit: cover;
+    border: 3px solid #ddd;
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+}
+
+p {
+    font-size: 16px;
+    color: #666;
+}
+
+.profile-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}

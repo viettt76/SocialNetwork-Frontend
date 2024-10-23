@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import routes from '~/routes';
 import { SetupInterceptors } from '~/utils/axios';
 import DefaultLayout from '~/layouts/DefaultLayout';
-
+import { getMyInfoService } from './services/userServices';
+import * as actions from './redux/actions';
 function NavigateFunctionComponent() {
     let navigate = useNavigate();
     const [ran, setRan] = useState(false);
@@ -17,17 +18,11 @@ function NavigateFunctionComponent() {
 }
 
 function App() {
-    const friend = {
-        id: 'd6b95a50-23ed-4a7c-9b45-1dd6e3afb959',
-        firstname: 'dien',
-        lastname: 'dinh',
-        avatar: '123.jpg',
-    };
 
     return (
         <BrowserRouter>
             <NavigateFunctionComponent />
-            {/* <FetchUserInfo /> */}
+            { <FetchUserInfo /> }
             <Routes>
                 {routes.map((route, index) => {
                     const Page = route.component;
@@ -54,38 +49,38 @@ function App() {
     );
 }
 
-// function FetchUserInfo() {
-//     const dispatch = useDispatch();
-//     const location = useLocation();
+function FetchUserInfo() {
+    const dispatch = useDispatch();
+    const location = useLocation();
 
-//     useEffect(() => {
-//         const fetchPersonalInfo = async () => {
-//             try {
-//                 const res = await getMyInfoService();
-//                 dispatch(
-//                     actions.saveUserInfo({
-//                         id: res?.id,
-//                         firstName: res?.firstName,
-//                         lastName: res?.lastName,
-//                         age: res?.age,
-//                         avatar: res?.avatar,
-//                         homeTown: res?.homeTown,
-//                         school: res?.school,
-//                         workplace: res?.workplace,
-//                     }),
-//                 );
-//             } catch (error) {
-//                 console.log(error);
-//             }
-//         };
+    useEffect(() => {
+        const fetchPersonalInfo = async () => {
+            try {
+                const res = (await getMyInfoService()).data;
+                dispatch(
+                    actions.saveUserInfo({
+                        id: res?.id,
+                        firstName: res?.firstName,
+                        lastName: res?.lastName,
+                        birthday: res?.dateOfBirth,
+                        avatar: res?.avatarUrl,
+                        homeTown: res?.homeTown,
+                        school: res?.school,
+                        workplace: res?.workplace,
+                    }),
+                );
+            } catch (error) {
+                console.log(error);
+            }
+        };
 
-//         if (location.pathname !== '/login') {
-//             fetchPersonalInfo();
-//         }
-//         // eslint-disable-next-line react-hooks/exhaustive-deps
-//     }, []);
+        if (location.pathname !== '/login') {
+            fetchPersonalInfo();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-//     return null;
-// }
+    return null;
+}
 
 export default App;

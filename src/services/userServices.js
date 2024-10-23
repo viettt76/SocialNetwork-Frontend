@@ -1,7 +1,7 @@
 import axios from '~/utils/axios';
 
 export const getMyInfoService = () => {
-    return axios.get('/user/my-info');
+    return axios.get('/User/getInfor');
 };
 
 export const updateMyInfoService = ({ homeTown, school, workplace, avatar, birthday }) => {

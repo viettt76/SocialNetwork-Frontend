@@ -8,9 +8,9 @@ export const getFriendSuggestionsService = () => {
     return axios.get('/relationships/suggestion');
 };
 
-export const sendFriendRequestService = (receiverId) => {
-    return axios.post('/relationships/request', { relationship: 1, receiverId });
-};
+export const getFriendsOnlineService = () => {
+    return axios.get('/User/getFriendOnline');
+}
 
 export const getFriendRequestService = () => {
     return axios.get('/relationships/request');

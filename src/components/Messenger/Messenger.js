@@ -70,7 +70,8 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
         const fetchLatestConversations = async () => {
             try {
                 const res = await getLatestConversationsService();
-                setLatestConversations(res);
+                // setLatestConversations(res);
+                setLatestConversations([]);
             } catch (error) {
                 console.log(error);
             }

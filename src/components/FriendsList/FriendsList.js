@@ -5,6 +5,7 @@ import socket from '~/socket';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import * as actions from '~/redux/actions';
 import { useDispatch } from 'react-redux';
+import { getFriendsOnlineService } from '~/services/relationshipServices';
 
 const FriendsList = () => {
     const dispatch = useDispatch();
@@ -12,22 +13,12 @@ const FriendsList = () => {
     const [onlineFriends, setOnlineFriends] = useState([]);
 
     useEffect(() => {
-        setOnlineFriends([
-            {
-                id: 'a393dd03-c9e5-46db-bc67-25b3c5bbc407',
-                firstName: '2',
-                lastName: '2',
-                avatar: 'https://res.cloudinary.com/du19iyqz9/image/upload/v1728027526/file_1728027522460.jpg',
-                isOnline: true,
-            },
-            {
-                id: '084c6450-b036-4c52-bdd1-ea2fca0cd612',
-                firstName: '6',
-                lastName: '6',
-                avatar: 'https://res.cloudinary.com/du19iyqz9/image/upload/v1727970378/file_1727970376041.jpg',
-                isOnline: false,
-            },
-        ]);
+        const getFriendsOnlineServiceHandler = async () => {
+            const friends = (await getFriendsOnlineService()).data;
+            setOnlineFriends(friends);
+        };
+    
+        getFriendsOnlineServiceHandler();
         // socket.emit('getFriendsOnline');
 
         // const handleFriendOnline = (resOnlineFriends) => {

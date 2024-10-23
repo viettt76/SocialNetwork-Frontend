@@ -7,7 +7,7 @@ import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import { useDispatch, useSelector } from 'react-redux';
 import { userInfoSelector } from '~/redux/selectors';
 import * as actions from '~/redux/actions';
-import { getAllMessageService} from '~/services/chatServices';
+import { getAllMessageService, sendMessageWithFriendService } from '~/services/chatServices';
 import socket from '~/socket';
 import _ from 'lodash';
 import useClickOutside from '~/hook/useClickOutside';
@@ -23,9 +23,14 @@ const ChatPopup = ({ friend }) => {
 
     const endOfMessagesRef = useRef(null);
 
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState([
+        {
+            symbol: 'like',
+        },
+    ]);
 
     const [sendMessage, setSendMessage] = useState('');
+    const [symbol, setSymbol] = useState(0);
 
     const [processingMessage, setProcessingMessage] = useState('');
 
@@ -35,7 +40,6 @@ const ChatPopup = ({ friend }) => {
     useEffect(() => {
         (async () => {
             try {
-
                 const messages = (await getAllMessageService(friend?.id)).data.map((message) => ({
                     id: message.messageID,
                     sender: message.senderID,
@@ -44,8 +48,7 @@ const ChatPopup = ({ friend }) => {
                 }));
 
                 setMessages(messages);
-            }
-             catch (error) {
+            } catch (error) {
                 console.log(error);
             }
         })();
@@ -99,7 +102,7 @@ const ChatPopup = ({ friend }) => {
         debugger;
         console.log('Start chat >>>>>>');
         try {
-            if(!sendMessage.trim()) return;
+            if (symbol === 0 && !sendMessage.trim()) return;
             const message = sendMessage;
 
             setSendMessage('');
@@ -118,7 +121,7 @@ const ChatPopup = ({ friend }) => {
 
             setProcessingMessage('Đang xử lý');
 
-            var messageId = await conn.invoke('SendMessageToPerson', friend?.id, message,0);
+            var messageId = await conn.invoke('SendMessageToPerson', friend?.id, message, 0);
 
             console.log('MessageId: ', messageId);
 
@@ -139,6 +142,15 @@ const ChatPopup = ({ friend }) => {
             console.log(`Sending message to ${friend?.id}: ${message}`);
         } catch (e) {
             console.log(e.message);
+        }
+    };
+
+    const handleSendSymbol = async () => {
+        try {
+            setSymbol(1);
+            await sendMessageToPerson();
+        } catch (error) {
+            console.log(error);
         }
     };
 
@@ -229,7 +241,17 @@ const ChatPopup = ({ friend }) => {
                                         src={friend?.avatar || defaultAvatar}
                                     />
                                 )}
-                                <div className={clsx(styles['message'])}>{message?.message}</div>
+                                {message?.message && <div className={clsx(styles['message'])}>{message?.message}</div>}
+                                {message.symbol && (
+                                    <div>
+                                        {message.symbol === 'like' && (
+                                            <FontAwesomeIcon
+                                                className={clsx(styles['message-symbol'])}
+                                                icon={faThumbsUp}
+                                            />
+                                        )}
+                                    </div>
+                                )}
                                 {processingMessage &&
                                     _.findLast(messages, { sender: userInfo?.id }) &&
                                     _.isEqual(_.findLast(messages, { sender: userInfo?.id }), message) && (
@@ -261,7 +283,11 @@ const ChatPopup = ({ friend }) => {
                     {sendMessage ? (
                         <i className={clsx(styles['send-message-btn'])} onClick={sendMessageToPerson}></i>
                     ) : (
-                        <FontAwesomeIcon className={clsx(styles['link-icon'])} icon={faThumbsUp} />
+                        <FontAwesomeIcon
+                            className={clsx(styles['link-icon'])}
+                            icon={faThumbsUp}
+                            onClick={handleSendSymbol}
+                        />
                     )}
                 </div>
             </div>

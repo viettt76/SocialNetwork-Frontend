@@ -142,6 +142,13 @@
                 word-break: break-word;
             }
 
+            .message-symbol {
+                margin-left: 0.6rem;
+                color: blue;
+                font-size: 2.6rem;
+                cursor: pointer;
+            }
+
             .process-message {
                 font-size: 1.3rem;
                 color: $text-color-gray;

@@ -18,11 +18,10 @@ function NavigateFunctionComponent() {
 }
 
 function App() {
-
     return (
         <BrowserRouter>
             <NavigateFunctionComponent />
-            { <FetchUserInfo /> }
+            <FetchUserInfo />
             <Routes>
                 {routes.map((route, index) => {
                     const Page = route.component;

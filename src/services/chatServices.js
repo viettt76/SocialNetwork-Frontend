@@ -59,5 +59,5 @@ export const updateGroupAvatarService = ({ groupChatId, avatar }) => {
 };
 
 export const getAllMessageService = (receiverId) => {
-    return axios.get(`/MessagePersonalChat/getAllMessage`,{params:{receiverId}});
+    return axios.get(`/MessagePersonalChat/getAllMessage`, { params: { receiverId } });
 };

@@ -256,6 +256,9 @@ const ChatPopup = ({ friend }) => {
                                     />
                                 )}
                                 {message?.message && <div className={clsx(styles['message'])}>{message?.message}</div>}
+                                {message?.picture && (
+                                    <img src={message?.picture} className={clsx(styles['message-picture'])} />
+                                )}
                                 {message.symbol && (
                                     <div>
                                         {message.symbol === 'like' && (

@@ -1,0 +1,7 @@
+@use '~/styles/variables' as *;
+
+.loading-wrapper {
+    display: flex;
+    justify-content: center;
+    color: $main-color;
+}

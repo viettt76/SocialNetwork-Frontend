@@ -173,7 +173,7 @@ function Login() {
                             name="email"
                             className="fz-16"
                             type="text"
-                            placeholder="email"
+                            placeholder="Email"
                             required
                             onKeyUp={handleEnterToLogin}
                             onChange={handleChangeFormLogin}

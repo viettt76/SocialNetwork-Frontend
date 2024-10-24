@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux';
 import ChatPopup from '~/components/ChatPopup';
 import Post from '~/components/Post';
+import WritePost from '~/components/WritePost';
 import { openChatsSelector } from '~/redux/selectors';
 
 const Home = () => {
@@ -17,8 +18,11 @@ const Home = () => {
     const openChats = useSelector(openChatsSelector);
     return (
         <div className="d-flex justify-content-center mt-5">
-            <Post postInfo={{ id: 1 }} />
-            {friendList?.map((friend) => {
+            <div>
+                <WritePost />
+                <Post postInfo={{ id: 1 }} />
+            </div>
+            {openChats?.map((friend) => {
                 return <ChatPopup key={`friend-${friend?.id}`} friend={friend} />;
             })}
         </div>

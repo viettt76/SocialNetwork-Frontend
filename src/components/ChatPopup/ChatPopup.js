@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faThumbsUp, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faPaperclip, faThumbsUp, faXmark } from '@fortawesome/free-solid-svg-icons';
 import styles from './ChatPopup.module.scss';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,6 +13,7 @@ import _ from 'lodash';
 import useClickOutside from '~/hook/useClickOutside';
 
 import { HubConnectionBuilder } from '@microsoft/signalr';
+import { uploadToCloudinary } from '~/utils/commonUtils';
 
 const ChatPopup = ({ friend }) => {
     const { ref: chatPopupRef, isComponentVisible: isFocus, setIsComponentVisible: setIsFocus } = useClickOutside(true);
@@ -23,11 +24,7 @@ const ChatPopup = ({ friend }) => {
 
     const endOfMessagesRef = useRef(null);
 
-    const [messages, setMessages] = useState([
-        {
-            symbol: 'like',
-        },
-    ]);
+    const [messages, setMessages] = useState([]);
 
     const [sendMessage, setSendMessage] = useState('');
     const [symbol, setSymbol] = useState(0);
@@ -99,7 +96,6 @@ const ChatPopup = ({ friend }) => {
     }, []);
 
     const sendMessageToPerson = async () => {
-        debugger;
         console.log('Start chat >>>>>>');
         try {
             if (symbol === 0 && !sendMessage.trim()) return;
@@ -195,6 +191,24 @@ const ChatPopup = ({ friend }) => {
     const handleShowSetting = () => setShowSetting(true);
     const handleHideSetting = () => setShowSetting(false);
 
+    const handleChooseFile = async (e) => {
+        const files = Array.from(e.target.files);
+
+        try {
+            const imagesUrl = [];
+            if (files.length > 0) {
+                const uploadedUrls = await Promise.all(files.map((fileUpload) => uploadToCloudinary(fileUpload)));
+                imagesUrl.push(...uploadedUrls);
+            }
+
+            imagesUrl?.map(async (imageUrl) => {
+                await sendMessageWithFriendService({ friendId: friend?.id, file: imageUrl });
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     return (
         <div className={clsx(styles['chat-wrapper'])} ref={chatPopupRef} onClick={() => setIsFocus(true)}>
             <div
@@ -269,6 +283,10 @@ const ChatPopup = ({ friend }) => {
             </div>
             <div className={clsx(styles['chat-footer'])}>
                 <div className={clsx(styles['send-message-wrapper'])}>
+                    <label htmlFor="chatpopup-attachment">
+                        <FontAwesomeIcon className={clsx(styles['send-message-attachment'])} icon={faPaperclip} />
+                    </label>
+                    <input type="file" id="chatpopup-attachment" multiple hidden onChange={handleChooseFile} />
                     <input
                         value={sendMessage}
                         className={clsx(styles['send-message'])}

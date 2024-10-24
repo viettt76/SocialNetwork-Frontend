@@ -142,6 +142,16 @@
                 word-break: break-word;
             }
 
+            .message-picture {
+                width: 18rem;
+                height: 18rem;
+                object-fit: fill;
+                border-top-right-radius: 0.4rem;
+                border-top-left-radius: 2.2rem;
+                border-bottom-right-radius: 2.2rem;
+                border-bottom-left-radius: 2.2rem;
+            }
+
             .message-symbol {
                 margin-left: 0.6rem;
                 color: blue;
@@ -160,6 +170,14 @@
     .chat-footer {
         .send-message-wrapper {
             position: relative;
+            display: flex;
+            align-items: center;
+
+            .send-message-attachment {
+                font-size: 1.8rem;
+                padding: 0.6rem;
+                cursor: pointer;
+            }
 
             .send-message {
                 width: 100%;

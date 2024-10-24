@@ -4,10 +4,11 @@ export const getMessagesWithFriendService = (friendId) => {
     return axios.get(`/chat/messages?friendId=${friendId}`);
 };
 
-export const sendMessageWithFriendService = ({ friendId, message }) => {
+export const sendMessageWithFriendService = ({ friendId, message, file }) => {
     return axios.post('/chat/message', {
         friendId: friendId,
         message: message,
+        file,
     });
 };
 

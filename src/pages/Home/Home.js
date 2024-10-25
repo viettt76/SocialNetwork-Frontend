@@ -22,8 +22,8 @@ const Home = () => {
                 <WritePost />
                 <Post postInfo={{ id: 1 }} />
             </div>
-            {openChats?.map((friend) => {
-                return <ChatPopup key={`friend-${friend?.id}`} friend={friend} />;
+            {openChats?.map((friend, index) => {
+                return <ChatPopup key={`friend-${friend?.id}`} friend={friend} index ={index}/>;
             })}
         </div>
     );

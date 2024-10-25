@@ -64,12 +64,12 @@ const Header = () => {
             dispatch(actions.addNotificationOther(notificationFriendRequest));
         };
 
-        socket.on('newMessage', handleNewNotificationMessenger);
-        socket.on('notificationNewFriendRequest', handleNotificationNewFriendRequest);
+        // socket.on('newMessage', handleNewNotificationMessenger);
+        // socket.on('notificationNewFriendRequest', handleNotificationNewFriendRequest);
 
         return () => {
-            socket.off('newMessage', handleNewNotificationMessenger);
-            socket.off('notificationNewFriendRequest', handleNotificationNewFriendRequest);
+            // socket.off('newMessage', handleNewNotificationMessenger);
+            // socket.off('notificationNewFriendRequest', handleNotificationNewFriendRequest);
         };
     }, []);
 

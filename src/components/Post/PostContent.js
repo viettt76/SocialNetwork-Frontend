@@ -173,12 +173,12 @@ Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Ma
             }
         };
 
-        socket.on('releaseEmotion', handleReleaseEmotion);
-        socket.on('updateEmotion', handleUpdateEmotion);
+        // socket.on('releaseEmotion', handleReleaseEmotion);
+        // socket.on('updateEmotion', handleUpdateEmotion);
 
         return () => {
-            socket.off('releaseEmotiff', handleReleaseEmotion);
-            socket.off('updateEmotion', handleUpdateEmotion);
+            // socket.off('releaseEmotiff', handleReleaseEmotion);
+            // socket.off('updateEmotion', handleUpdateEmotion);
         };
     }, [id]);
 
@@ -193,23 +193,23 @@ Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Ma
         }
     };
 
-    useEffect(() => {
-        const handleCancelReleasedEmotion = ({ postId, userId: userCancelReleaseEmotionId }) => {
-            if (userInfo.id === userCancelReleaseEmotionId && id === postId) {
-                setCurrentEmotionNameCustom(null);
+    // useEffect(() => {
+    //     const handleCancelReleasedEmotion = ({ postId, userId: userCancelReleaseEmotionId }) => {
+    //         if (userInfo.id === userCancelReleaseEmotionId && id === postId) {
+    //             setCurrentEmotionNameCustom(null);
 
-                setCopyEmotions((prev) => {
-                    const clone = _.filter(prev, (e) => e?.userInfo?.id !== userCancelReleaseEmotionId);
-                    return clone;
-                });
-            }
-        };
-        socket.on('cancelReleasedEmotion', handleCancelReleasedEmotion);
+    //             setCopyEmotions((prev) => {
+    //                 const clone = _.filter(prev, (e) => e?.userInfo?.id !== userCancelReleaseEmotionId);
+    //                 return clone;
+    //             });
+    //         }
+    //     };
+    //     socket.on('cancelReleasedEmotion', handleCancelReleasedEmotion);
 
-        return () => {
-            socket.off('cancelReleasedEmotion', handleCancelReleasedEmotion);
-        };
-    }, [id, userInfo.id]);
+    //     return () => {
+    //         socket.off('cancelReleasedEmotion', handleCancelReleasedEmotion);
+    //     };
+    // }, [id, userInfo.id]);
 
     const handleCancelReleasedEmotion = async () => {
         try {
@@ -219,18 +219,18 @@ Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Ma
         }
     };
 
-    useEffect(() => {
-        const handleNewCommentNumberOfComments = (postId) => {
-            if (id === postId) {
-                setNumberOfComments((prev) => prev + 1);
-            }
-        };
-        socket.on('newComment-numberOfComments', handleNewCommentNumberOfComments);
+    // useEffect(() => {
+    //     const handleNewCommentNumberOfComments = (postId) => {
+    //         if (id === postId) {
+    //             setNumberOfComments((prev) => prev + 1);
+    //         }
+    //     };
+    //     socket.on('newComment-numberOfComments', handleNewCommentNumberOfComments);
 
-        return () => {
-            socket.off('newComment-numberOfComments', handleNewCommentNumberOfComments);
-        };
-    }, [id]);
+    //     return () => {
+    //         socket.off('newComment-numberOfComments', handleNewCommentNumberOfComments);
+    //     };
+    // }, [id]);
 
     return (
         <div className={clsx(styles['post-content-wrapper'])}>

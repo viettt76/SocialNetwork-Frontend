@@ -10,7 +10,6 @@ import customToastify from '~/utils/customToastify';
 import { loginService, signUpService } from '~/services/authServices';
 import { getMyInfoService } from '~/services/userServices';
 import * as actions from '~/redux/actions';
-// import socket from '~/socket';
 
 function Login() {
     const navigate = useNavigate(null);
@@ -95,7 +94,6 @@ function Login() {
                             workplace: 'NewwaveJSC',
                         }),
                     );
-                    // socket.connect();
                     console.log(res);
                 };
                 fetchPersonalInfo();

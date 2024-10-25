@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { userInfoSelector } from '~/redux/selectors';
 import * as actions from '~/redux/actions';
 import { getAllMessageService, sendMessageWithFriendService } from '~/services/chatServices';
-import socket from '~/socket';
 import _ from 'lodash';
 import useClickOutside from '~/hook/useClickOutside';
 
@@ -27,6 +26,7 @@ const ChatPopup = ({ friend }) => {
     const [messages, setMessages] = useState([]);
 
     const [sendMessage, setSendMessage] = useState('');
+
     const [symbol, setSymbol] = useState(0);
 
     const [processingMessage, setProcessingMessage] = useState('');
@@ -34,6 +34,13 @@ const ChatPopup = ({ friend }) => {
     const [conn, setConn] = useState('');
 
     const [error, setError] = useState('');
+
+    const [isTyping, setIsTyping] = useState(false);
+
+    const [isDisplayTyping, setIsDisPlayTyping] = useState(false);
+
+    let typingTimeout = null;
+
     useEffect(() => {
         (async () => {
             try {
@@ -54,7 +61,6 @@ const ChatPopup = ({ friend }) => {
     }, [friend]);
     useEffect(() => {
         const connection = new HubConnectionBuilder().withUrl('https://localhost:7072/chatPerson').build();
-        // Mở kết nối
         const startConnection = async () => {
             try {
                 await connection.start();
@@ -66,19 +72,25 @@ const ChatPopup = ({ friend }) => {
                     console.error('Error received: ', errorMessage);
                 });
 
-                connection.on('ReceiveSpecitificMessage', (messageID, message, sendDate, picture) => {
+                connection.on('ReceiveSpecitificMessage', (messageResponse) => {
                     setMessages((prev) => {
                         return [
                             ...prev,
                             {
-                                id: messageID,
+                                id: messageResponse.messageID,
                                 sender: friend?.id,
                                 receiver: userInfo?.id,
-                                message,
+                                message: messageResponse.content,
+                                pictures: messageResponse.images,
+                                sendDate: messageResponse.sendDate,
+                                symbol: messageResponse.symbol
                             },
                         ];
                     });
-
+                    connection.on("ReciverTypingNotification", (isTyping) => {
+                        setIsDisPlayTyping(isTyping);
+                        console.log("User is typing? >>>", isTyping);
+                    })
                     console.log(`${sender} has send ${message}`);
                 });
             } catch (error) {
@@ -97,11 +109,13 @@ const ChatPopup = ({ friend }) => {
     }, []);
 
         const sendMessageToPerson = async (imagesUrls = []) => {
-            console.log(imagesUrls);
-            console.log('Start chat >>>>>>');
             try {
                 if (symbol === 0 && !sendMessage.trim() && imagesUrls.length === 0) return;
-                const message = sendMessage;
+                let message = sendMessage;
+
+                if(imagesUrls.length > 0) {
+                    message = '';
+                }
 
                 setSendMessage('');
 
@@ -144,7 +158,6 @@ const ChatPopup = ({ friend }) => {
 
             setProcessingMessage('');
 
-            console.log(`Sending message to ${friend?.id}: ${message}`);
         } catch (e) {
             console.log(e.message);
         }
@@ -165,28 +178,7 @@ const ChatPopup = ({ friend }) => {
 
     const handleCloseChatPopup = useCallback(() => {
         dispatch(actions.closeChat(friend?.id));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [friend?.id]);
-
-    useEffect(() => {
-        const handleNewMessage = (newMessage) => {
-            if (newMessage.receiver === userInfo?.id) {
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        id: newMessage?.id,
-                        sender: newMessage?.sender,
-                        message: newMessage?.message,
-                    },
-                ]);
-            }
-        };
-        socket.on('newMessage', handleNewMessage);
-
-        return () => {
-            socket.off('newMessage', handleNewMessage);
-        };
-    }, [userInfo?.id]);
 
     useEffect(() => {
         window.onkeydown = (e) => {
@@ -195,6 +187,13 @@ const ChatPopup = ({ friend }) => {
             }
         };
     }, [handleCloseChatPopup, isFocus]);
+
+    // useEffect(() => {
+    //     () => {return conn.on("ReciverTypingNotification", (isTyping) => {
+    //         setIsDisPlayTyping(isTyping);
+    //         console.log("User is typing? >>>", isTyping);
+    //     })};
+    // }, [isTyping]);
 
     const [showSetting, setShowSetting] = useState(false);
     const handleShowSetting = () => setShowSetting(true);
@@ -210,16 +209,24 @@ const ChatPopup = ({ friend }) => {
                 imagesUrls.push(...uploadedUrls);
                 console.log(imagesUrls);
             }
-
-            // imagesUrl?.map(async (imageUrl) => {
-            //     // await sendMessageWithFriendService({ friendId: friend?.id, file: imageUrl });
-            //     // await sendMessageToPerson(files);
-            // });
-
             await sendMessageToPerson(imagesUrls);
             e.target.value = null;
         } catch (error) {
             console.log(error);
+        }
+    };
+
+    const handlerTyping = async() => {
+        if(!isTyping){
+            setIsTyping(true);
+            await conn.invoke("OnUserTyping", friend?.id);
+        }
+        else{
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(async() => {
+                setIsTyping(false);
+                await conn.invoke("StoppedUserTyping", friend?.id);
+            }, 3000);
         }
     };
 
@@ -254,49 +261,72 @@ const ChatPopup = ({ friend }) => {
                 />
             </div>
             <div ref={endOfMessagesRef} className={clsx(styles['chat-container'])}>
-                {messages?.length > 0 ? (
-                    messages?.map((message, index) => {
-                        return (
-                            <div
-                                key={`chat-${index}`}
-                                className={clsx(styles['message-wrapper'], {
-                                    [[styles['message-current-user']]]: message?.sender === userInfo?.id,
-                                })}
-                            >
-                                {messages[index - 1]?.sender !== message?.sender && message?.sender === friend?.id && (
-                                    <img
-                                        className={clsx(styles['message-avatar'])}
-                                        src={friend?.avatar || defaultAvatar}
-                                    />
-                                )}
-                                {message?.message && <div className={clsx(styles['message'])}>{message?.message}</div>}
-                                {message?.pictures.length > 0 &&
-                                 (message.pictures.map((picture) => {
-                                     return <img src={picture} className={clsx(styles['message-picture'])} />;
-                                }))}
-                                {message.symbol > 0 && (
-                                    <div>
-                                        {message.symbol === 'like' && (
-                                            <FontAwesomeIcon
-                                                className={clsx(styles['message-symbol'])}
-                                                icon={faThumbsUp}
-                                            />
-                                        )}
-                                    </div>
-                                )}
-                                {processingMessage &&
-                                    _.findLast(messages, { sender: userInfo?.id }) &&
-                                    _.isEqual(_.findLast(messages, { sender: userInfo?.id }), message) && (
-                                        <div className={clsx(styles['process-message'])}>{processingMessage}</div>
-                                    )}
-                            </div>
-                        );
-                    })
-                ) : (
-                    <div className="mt-5 text-center fz-16">
-                        Hãy bắt đầu cuộc trò chuyện với {`${friend?.lastName} ${friend?.firstName}`}
-                    </div>
-                )}
+
+            {messages?.length > 0 ? (
+    <>
+        {messages?.map((message, index) => {
+            return (
+                <div
+                    key={`chat-${index}`}
+                    className={clsx(styles['message-wrapper'], {
+                        [styles['message-current-user']]: message?.sender === userInfo?.id,
+                    })}
+                >
+                    {messages[index - 1]?.sender !== message?.sender && message?.sender === friend?.id && (
+                        <img
+                            className={clsx(styles['message-avatar'])}
+                            src={friend?.avatar || defaultAvatar}
+                        />
+                    )}
+                    {message?.message && <div className={clsx(styles['message'])}>{message?.message}</div>}
+                    {message?.pictures?.length > 0 &&
+                        message.pictures.map((picture, picIndex) => (
+                            <img
+                                key={`pic-${picIndex}`}
+                                src={picture}
+                                className={clsx(styles['message-picture'])}
+                            />
+                        ))
+                    }
+                    {message.symbol > 0 && (
+                        <div>
+                            {message.symbol === 'like' && (
+                                <FontAwesomeIcon
+                                    className={clsx(styles['message-symbol'])}
+                                    icon={faThumbsUp}
+                                />
+                            )}
+                        </div>
+                    )}
+                    {processingMessage &&
+                        _.findLast(messages, { sender: userInfo?.id }) &&
+                        _.isEqual(_.findLast(messages, { sender: userInfo?.id }), message) && (
+                            <div className={clsx(styles['process-message'])}>{processingMessage}</div>
+                        )
+                    }
+                </div>
+            );
+        })}
+        {isDisplayTyping && (
+            <div className={clsx(styles['typing-wrapper'])}>
+                <img
+                    className={clsx(styles['message-avatar'])}
+                    src={friend?.avatar || defaultAvatar}
+                />
+                <div className={clsx(styles['typing-indicator'])}>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        )}
+    </>
+            ) : (
+                <div className="mt-5 text-center fz-16">
+                    Hãy bắt đầu cuộc trò chuyện với {`${friend?.lastName} ${friend?.firstName}`}
+                </div>
+            )}
+                
                 <div></div>
             </div>
             <div className={clsx(styles['chat-footer'])}>
@@ -309,7 +339,10 @@ const ChatPopup = ({ friend }) => {
                         value={sendMessage}
                         className={clsx(styles['send-message'])}
                         placeholder="Aa"
-                        onChange={(e) => setSendMessage(e.target.value)}
+                        onChange={(e) => {
+                            setSendMessage(e.target.value);
+                            handlerTyping();
+                        }}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 sendMessageToPerson([]);

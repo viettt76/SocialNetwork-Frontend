@@ -30,18 +30,18 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
 
     const [latestConversations, setLatestConversations] = useState([]);
 
-    useEffect(() => {
-        socket.emit('getFriendsOnline');
+    // useEffect(() => {
+    //     socket.emit('getFriendsOnline');
 
-        const handleFriendOnline = (resOnlineFriends) => {
-            setOnlineFriends(resOnlineFriends);
-        };
-        socket.on('friendsOnline', handleFriendOnline);
+    //     const handleFriendOnline = (resOnlineFriends) => {
+    //         setOnlineFriends(resOnlineFriends);
+    //     };
+    //     socket.on('friendsOnline', handleFriendOnline);
 
-        return () => {
-            socket.off('friendsOnline', handleFriendOnline);
-        };
-    }, []);
+    //     return () => {
+    //         socket.off('friendsOnline', handleFriendOnline);
+    //     };
+    // }, []);
 
     const [isInValidNameGroup, setIsInvalidNameGroup] = useState(false);
 

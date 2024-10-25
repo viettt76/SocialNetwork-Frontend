@@ -203,7 +203,7 @@ const ModalPost = ({ postInfo, show, handleClose }) => {
     };
 
     useEffect(() => {
-        socket.emit('joinPost', id);
+        // socket.emit('joinPost', id);
     }, [id]);
 
     useEffect(() => {
@@ -253,12 +253,12 @@ const ModalPost = ({ postInfo, show, handleClose }) => {
             }
         };
 
-        socket.on('newComment', handleNewComment);
-        socket.on('newChildComment', handleNewChildComment);
+        // socket.on('newComment', handleNewComment);
+        // socket.on('newChildComment', handleNewChildComment);
 
         return () => {
-            socket.off('newComment', handleNewComment);
-            socket.off('newChildComment', handleNewChildComment);
+            // socket.off('newComment', handleNewComment);
+            // socket.off('newChildComment', handleNewChildComment);
         };
     }, [id]);
 

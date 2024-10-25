@@ -40,8 +40,10 @@ const ChatPopup = ({ friend }) => {
                 const messages = (await getAllMessageService(friend?.id)).data.map((message) => ({
                     id: message.messageID,
                     sender: message.senderID,
-                    receiver: message.receiverID,
+                    receiver: message.reciverID,
                     message: message.content,
+                    pictures: message.images || [],
+                    symbol: message.symbol,
                 }));
 
                 setMessages(messages);
@@ -50,7 +52,6 @@ const ChatPopup = ({ friend }) => {
             }
         })();
     }, [friend]);
-
     useEffect(() => {
         const connection = new HubConnectionBuilder().withUrl('https://localhost:7072/chatPerson').build();
         // Mở kết nối
@@ -65,7 +66,7 @@ const ChatPopup = ({ friend }) => {
                     console.error('Error received: ', errorMessage);
                 });
 
-                connection.on('ReceiveSpecitificMessage', (messageID, message, sendDate) => {
+                connection.on('ReceiveSpecitificMessage', (messageID, message, sendDate, picture) => {
                     setMessages((prev) => {
                         return [
                             ...prev,
@@ -95,29 +96,37 @@ const ChatPopup = ({ friend }) => {
         };
     }, []);
 
-    const sendMessageToPerson = async () => {
-        console.log('Start chat >>>>>>');
-        try {
-            if (symbol === 0 && !sendMessage.trim()) return;
-            const message = sendMessage;
+        const sendMessageToPerson = async (imagesUrls = []) => {
+            console.log(imagesUrls);
+            console.log('Start chat >>>>>>');
+            try {
+                if (symbol === 0 && !sendMessage.trim() && imagesUrls.length === 0) return;
+                const message = sendMessage;
 
-            setSendMessage('');
+                setSendMessage('');
 
-            setMessages((prev) => {
-                return [
-                    ...prev,
-                    {
-                        id: null,
-                        sender: userInfo?.id,
-                        receiver: friend?.id,
-                        message,
-                    },
-                ];
-            });
+                setMessages((prev) => {
+                    return [
+                        ...prev,
+                        {
+                            id: null,
+                            sender: userInfo?.id,
+                            receiver: friend?.id,
+                            message,
+                            pictures: imagesUrls || [],
+                        },
+                    ];
+                });
 
             setProcessingMessage('Đang xử lý');
-
-            var messageId = await conn.invoke('SendMessageToPerson', friend?.id, message, 0);
+            
+            var messageParameter = {
+                reciverID: friend?.id,
+                content: message,
+                images: imagesUrls,
+                symbol: symbol,
+            }
+            var messageId = await conn.invoke('SendMessageToPerson', messageParameter);
 
             console.log('MessageId: ', messageId);
 
@@ -193,17 +202,22 @@ const ChatPopup = ({ friend }) => {
 
     const handleChooseFile = async (e) => {
         const files = Array.from(e.target.files);
-
+        console.log(files);
         try {
-            const imagesUrl = [];
+            const imagesUrls = [];
             if (files.length > 0) {
                 const uploadedUrls = await Promise.all(files.map((fileUpload) => uploadToCloudinary(fileUpload)));
-                imagesUrl.push(...uploadedUrls);
+                imagesUrls.push(...uploadedUrls);
+                console.log(imagesUrls);
             }
 
-            imagesUrl?.map(async (imageUrl) => {
-                await sendMessageWithFriendService({ friendId: friend?.id, file: imageUrl });
-            });
+            // imagesUrl?.map(async (imageUrl) => {
+            //     // await sendMessageWithFriendService({ friendId: friend?.id, file: imageUrl });
+            //     // await sendMessageToPerson(files);
+            // });
+
+            await sendMessageToPerson(imagesUrls);
+            e.target.value = null;
         } catch (error) {
             console.log(error);
         }
@@ -256,10 +270,11 @@ const ChatPopup = ({ friend }) => {
                                     />
                                 )}
                                 {message?.message && <div className={clsx(styles['message'])}>{message?.message}</div>}
-                                {message?.picture && (
-                                    <img src={message?.picture} className={clsx(styles['message-picture'])} />
-                                )}
-                                {message.symbol && (
+                                {message?.pictures.length > 0 &&
+                                 (message.pictures.map((picture) => {
+                                     return <img src={picture} className={clsx(styles['message-picture'])} />;
+                                }))}
+                                {message.symbol > 0 && (
                                     <div>
                                         {message.symbol === 'like' && (
                                             <FontAwesomeIcon
@@ -297,12 +312,12 @@ const ChatPopup = ({ friend }) => {
                         onChange={(e) => setSendMessage(e.target.value)}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
-                                sendMessageToPerson();
+                                sendMessageToPerson([]);
                             }
                         }}
                     />
                     {sendMessage ? (
-                        <i className={clsx(styles['send-message-btn'])} onClick={sendMessageToPerson}></i>
+                        <i className={clsx(styles['send-message-btn'])} onClick={() => sendMessageToPerson([])}></i>
                     ) : (
                         <FontAwesomeIcon
                             className={clsx(styles['link-icon'])}

@@ -246,6 +246,7 @@
                     height: 1.5rem;
                     bottom: 100%;
                     right: -4rem;
+                    z-index: -1;
                 }
             }
 
@@ -266,7 +267,28 @@
                 .emotion {
                     margin-right: 0.6rem;
                 }
-
+                .emotion:hover {
+                    transform: scale(1.7);
+                    z-index: 1;
+                    animation: bounce 0.2s infinite alternate;
+                }
+                .emotion svg {
+                    transition: all 0.2s ease-in-out;
+                }
+                
+                .emotion:hover svg {
+                    filter: brightness(1.1);  
+                }
+                
+                @keyframes bounce {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.1); }
+                    100% { transform: scale(1); }
+                }
+                
+                .emotion:active {
+                    transform: scale(0.95);  
+                }
                 .emotion:last-child {
                     margin-right: 0;
                 }

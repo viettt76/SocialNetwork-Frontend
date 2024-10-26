@@ -40,6 +40,8 @@ const ChatPopup = ({ friend, index }) => {
 
     const [isDisplayTyping, setIsDisPlayTyping] = useState(false);
 
+    const [currentEmotionType, setCurrentEmotionType] = useState('');
+
     let typingTimeout = null;
 
     useEffect(() => {
@@ -62,6 +64,9 @@ const ChatPopup = ({ friend, index }) => {
     }, [friend]);
     useEffect(() => {
         const connection = new HubConnectionBuilder().withUrl('https://localhost:7072/chatPerson').build();
+
+        const reactionHub = new HubConnectionBuilder().withUrl('https://localhost:7072//reactionMessage').build();
+
         const startConnection = async () => {
             try {
                 await connection.start();
@@ -88,6 +93,7 @@ const ChatPopup = ({ friend, index }) => {
                             },
                         ];
                     });
+
                     connection.on("ReciverTypingNotification", (isTyping) => {
                         setIsDisPlayTyping(isTyping);
                         console.log("User is typing? >>>", isTyping);
@@ -101,6 +107,35 @@ const ChatPopup = ({ friend, index }) => {
 
         startConnection();
 
+        
+        const startReactionConnection = async () => {
+
+            await reactionHub.start();
+
+            reactionHub.on('UserNotConnected', (errorMessage) => {
+                setError(errorMessage);
+                console.error('Error received: ', errorMessage);
+            });
+            
+            connection.on('ReceiveReactionMessage', (reactionMessageResponse) => {
+                setMessages((prev) => {
+                    return [
+                        ...prev,
+                        {
+                            id: messageResponse.messageID,
+                            sender: friend?.id,
+                            receiver: userInfo?.id,
+                            message: messageResponse.content,
+                            pictures: messageResponse.images,
+                            sendDate: messageResponse.sendDate,
+                            symbol: messageResponse.symbol
+                        },
+                    ];
+                });
+        });};
+
+        startReactionConnection();
+
         return () => {
             if (connection) {
                 connection.stop();
@@ -110,6 +145,7 @@ const ChatPopup = ({ friend, index }) => {
     }, []);
 
         const sendMessageToPerson = async (imagesUrls = []) => {
+            debugger;
             try {
                 if (symbol === 0 && !sendMessage.trim() && imagesUrls.length === 0) return;
                 let message = sendMessage;
@@ -129,6 +165,7 @@ const ChatPopup = ({ friend, index }) => {
                             receiver: friend?.id,
                             message,
                             pictures: imagesUrls || [],
+                            symbol: symbol,
                         },
                     ];
                 });
@@ -143,6 +180,7 @@ const ChatPopup = ({ friend, index }) => {
             }
             var messageId = await conn.invoke('SendMessageToPerson', messageParameter);
 
+            setSymbol(0);
             console.log('MessageId: ', messageId);
 
             setMessages((prev) => {
@@ -165,13 +203,19 @@ const ChatPopup = ({ friend, index }) => {
     };
 
     const handleSendSymbol = async () => {
+        debugger;
         try {
             setSymbol(1);
-            await sendMessageToPerson();
         } catch (error) {
             console.log(error);
         }
     };
+
+    useEffect(() => {
+        if (symbol === 1) {
+            sendMessageToPerson([]);
+        }
+    }, [symbol]);
 
     useEffect(() => {
         endOfMessagesRef.current.scrollTop = endOfMessagesRef.current.scrollHeight;
@@ -231,8 +275,10 @@ const ChatPopup = ({ friend, index }) => {
         }
     }
     const handleEmotionMessage = async ({ messageId, emotionType }) => {
+        console.log(emotionType);
         try {
-            await emotionMessageService({ messageId, emotionType });
+            setCurrentEmotionType(emotionType);
+            await sendReactionMessage({ messageId, emotionType });
         } catch (error) {
             console.log(error);
         }
@@ -333,7 +379,7 @@ const ChatPopup = ({ friend, index }) => {
                                         }
                                         {message.symbol > 0 && (
                                             <div>
-                                                {message.symbol === 'like' && (
+                                                {message.symbol === 1 && (
                                                     <FontAwesomeIcon
                                                         className={clsx(styles['message-symbol'])}
                                                         icon={faThumbsUp}
@@ -383,7 +429,7 @@ const ChatPopup = ({ friend, index }) => {
                                                     onClick={() =>
                                                         handleEmotionMessage({
                                                             messageId: message?.id,
-                                                            emotionType: 'like',
+                                                            emotionType: '0',
                                                         })
                                                     }
                                                 >
@@ -394,7 +440,7 @@ const ChatPopup = ({ friend, index }) => {
                                                     onClick={() =>
                                                         handleEmotionMessage({
                                                             messageId: message?.id,
-                                                            emotionType: 'love',
+                                                            emotionType: '1',
                                                         })
                                                     }
                                                 >
@@ -405,7 +451,7 @@ const ChatPopup = ({ friend, index }) => {
                                                     onClick={() =>
                                                         handleEmotionMessage({
                                                             messageId: message?.id,
-                                                            emotionType: 'haha',
+                                                            emotionType: '2',
                                                         })
                                                     }
                                                 >
@@ -416,7 +462,7 @@ const ChatPopup = ({ friend, index }) => {
                                                     onClick={() =>
                                                         handleEmotionMessage({
                                                             messageId: message?.id,
-                                                            emotionType: 'wow',
+                                                            emotionType: '3',
                                                         })
                                                     }
                                                 >
@@ -427,7 +473,7 @@ const ChatPopup = ({ friend, index }) => {
                                                     onClick={() =>
                                                         handleEmotionMessage({
                                                             messageId: message?.id,
-                                                            emotionType: 'sad',
+                                                            emotionType: '4',
                                                         })
                                                     }
                                                 >
@@ -438,7 +484,7 @@ const ChatPopup = ({ friend, index }) => {
                                                     onClick={() =>
                                                         handleEmotionMessage({
                                                             messageId: message?.id,
-                                                            emotionType: 'angry',
+                                                            emotionType: '5',
                                                         })
                                                     }
                                                 >

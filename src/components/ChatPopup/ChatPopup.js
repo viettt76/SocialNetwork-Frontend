@@ -98,10 +98,10 @@ const ChatPopup = ({ friend, index }) => {
                         ];
                     });
 
-                    connection.on("ReciverTypingNotification", (isTyping) => {
+                    connection.on('ReciverTypingNotification', (isTyping) => {
                         setIsDisPlayTyping(isTyping);
-                        console.log("User is typing? >>>", isTyping);
-                    })
+                        console.log('User is typing? >>>', isTyping);
+                    });
                     console.log(`${sender} has send ${message}`);
                 });
             } catch (error) {
@@ -111,9 +111,7 @@ const ChatPopup = ({ friend, index }) => {
 
         startConnection();
 
-        
         const startReactionConnection = async () => {
-
             await reactionHub.start();
 
             setConnectionChathub(reactionHub);
@@ -122,17 +120,19 @@ const ChatPopup = ({ friend, index }) => {
                 setError(errorMessage);
                 console.error('Error received: ', errorMessage);
             });
-            
+
             reactionHub.on('ReceiveReactionMessage', (reactionMessageResponse) => {
                 debugger;
                 console.log(reactionMessageResponse);
-                setMessages((prev) => {prev.map((message) => {
-                    if(message.id === reactionMessageResponse.messageID){
-                        message.emotionType = reactionMessageResponse.emotionType;
-                    }
+                setMessages((prev) => {
+                    prev.map((message) => {
+                        if (message.id === reactionMessageResponse.messageID) {
+                            message.emotionType = reactionMessageResponse.emotionType;
+                        }
+                    });
                 });
-                });
-        });};
+            });
+        };
 
         startReactionConnection();
 
@@ -144,39 +144,39 @@ const ChatPopup = ({ friend, index }) => {
         };
     }, []);
 
-        const sendMessageToPerson = async (imagesUrls = []) => {
-            try {
-                if (symbol === 0 && !sendMessage.trim() && imagesUrls.length === 0) return;
-                let message = sendMessage;
+    const sendMessageToPerson = async (imagesUrls = []) => {
+        try {
+            if (symbol === 0 && !sendMessage.trim() && imagesUrls.length === 0) return;
+            let message = sendMessage;
 
-                if(imagesUrls.length > 0) {
-                    message = '';
-                }
+            if (imagesUrls.length > 0) {
+                message = '';
+            }
 
-                setSendMessage('');
+            setSendMessage('');
 
-                setMessages((prev) => {
-                    return [
-                        ...prev,
-                        {
-                            id: null,
-                            sender: userInfo?.id,
-                            receiver: friend?.id,
-                            message,
-                            pictures: imagesUrls || [],
-                            symbol: symbol,
-                        },
-                    ];
-                });
+            setMessages((prev) => {
+                return [
+                    ...prev,
+                    {
+                        id: null,
+                        sender: userInfo?.id,
+                        receiver: friend?.id,
+                        message,
+                        pictures: imagesUrls || [],
+                        symbol: symbol,
+                    },
+                ];
+            });
 
             setProcessingMessage('Đang xử lý');
-            
+
             var messageParameter = {
                 reciverID: friend?.id,
                 content: message,
                 images: imagesUrls,
                 symbol: symbol,
-            }
+            };
             var messageId = await conn.invoke('SendMessageToPerson', messageParameter);
 
             setSymbol(0);
@@ -195,7 +195,6 @@ const ChatPopup = ({ friend, index }) => {
             });
 
             setProcessingMessage('');
-
         } catch (e) {
             console.log(e.message);
         }
@@ -205,8 +204,8 @@ const ChatPopup = ({ friend, index }) => {
         var param = {
             messageId,
             emotionType,
-            reciverId : friend?.id
-        }
+            reciverId: friend?.id,
+        };
         await connectionChathub.invoke('AddReactionToMessage', param);
     };
 
@@ -268,37 +267,33 @@ const ChatPopup = ({ friend, index }) => {
         }
     };
 
-    const handlerTyping = async() => {
-        if(!isTyping){
+    const handlerTyping = async () => {
+        if (!isTyping) {
             setIsTyping(true);
-            await conn.invoke("OnUserTyping", friend?.id);
-        }
-        else{
+            await conn.invoke('OnUserTyping', friend?.id);
+        } else {
             clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(async() => {
+            typingTimeout = setTimeout(async () => {
                 setIsTyping(false);
-                await conn.invoke("StoppedUserTyping", friend?.id);
+                await conn.invoke('StoppedUserTyping', friend?.id);
             }, 3000);
         }
-    }
+    };
     const handleEmotionMessage = async ({ messageId, emotionType }) => {
-        console.log("before set message", messages);
+        console.log('before set message', messages);
         try {
             // setCurrentEmotionType(emotionType);
             setMessages((prev) => {
-                return prev.map(message => 
-                    message.id === messageId 
-                        ? {...message, emotionType: emotionType}
-                        : message
+                return prev.map((message) =>
+                    message.id === messageId ? { ...message, emotionType: Number(emotionType) } : message,
                 );
-        });
+            });
             await sendReactionMessage({ messageId, emotionType });
-        } 
-        catch (error) {
+        } catch (error) {
             console.log(error);
         }
     };
-    console.log("after set message", messages);
+    console.log('after set message', messages);
     return (
         <div
             style={{ right: index === 0 ? '3rem' : '38rem', zIndex: 2 - index }}
@@ -337,263 +332,265 @@ const ChatPopup = ({ friend, index }) => {
             <div ref={endOfMessagesRef} className={clsx(styles['chat-container'])}>
                 {messages?.length > 0 ? (
                     <>
-                    {messages?.map((message, index) => {
-                        let minDiff = 0;
-                        let isSameDay = true;
-                        const latestTime = calculateTime(message?.createdAt);
-                        const beforeTime = calculateTime(new Date().toISOString());
-                        if (
-                            latestTime?.year !== beforeTime?.year ||
-                            latestTime?.month !== beforeTime?.month ||
-                            latestTime?.day !== beforeTime?.day
-                        ) {
-                            isSameDay = false;
-                        }
+                        {messages?.map((message, index) => {
+                            let minDiff = 0;
+                            let isSameDay = true;
+                            const latestTime = calculateTime(message?.createdAt);
+                            const beforeTime = calculateTime(new Date().toISOString());
+                            if (
+                                latestTime?.year !== beforeTime?.year ||
+                                latestTime?.month !== beforeTime?.month ||
+                                latestTime?.day !== beforeTime?.day
+                            ) {
+                                isSameDay = false;
+                            }
 
-                        if (index >= 1) {
-                            const date1 = new Date(message?.createdAt);
-                            const date2 = new Date(messages[index - 1]?.createdAt);
+                            if (index >= 1) {
+                                const date1 = new Date(message?.createdAt);
+                                const date2 = new Date(messages[index - 1]?.createdAt);
 
-                            const diff = date1 - date2;
-                            minDiff = diff / (1000 * 60);
-                        }
-                        return (
-                            <div className={clsx(styles['chat-item-wrapper'])} key={`chat-${index}`}>
-                                {(index === 0 || minDiff >= 10) && (
-                                    <div className="fz-14 text-center mt-4 mb-2">
-                                        {latestTime?.hours}:{latestTime?.minutes}{' '}
-                                        {!isSameDay && `${latestTime?.day}/${latestTime?.month}`}
-                                    </div>
-                                )}
-                                <div className={clsx(styles['chat-item'])}>
-                                    <div
-                                        className={clsx(styles['message-wrapper'], {
-                                            [[styles['message-current-user']]]: message?.sender === userInfo?.id,
-                                        })}
-                                    >
-                                        {(index === 0 ||
-                                            minDiff >= 10 ||
-                                            messages[index - 1]?.sender !== message?.sender) &&
-                                            message?.sender === friend?.id && (
-                                                <img
-                                                    className={clsx(styles['message-avatar'])}
-                                                    src={friend?.avatar || defaultAvatar}
-                                                />
-                                            )}
-                                        {message?.message && (
-                                            <div className={clsx(styles['message'])}>{message?.message}</div>
-                                        )}
-                                        {message?.pictures?.length > 0 &&
-                                        message.pictures.map((picture, picIndex) => (
-                                            <img
-                                                key={`pic-${picIndex}`}
-                                                src={picture}
-                                                className={clsx(styles['message-picture'])}
-                                            />
-                                        ))
-                                        }
-                                        {message.symbol > 0 && (
-                                            <div>
-                                                {message.symbol === 1 && (
-                                                    <FontAwesomeIcon
-                                                        className={clsx(styles['message-symbol'])}
-                                                        icon={faThumbsUp}
-                                                    />
-                                                )}
-                                            </div>
-                                        )}
-                                        {processingMessage &&
-                                            _.findLast(messages, { sender: userInfo?.id }) &&
-                                            _.isEqual(_.findLast(messages, { sender: userInfo?.id }), message) && (
-                                                <div className={clsx(styles['process-message'])}>
-                                                    {processingMessage}
-                                                </div>
-                                            )}
-                                        <div className={clsx(styles['message-expand'])}>
-                                            <svg
-                                                viewBox="0 0 20 20"
-                                                width="16"
-                                                height="16"
-                                                fill="currentColor"
-                                                className="xfx01vb x1lliihq x1tzjh5l x1k90msu x2h7rmj x1qfuztq"
-                                                style={{ color: '#65676b' }}
-                                            >
-                                                <path
-                                                    d="M6.062 11.548c.596 1.376 2.234 2.453 3.955 2.452 1.694 0 3.327-1.08 3.921-2.452a.75.75 0 1 0-1.376-.596c-.357.825-1.451 1.548-2.545 1.548-1.123 0-2.22-.72-2.579-1.548a.75.75 0 1 0-1.376.596z"
-                                                    fillRule="nonzero"
-                                                ></path>
-                                                <ellipse cx="13.6" cy="6.8" rx="1.2" ry="1.2"></ellipse>
-                                                <ellipse cx="6.4" cy="6.8" rx="1.2" ry="1.2"></ellipse>
-                                                <ellipse
-                                                    stroke="currentColor"
-                                                    strokeWidth="1.5"
-                                                    fill="none"
-                                                    cx="10"
-                                                    cy="10"
-                                                    rx="9"
-                                                    ry="9"
-                                                ></ellipse>
-                                            </svg>
-                                            <ul
-                                                className={clsx(styles['emotion-list'], {
-                                                    [[styles['left--9']]]: message?.message?.length < 4,
-                                                })}
-                                            >
-                                                <li
-                                                    className={clsx(styles['emotion'])}
-                                                    onClick={() =>
-                                                        handleEmotionMessage({
-                                                            messageId: message?.id,
-                                                            emotionType: '0',
-                                                        })
-                                                    }
-                                                >
-                                                    <LikeIcon width={20} height={20} />
-                                                </li>
-                                                <li
-                                                    className={clsx(styles['emotion'])}
-                                                    onClick={() =>
-                                                        handleEmotionMessage({
-                                                            messageId: message?.id,
-                                                            emotionType: '1',
-                                                        })
-                                                    }
-                                                >
-                                                    <LoveIcon width={20} height={20} />
-                                                </li>
-                                                <li
-                                                    className={clsx(styles['emotion'])}
-                                                    onClick={() =>
-                                                        handleEmotionMessage({
-                                                            messageId: message?.id,
-                                                            emotionType: '2',
-                                                        })
-                                                    }
-                                                >
-                                                    <HaHaIcon width={20} height={20} />
-                                                </li>
-                                                <li
-                                                    className={clsx(styles['emotion'])}
-                                                    onClick={() =>
-                                                        handleEmotionMessage({
-                                                            messageId: message?.id,
-                                                            emotionType: '3',
-                                                        })
-                                                    }
-                                                >
-                                                    <WowIcon width={20} height={20} />
-                                                </li>
-                                                <li
-                                                    className={clsx(styles['emotion'])}
-                                                    onClick={() =>
-                                                        handleEmotionMessage({
-                                                            messageId: message?.id,
-                                                            emotionType: '4',
-                                                        })
-                                                    }
-                                                >
-                                                    <SadIcon width={20} height={20} />
-                                                </li>
-                                                <li
-                                                    className={clsx(styles['emotion'])}
-                                                    onClick={() =>
-                                                        handleEmotionMessage({
-                                                            messageId: message?.id,
-                                                            emotionType: '5',
-                                                        })
-                                                    }
-                                                >
-                                                    <AngryIcon width={20} height={20} />
-                                                </li>
-                                            </ul>
-                                        </div>
-
-                                        {message.emotionType === 0 && (
-                                        <div
-                                            className={clsx(styles['reaction-message'], {
-                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
-                                            })}
-                                        >
-                                            <LikeIcon width={16} height={16} />
-                                        </div>
-                                         )}
-
-                                        {message.emotionType === 1 && (
-                                        <div
-                                            className={clsx(styles['reaction-message'], {
-                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
-                                            })}
-                                        >
-                                            <LoveIcon width={16} height={16} />
-                                        </div>
-                                         )}
-
-                                        {message.emotionType === 2 && (
-                                        <div
-                                            className={clsx(styles['reaction-message'], {
-                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
-                                            })}
-                                        >
-                                            <HaHaIcon width={16} height={16} />
-                                        </div>
-                                         )}
-
-                                        {message.emotionType === 3 && (
-                                        <div
-                                            className={clsx(styles['reaction-message'], {
-                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
-                                            })}
-                                        >
-                                            <WowIcon width={16} height={16} />
-                                        </div>
-                                         )}
-
-                                        {message.emotionType === 4 && (
-                                        <div
-                                            className={clsx(styles['reaction-message'], {
-                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
-                                            })}
-                                        >
-                                            <SadIcon width={16} height={16} />
-                                        </div>
-                                         )}
-                                         
-                                        {message.emotionType === 5 && (
-                                        <div
-                                            className={clsx(styles['reaction-message'], {
-                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
-                                            })}
-                                        >
-                                            <AngryIcon width={16} height={16} />
-                                        </div>
-                                         )}
-                                    </div>
-                                    {index === messages?.length - 1 && (
-                                        <div
-                                            className={clsx(styles['time-of-last-message'], {
-                                                [[styles['message-of-friend']]]: message?.sender === friend?.id,
-                                            })}
-                                        >
-                                            {latestTime?.hours}:{latestTime?.minutes}
+                                const diff = date1 - date2;
+                                minDiff = diff / (1000 * 60);
+                            }
+                            return (
+                                <div className={clsx(styles['chat-item-wrapper'])} key={`chat-${index}`}>
+                                    {(index === 0 || minDiff >= 10) && (
+                                        <div className="fz-14 text-center mt-4 mb-2">
+                                            {latestTime?.hours}:{latestTime?.minutes}{' '}
+                                            {!isSameDay && `${latestTime?.day}/${latestTime?.month}`}
                                         </div>
                                     )}
+                                    <div className={clsx(styles['chat-item'])}>
+                                        <div
+                                            className={clsx(styles['message-wrapper'], {
+                                                [[styles['message-current-user']]]: message?.sender === userInfo?.id,
+                                            })}
+                                        >
+                                            {(index === 0 ||
+                                                minDiff >= 10 ||
+                                                messages[index - 1]?.sender !== message?.sender) &&
+                                                message?.sender === friend?.id && (
+                                                    <img
+                                                        className={clsx(styles['message-avatar'])}
+                                                        src={friend?.avatar || defaultAvatar}
+                                                    />
+                                                )}
+                                            {message?.message && (
+                                                <div className={clsx(styles['message'])}>{message?.message}</div>
+                                            )}
+                                            {message?.pictures?.length > 0 &&
+                                                message.pictures.map((picture, picIndex) => (
+                                                    <img
+                                                        key={`pic-${picIndex}`}
+                                                        src={picture}
+                                                        className={clsx(styles['message-picture'])}
+                                                    />
+                                                ))}
+                                            {message.symbol > 0 && (
+                                                <div>
+                                                    {message.symbol === 1 && (
+                                                        <FontAwesomeIcon
+                                                            className={clsx(styles['message-symbol'])}
+                                                            icon={faThumbsUp}
+                                                        />
+                                                    )}
+                                                </div>
+                                            )}
+                                            {processingMessage &&
+                                                _.findLast(messages, { sender: userInfo?.id }) &&
+                                                _.isEqual(_.findLast(messages, { sender: userInfo?.id }), message) && (
+                                                    <div className={clsx(styles['process-message'])}>
+                                                        {processingMessage}
+                                                    </div>
+                                                )}
+                                            <div className={clsx(styles['message-expand'])}>
+                                                <svg
+                                                    viewBox="0 0 20 20"
+                                                    width="16"
+                                                    height="16"
+                                                    fill="currentColor"
+                                                    className="xfx01vb x1lliihq x1tzjh5l x1k90msu x2h7rmj x1qfuztq"
+                                                    style={{ color: '#65676b' }}
+                                                >
+                                                    <path
+                                                        d="M6.062 11.548c.596 1.376 2.234 2.453 3.955 2.452 1.694 0 3.327-1.08 3.921-2.452a.75.75 0 1 0-1.376-.596c-.357.825-1.451 1.548-2.545 1.548-1.123 0-2.22-.72-2.579-1.548a.75.75 0 1 0-1.376.596z"
+                                                        fillRule="nonzero"
+                                                    ></path>
+                                                    <ellipse cx="13.6" cy="6.8" rx="1.2" ry="1.2"></ellipse>
+                                                    <ellipse cx="6.4" cy="6.8" rx="1.2" ry="1.2"></ellipse>
+                                                    <ellipse
+                                                        stroke="currentColor"
+                                                        strokeWidth="1.5"
+                                                        fill="none"
+                                                        cx="10"
+                                                        cy="10"
+                                                        rx="9"
+                                                        ry="9"
+                                                    ></ellipse>
+                                                </svg>
+                                                <ul
+                                                    className={clsx(styles['emotion-list'], {
+                                                        [[styles['left--9']]]: message?.message?.length < 4,
+                                                    })}
+                                                >
+                                                    <li
+                                                        className={clsx(styles['emotion'])}
+                                                        onClick={() =>
+                                                            handleEmotionMessage({
+                                                                messageId: message?.id,
+                                                                emotionType: '0',
+                                                            })
+                                                        }
+                                                    >
+                                                        <LikeIcon width={20} height={20} />
+                                                    </li>
+                                                    <li
+                                                        className={clsx(styles['emotion'])}
+                                                        onClick={() =>
+                                                            handleEmotionMessage({
+                                                                messageId: message?.id,
+                                                                emotionType: '1',
+                                                            })
+                                                        }
+                                                    >
+                                                        <LoveIcon width={20} height={20} />
+                                                    </li>
+                                                    <li
+                                                        className={clsx(styles['emotion'])}
+                                                        onClick={() =>
+                                                            handleEmotionMessage({
+                                                                messageId: message?.id,
+                                                                emotionType: '2',
+                                                            })
+                                                        }
+                                                    >
+                                                        <HaHaIcon width={20} height={20} />
+                                                    </li>
+                                                    <li
+                                                        className={clsx(styles['emotion'])}
+                                                        onClick={() =>
+                                                            handleEmotionMessage({
+                                                                messageId: message?.id,
+                                                                emotionType: '3',
+                                                            })
+                                                        }
+                                                    >
+                                                        <WowIcon width={20} height={20} />
+                                                    </li>
+                                                    <li
+                                                        className={clsx(styles['emotion'])}
+                                                        onClick={() =>
+                                                            handleEmotionMessage({
+                                                                messageId: message?.id,
+                                                                emotionType: '4',
+                                                            })
+                                                        }
+                                                    >
+                                                        <SadIcon width={20} height={20} />
+                                                    </li>
+                                                    <li
+                                                        className={clsx(styles['emotion'])}
+                                                        onClick={() =>
+                                                            handleEmotionMessage({
+                                                                messageId: message?.id,
+                                                                emotionType: '5',
+                                                            })
+                                                        }
+                                                    >
+                                                        <AngryIcon width={20} height={20} />
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                            {message.emotionType === 0 && (
+                                                <div
+                                                    className={clsx(styles['reaction-message'], {
+                                                        [[styles['reaction-of-friend']]]:
+                                                            message?.sender === friend?.id,
+                                                    })}
+                                                >
+                                                    <LikeIcon width={16} height={16} />
+                                                </div>
+                                            )}
+
+                                            {message.emotionType === 1 && (
+                                                <div
+                                                    className={clsx(styles['reaction-message'], {
+                                                        [[styles['reaction-of-friend']]]:
+                                                            message?.sender === friend?.id,
+                                                    })}
+                                                >
+                                                    <LoveIcon width={16} height={16} />
+                                                </div>
+                                            )}
+
+                                            {message.emotionType === 2 && (
+                                                <div
+                                                    className={clsx(styles['reaction-message'], {
+                                                        [[styles['reaction-of-friend']]]:
+                                                            message?.sender === friend?.id,
+                                                    })}
+                                                >
+                                                    <HaHaIcon width={16} height={16} />
+                                                </div>
+                                            )}
+
+                                            {message.emotionType === 3 && (
+                                                <div
+                                                    className={clsx(styles['reaction-message'], {
+                                                        [[styles['reaction-of-friend']]]:
+                                                            message?.sender === friend?.id,
+                                                    })}
+                                                >
+                                                    <WowIcon width={16} height={16} />
+                                                </div>
+                                            )}
+
+                                            {message.emotionType === 4 && (
+                                                <div
+                                                    className={clsx(styles['reaction-message'], {
+                                                        [[styles['reaction-of-friend']]]:
+                                                            message?.sender === friend?.id,
+                                                    })}
+                                                >
+                                                    <SadIcon width={16} height={16} />
+                                                </div>
+                                            )}
+
+                                            {message.emotionType === 5 && (
+                                                <div
+                                                    className={clsx(styles['reaction-message'], {
+                                                        [[styles['reaction-of-friend']]]:
+                                                            message?.sender === friend?.id,
+                                                    })}
+                                                >
+                                                    <AngryIcon width={16} height={16} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        {index === messages?.length - 1 && (
+                                            <div
+                                                className={clsx(styles['time-of-last-message'], {
+                                                    [[styles['message-of-friend']]]: message?.sender === friend?.id,
+                                                })}
+                                            >
+                                                {latestTime?.hours}:{latestTime?.minutes}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {isDisplayTyping && (
+                            <div className={clsx(styles['typing-wrapper'])}>
+                                <img className={clsx(styles['message-avatar'])} src={friend?.avatar || defaultAvatar} />
+                                <div className={clsx(styles['typing-indicator'])}>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
                                 </div>
                             </div>
-                        );
-                    })}
-                    {isDisplayTyping && (
-                        <div className={clsx(styles['typing-wrapper'])}>
-                            <img
-                                className={clsx(styles['message-avatar'])}
-                                src={friend?.avatar || defaultAvatar}
-                            />
-                            <div className={clsx(styles['typing-indicator'])}>
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                        </div>
-                    )}
+                        )}
                     </>
                 ) : (
                     <div className="mt-5 text-center fz-16">

@@ -108,7 +108,7 @@
 
         .chat-item-wrapper {
             & + .chat-item-wrapper {
-                margin-top: 0.2rem;
+                margin-top: 0.3rem;
             }
         }
 
@@ -196,6 +196,12 @@
                     text-align: start;
                     padding-left: 3.4rem;
                 }
+            }
+
+            .reaction-message{
+                position: absolute;
+                right: 0rem;
+                bottom: -0.5rem;
             }
 
             &:hover {

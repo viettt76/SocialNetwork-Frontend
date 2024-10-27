@@ -34,6 +34,8 @@ const ChatPopup = ({ friend, index }) => {
 
     const [conn, setConn] = useState('');
 
+    const [connectionChathub, setConnectionChathub] = useState('');
+
     const [error, setError] = useState('');
 
     const [isTyping, setIsTyping] = useState(false);
@@ -65,7 +67,7 @@ const ChatPopup = ({ friend, index }) => {
     useEffect(() => {
         const connection = new HubConnectionBuilder().withUrl('https://localhost:7072/chatPerson').build();
 
-        const reactionHub = new HubConnectionBuilder().withUrl('https://localhost:7072//reactionMessage').build();
+        const reactionHub = new HubConnectionBuilder().withUrl('https://localhost:7072/reactionMessage').build();
 
         const startConnection = async () => {
             try {
@@ -112,23 +114,27 @@ const ChatPopup = ({ friend, index }) => {
 
             await reactionHub.start();
 
+            setConnectionChathub(reactionHub);
+
             reactionHub.on('UserNotConnected', (errorMessage) => {
                 setError(errorMessage);
                 console.error('Error received: ', errorMessage);
             });
             
-            connection.on('ReceiveReactionMessage', (reactionMessageResponse) => {
+            reactionHub.on('ReceiveReactionMessage', (reactionMessageResponse) => {
+                debugger;
+                console.log(reactionMessageResponse);
                 setMessages((prev) => {
                     return [
                         ...prev,
                         {
-                            id: messageResponse.messageID,
+                            id: reactionMessageResponse.messageID,
                             sender: friend?.id,
                             receiver: userInfo?.id,
-                            message: messageResponse.content,
-                            pictures: messageResponse.images,
-                            sendDate: messageResponse.sendDate,
-                            symbol: messageResponse.symbol
+                            message: reactionMessageResponse.content,
+                            pictures: reactionMessageResponse.images,
+                            sendDate: reactionMessageResponse.sendDate,
+                            symbol: reactionMessageResponse.symbol
                         },
                     ];
                 });
@@ -145,7 +151,6 @@ const ChatPopup = ({ friend, index }) => {
     }, []);
 
         const sendMessageToPerson = async (imagesUrls = []) => {
-            debugger;
             try {
                 if (symbol === 0 && !sendMessage.trim() && imagesUrls.length === 0) return;
                 let message = sendMessage;
@@ -202,8 +207,16 @@ const ChatPopup = ({ friend, index }) => {
         }
     };
 
+    const sendReactionMessage = async ({ messageId, emotionType }) => {
+        var param = {
+            messageId,
+            emotionType,
+            reciverId : friend?.id
+        }
+        await connectionChathub.invoke('AddReactionToMessage', param);
+    };
+
     const handleSendSymbol = async () => {
-        debugger;
         try {
             setSymbol(1);
         } catch (error) {
@@ -492,6 +505,66 @@ const ChatPopup = ({ friend, index }) => {
                                                 </li>
                                             </ul>
                                         </div>
+
+                                        {message.emotionType === 0 && (
+                                        <div
+                                            className={clsx(styles['reaction-message'], {
+                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
+                                            })}
+                                        >
+                                            <LikeIcon width={16} height={16} />
+                                        </div>
+                                         )}
+
+                                        {message.emotionType === 1 && (
+                                        <div
+                                            className={clsx(styles['reaction-message'], {
+                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
+                                            })}
+                                        >
+                                            <LoveIcon width={16} height={16} />
+                                        </div>
+                                         )}
+
+                                        {message.emotionType === 2 && (
+                                        <div
+                                            className={clsx(styles['reaction-message'], {
+                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
+                                            })}
+                                        >
+                                            <HaHaIcon width={16} height={16} />
+                                        </div>
+                                         )}
+
+                                        {message.emotionType === 3 && (
+                                        <div
+                                            className={clsx(styles['reaction-message'], {
+                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
+                                            })}
+                                        >
+                                            <WowIcon width={16} height={16} />
+                                        </div>
+                                         )}
+
+                                        {message.emotionType === 4 && (
+                                        <div
+                                            className={clsx(styles['reaction-message'], {
+                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
+                                            })}
+                                        >
+                                            <SadIcon width={16} height={16} />
+                                        </div>
+                                         )}
+                                         
+                                        {message.emotionType === 5 && (
+                                        <div
+                                            className={clsx(styles['reaction-message'], {
+                                                [[styles['reaction-of-friend']]] : message?.sender === friend?.id,
+                                            })}
+                                        >
+                                            <AngryIcon width={16} height={16} />
+                                        </div>
+                                         )}
                                     </div>
                                     {index === messages?.length - 1 && (
                                         <div

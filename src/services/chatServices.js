@@ -62,3 +62,7 @@ export const updateGroupAvatarService = ({ groupChatId, avatar }) => {
 export const getAllMessageService = (receiverId) => {
     return axios.get(`/MessagePersonalChat/getAllMessage`, { params: { receiverId } });
 };
+
+export const sendReactionMessage = ({ messageId, emotionType }) => {
+    return axios.post(``)
+}

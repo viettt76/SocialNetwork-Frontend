@@ -56,6 +56,7 @@ const ChatPopup = ({ friend, index }) => {
                     message: message.content,
                     pictures: message.images || [],
                     symbol: message.symbol,
+                    emotionType: message.emotionType,
                 }));
 
                 setMessages(messages);
@@ -91,7 +92,8 @@ const ChatPopup = ({ friend, index }) => {
                                 message: messageResponse.content,
                                 pictures: messageResponse.images,
                                 sendDate: messageResponse.sendDate,
-                                symbol: messageResponse.symbol
+                                symbol: messageResponse.symbol,
+                                emotionType: messageResponse.emotionType,
                             },
                         ];
                     });
@@ -124,19 +126,11 @@ const ChatPopup = ({ friend, index }) => {
             reactionHub.on('ReceiveReactionMessage', (reactionMessageResponse) => {
                 debugger;
                 console.log(reactionMessageResponse);
-                setMessages((prev) => {
-                    return [
-                        ...prev,
-                        {
-                            id: reactionMessageResponse.messageID,
-                            sender: friend?.id,
-                            receiver: userInfo?.id,
-                            message: reactionMessageResponse.content,
-                            pictures: reactionMessageResponse.images,
-                            sendDate: reactionMessageResponse.sendDate,
-                            symbol: reactionMessageResponse.symbol
-                        },
-                    ];
+                setMessages((prev) => {prev.map((message) => {
+                    if(message.id === reactionMessageResponse.messageID){
+                        message.emotionType = reactionMessageResponse.emotionType;
+                    }
+                });
                 });
         });};
 
@@ -288,15 +282,23 @@ const ChatPopup = ({ friend, index }) => {
         }
     }
     const handleEmotionMessage = async ({ messageId, emotionType }) => {
-        console.log(emotionType);
+        console.log("before set message", messages);
         try {
-            setCurrentEmotionType(emotionType);
+            // setCurrentEmotionType(emotionType);
+            setMessages((prev) => {
+                return prev.map(message => 
+                    message.id === messageId 
+                        ? {...message, emotionType: emotionType}
+                        : message
+                );
+        });
             await sendReactionMessage({ messageId, emotionType });
-        } catch (error) {
+        } 
+        catch (error) {
             console.log(error);
         }
     };
-
+    console.log("after set message", messages);
     return (
         <div
             style={{ right: index === 0 ? '3rem' : '38rem', zIndex: 2 - index }}

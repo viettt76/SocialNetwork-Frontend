@@ -202,6 +202,7 @@
                 position: absolute;
                 right: 0rem;
                 bottom: -0.5rem;
+                cursor: pointer;
             }
 
             &:first-child {
@@ -211,6 +212,42 @@
                 .message-expand {
                     display: block;
                 }
+            }
+
+            .reaction-wrapper {
+                position: absolute;
+                bottom: -10px; /* Điều chỉnh vị trí theo chiều dọc */
+                left: 8px; /* Điều chỉnh vị trí theo chiều ngang */
+                display: inline-flex;
+                align-items: center;
+                background: white;
+                border-radius: 20px;
+                padding: 2px 4px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                z-index: 1;
+            }
+
+            .reaction-message {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px; /* Kích thước cố định cho reaction */
+                height: 20px;
+                border-radius: 50%;
+                margin-left: -4px; /* Tạo hiệu ứng chồng lấn */
+                background: white;
+                transition: transform 0.2s ease;
+                position: relative;
+                cursor: pointer;
+            }
+
+            .reaction-message:first-child {
+                margin-left: 0;
+            }
+
+            .reaction-message:hover {
+                transform: scale(1.2);
+                z-index: 2;
             }
 
             .message-wrapper {

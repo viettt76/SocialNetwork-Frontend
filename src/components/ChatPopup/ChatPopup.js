@@ -181,6 +181,7 @@ const ChatPopup = ({ friend, index }) => {
                         message,
                         pictures: imagesUrls || [],
                         symbol: symbol,
+                        emotionType: [],
                     },
                 ];
             });

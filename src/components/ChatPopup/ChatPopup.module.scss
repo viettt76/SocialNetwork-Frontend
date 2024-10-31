@@ -198,16 +198,53 @@
                 }
             }
 
-            .reaction-message{
+            .reaction-message {
                 position: absolute;
                 right: 0rem;
                 bottom: -0.5rem;
+                cursor: pointer;
             }
 
             &:hover {
                 .message-expand {
                     display: block;
                 }
+            }
+
+            .reaction-wrapper {
+                position: absolute;
+                bottom: -10px; /* Điều chỉnh vị trí theo chiều dọc */
+                left: 8px; /* Điều chỉnh vị trí theo chiều ngang */
+                display: inline-flex;
+                align-items: center;
+                background: white;
+                border-radius: 20px;
+                padding: 2px 4px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                z-index: 1;
+            }
+
+            .reaction-message {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px; /* Kích thước cố định cho reaction */
+                height: 20px;
+                border-radius: 50%;
+                margin-left: -4px; /* Tạo hiệu ứng chồng lấn */
+                background: white;
+                transition: transform 0.2s ease;
+                position: relative;
+                cursor: pointer;
+            }
+
+            .reaction-message:first-child {
+                margin-left: 0;
+            }
+
+            .reaction-message:hover {
+                transform: scale(1.2);
+                z-index: 2;
             }
 
             .message-wrapper {
@@ -281,19 +318,25 @@
                 .emotion svg {
                     transition: all 0.2s ease-in-out;
                 }
-                
+
                 .emotion:hover svg {
-                    filter: brightness(1.1);  
+                    filter: brightness(1.1);
                 }
-                
+
                 @keyframes bounce {
-                    0% { transform: scale(1); }
-                    50% { transform: scale(1.1); }
-                    100% { transform: scale(1); }
+                    0% {
+                        transform: scale(1);
+                    }
+                    50% {
+                        transform: scale(1.1);
+                    }
+                    100% {
+                        transform: scale(1);
+                    }
                 }
-                
+
                 .emotion:active {
-                    transform: scale(0.95);  
+                    transform: scale(0.95);
                 }
                 .emotion:last-child {
                     margin-right: 0;
@@ -301,7 +344,7 @@
             }
         }
 
-        .typing-wrapper{
+        .typing-wrapper {
             align-self: flex-start;
             align-items: flex-end;
             display: flex;
@@ -328,7 +371,7 @@
                 border-radius: 50%;
                 animation: typing-bounce 1s infinite alternate;
             }
-        
+
             span:nth-child(1) {
                 animation-delay: 0s;
             }
@@ -339,7 +382,7 @@
                 animation-delay: 0.4s;
             }
         }
-        
+
         @keyframes typing-bounce {
             from {
                 transform: translateY(0);

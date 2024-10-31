@@ -527,42 +527,46 @@ const ChatPopup = ({ friend, index }) => {
                                                     </li>
                                                 </ul>
                                             </div>
-                                            {message.reactionByUser !== null &&
-                                                message.reactionByUser.map((emotion, index) => (
-                                                    <Fragment key={index}>
-                                                        {emotion.emotionType === 0 && (
-                                                            <div className={clsx(styles['reaction-message'])}>
-                                                                <LikeIcon width={16} height={16} />
-                                                            </div>
-                                                        )}
-                                                        {emotion.emotionType === 1 && (
-                                                            <div className={clsx(styles['reaction-message'])}>
-                                                                <LoveIcon width={16} height={16} />
-                                                            </div>
-                                                        )}
-                                                        {emotion.emotionType === 2 && (
-                                                            <div className={clsx(styles['reaction-message'])}>
-                                                                <HaHaIcon width={16} height={16} />
-                                                            </div>
-                                                        )}
-                                                        {emotion.emotionType === 3 && (
-                                                            <div className={clsx(styles['reaction-message'])}>
-                                                                <WowIcon width={16} height={16} />
-                                                            </div>
-                                                        )}
-                                                        {emotion.emotionType === 4 && (
-                                                            <div className={clsx(styles['reaction-message'])}>
-                                                                <SadIcon width={16} height={16} />
-                                                            </div>
-                                                        )}
-                                                        {emotion.emotionType === 5 && (
-                                                            <div className={clsx(styles['reaction-message'])}>
-                                                                <AngryIcon width={16} height={16} />
-                                                            </div>
-                                                        )}
-                                                    </Fragment>
-                                                ))}
 
+                                            {message.emotionType !== null && (
+                                                <div className={clsx(styles['reaction-wrapper'])}>
+                                                    {message.reactionByUser !== null &&
+                                                        message.reactionByUser.map((emotion, index) => (
+                                                            <Fragment key={index}>
+                                                                {emotion.emotionType === 0 && (
+                                                                    <div className={clsx(styles['reaction-message'])}>
+                                                                        <LikeIcon width={16} height={16} />
+                                                                    </div>
+                                                                )}
+                                                                {emotion.emotionType === 1 && (
+                                                                    <div className={clsx(styles['reaction-message'])}>
+                                                                        <LoveIcon width={16} height={16} />
+                                                                    </div>
+                                                                )}
+                                                                {emotion.emotionType === 2 && (
+                                                                    <div className={clsx(styles['reaction-message'])}>
+                                                                        <HaHaIcon width={16} height={16} />
+                                                                    </div>
+                                                                )}
+                                                                {emotion.emotionType === 3 && (
+                                                                    <div className={clsx(styles['reaction-message'])}>
+                                                                        <WowIcon width={16} height={16} />
+                                                                    </div>
+                                                                )}
+                                                                {emotion.emotionType === 4 && (
+                                                                    <div className={clsx(styles['reaction-message'])}>
+                                                                        <SadIcon width={16} height={16} />
+                                                                    </div>
+                                                                )}
+                                                                {emotion.emotionType === 5 && (
+                                                                    <div className={clsx(styles['reaction-message'])}>
+                                                                        <AngryIcon width={16} height={16} />
+                                                                    </div>
+                                                                )}
+                                                            </Fragment>
+                                                        ))}
+                                                </div>
+                                            )}
                                             {/* {message.emotionType === 0 && (
                                                 <div className={clsx(styles['reaction-message'])}>
                                                     <LikeIcon width={16} height={16} />

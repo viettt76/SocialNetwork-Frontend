@@ -56,7 +56,16 @@ const ChatPopup = ({ friend, index }) => {
                     message: message.content,
                     pictures: message.images || [],
                     symbol: message.symbol,
-                    emotionType: message.emotionType === null ? null : message.emotionType.map((item) => Number(item)),
+                    reactionByUser:
+                        message.reactionByUser === null
+                            ? null
+                            : message.reactionByUser.map((item) => {
+                                  return {
+                                      userId: item.userId,
+                                      reactionId: item.reactionId,
+                                      emotionType: Number(item.emotionType),
+                                  };
+                              }),
                 }));
                 console.log(messages);
                 setMessages(messages);
@@ -95,7 +104,7 @@ const ChatPopup = ({ friend, index }) => {
                                 pictures: messageResponse.images,
                                 sendDate: messageResponse.sendDate,
                                 symbol: messageResponse.symbol,
-                                emotionType: Number(messageResponse.emotionType),
+                                reactionByUser: messageResponse.reactionByUser,
                             },
                         ];
                     });
@@ -130,9 +139,10 @@ const ChatPopup = ({ friend, index }) => {
                         message.id === reactionMessageResponse.messageId
                             ? {
                                   ...message,
-                                  emotionType: message.emotionType
-                                      ? [...message.emotionType, Number(reactionMessageResponse.emotionType)]
-                                      : [Number(reactionMessageResponse.emotionType)],
+                                  reactionByUser:
+                                      message.reactionByUser && message.senderID === friend?.id
+                                          ? [...message.reactionByUser, Number(reactionMessageResponse.reactionByUser)]
+                                          : [Number(reactionMessageResponse.reactionByUser)],
                               }
                             : message,
                     );
@@ -294,10 +304,10 @@ const ChatPopup = ({ friend, index }) => {
                     message.id === messageId
                         ? {
                               ...message,
-                              emotionType:
-                                  message.senderID === userInfo.id && message.emotionType
-                                      ? [...message.emotionType, emotionType]
-                                      : [emotionType],
+                              reactionByUser:
+                                  message.senderID === friend?.id && message.reactionByUser
+                                      ? [...message.reactionByUser, Number(reactionByUser)]
+                                      : [Number(reactionByUser)],
                           }
                         : message,
                 );
@@ -516,35 +526,35 @@ const ChatPopup = ({ friend, index }) => {
                                                     </li>
                                                 </ul>
                                             </div>
-                                            {message.emotionType !== null &&
-                                                message.emotionType.map((emotion, index) => (
+                                            {message.reactionByUser !== null &&
+                                                message.reactionByUser.map((emotion, index) => (
                                                     <Fragment key={index}>
-                                                        {emotion === 0 && (
+                                                        {emotion.emotionType === 0 && (
                                                             <div className={clsx(styles['reaction-message'])}>
                                                                 <LikeIcon width={16} height={16} />
                                                             </div>
                                                         )}
-                                                        {emotion === 1 && (
+                                                        {emotion.emotionType === 1 && (
                                                             <div className={clsx(styles['reaction-message'])}>
                                                                 <LoveIcon width={16} height={16} />
                                                             </div>
                                                         )}
-                                                        {emotion === 2 && (
+                                                        {emotion.emotionType === 2 && (
                                                             <div className={clsx(styles['reaction-message'])}>
                                                                 <HaHaIcon width={16} height={16} />
                                                             </div>
                                                         )}
-                                                        {emotion === 3 && (
+                                                        {emotion.emotionType === 3 && (
                                                             <div className={clsx(styles['reaction-message'])}>
                                                                 <WowIcon width={16} height={16} />
                                                             </div>
                                                         )}
-                                                        {emotion === 4 && (
+                                                        {emotion.emotionType === 4 && (
                                                             <div className={clsx(styles['reaction-message'])}>
                                                                 <SadIcon width={16} height={16} />
                                                             </div>
                                                         )}
-                                                        {emotion === 5 && (
+                                                        {emotion.emotionType === 5 && (
                                                             <div className={clsx(styles['reaction-message'])}>
                                                                 <AngryIcon width={16} height={16} />
                                                             </div>
@@ -552,7 +562,7 @@ const ChatPopup = ({ friend, index }) => {
                                                     </Fragment>
                                                 ))}
 
-                                            {message.emotionType === 0 && (
+                                            {/* {message.emotionType === 0 && (
                                                 <div className={clsx(styles['reaction-message'])}>
                                                     <LikeIcon width={16} height={16} />
                                                 </div>
@@ -586,7 +596,7 @@ const ChatPopup = ({ friend, index }) => {
                                                 <div className={clsx(styles['reaction-message'])}>
                                                     <AngryIcon width={16} height={16} />
                                                 </div>
-                                            )}
+                                            )} */}
                                         </div>
                                         {index === messages?.length - 1 && (
                                             <div

@@ -42,7 +42,7 @@ const ChatPopup = ({ friend, index }) => {
 
     const [isDisplayTyping, setIsDisPlayTyping] = useState(false);
 
-    const [currentMessageSelect, setcurrentMessageSelect] = useState('');
+    const [currentMessageSelect, setcurrentMessageSelect] = useState({});
 
     let typingTimeout = null;
 
@@ -98,8 +98,11 @@ const ChatPopup = ({ friend, index }) => {
                         });
                     } else {
                         setMessages((prev) => {
+                            var x = prev.find((message) => message.id === messageResponse.messageID);
                             return [
-                                ...prev,
+                                ...(prev.find((message) => message.id === messageResponse.messageID)
+                                    ? prev.filter((message) => message.id !== messageResponse.messageID)
+                                    : prev),
                                 {
                                     id: messageResponse.messageID,
                                     sender: friend?.id,
@@ -108,7 +111,15 @@ const ChatPopup = ({ friend, index }) => {
                                     pictures: messageResponse.images,
                                     sendDate: messageResponse.sendDate,
                                     symbol: messageResponse.symbol,
-                                    reactionByUser: messageResponse.reactionByUser,
+                                    reactionByUser: messageResponse.reactionByUser
+                                        ? messageResponse.reactionByUser.map((reaction) => {
+                                              return {
+                                                  userId: reaction.userId,
+                                                  reactionId: reaction.reactionId,
+                                                  emotionType: Number(reaction.emotionType.toString()),
+                                              };
+                                          })
+                                        : [],
                                 },
                             ];
                         });
@@ -116,9 +127,7 @@ const ChatPopup = ({ friend, index }) => {
 
                     connection.on('ReciverTypingNotification', (isTyping) => {
                         setIsDisPlayTyping(isTyping);
-                        console.log('User is typing? >>>', isTyping);
                     });
-                    console.log(`${sender} has send ${message}`);
                 });
             } catch (error) {
                 console.error('Error establishing connection:', error);
@@ -136,9 +145,7 @@ const ChatPopup = ({ friend, index }) => {
                 setError(errorMessage);
                 console.error('Error received: ', errorMessage);
             });
-            console.log('messagess', messages);
             reactionHub.on('ReceiveReactionMessage', (reactionMessageResponse) => {
-                console.log('ReceiveReactionMessage:', reactionMessageResponse);
                 setMessages((prevMessages) => {
                     if (reactionMessageResponse.isRemove === true) {
                         const updatedMessages = prevMessages.map((message) => {
@@ -152,12 +159,10 @@ const ChatPopup = ({ friend, index }) => {
                             }
                             return message;
                         });
-                        console.log('updatedReactions:', updatedMessages);
                         return updatedMessages;
                     } else {
                         const updatedMessages = prevMessages.map((message, index) => {
                             if (message.id === reactionMessageResponse.messageId) {
-                                console.log('message:' + index, message);
                                 let updatedReactions = [...(message.reactionByUser || [])];
                                 const existingReactionIndex = updatedReactions.findIndex(
                                     (reaction) => reaction.userId === reactionMessageResponse.senderId,
@@ -197,36 +202,42 @@ const ChatPopup = ({ friend, index }) => {
 
     const sendMessageToPerson = async (imagesUrls = []) => {
         try {
-            if (currentMessageSelect !== '') {
+            if (Object.keys(currentMessageSelect).length > 0) {
+                console.log('currentMessageSelect', currentMessageSelect);
                 var messageUpdateParameter = {
-                    messageId: currentMessageSelect,
+                    messageId: currentMessageSelect.messageId,
+                    reactionByUser: currentMessageSelect.reactionByUser.map((reaction) => {
+                        return {
+                            userId: reaction.userId,
+                            reactionId: reaction.reactionId,
+                            emotionType: reaction.emotionType.toString(),
+                        };
+                    }),
                     content: sendMessage,
                     reciverId: friend?.id,
                 };
-
                 setSendMessage('');
 
                 setMessages((prev) => {
                     return [
                         ...prev,
                         {
-                            id: null,
+                            id: currentMessageSelect.messageId,
                             sender: userInfo?.id,
                             receiver: friend?.id,
                             message: sendMessage,
                             pictures: imagesUrls || [],
                             symbol: symbol,
-                            reactionByUser: [],
+                            reactionByUser: currentMessageSelect.reactionByUser,
                         },
                     ];
                 });
 
                 setProcessingMessage('Đang xử lý');
 
-                await conn.invoke('UpdateMessage', messageUpdateParameter);
+                var messageId = await conn.invoke('UpdateMessage', messageUpdateParameter);
 
                 setSymbol(0);
-                console.log('MessageId: ', messageId);
 
                 setMessages((prev) => {
                     const index = _.findIndex(prev, { id: null, sendMessage });
@@ -241,6 +252,7 @@ const ChatPopup = ({ friend, index }) => {
                 });
 
                 setProcessingMessage('');
+                setcurrentMessageSelect({});
             } else {
                 if (symbol === 0 && !sendMessage.trim() && imagesUrls.length === 0) return;
                 let message = sendMessage;
@@ -277,7 +289,6 @@ const ChatPopup = ({ friend, index }) => {
                 var messageId = await conn.invoke('SendMessageToPerson', messageParameter);
 
                 setSymbol(0);
-                console.log('MessageId: ', messageId);
 
                 setMessages((prev) => {
                     const index = _.findIndex(prev, { id: null, message });
@@ -351,13 +362,11 @@ const ChatPopup = ({ friend, index }) => {
 
     const handleChooseFile = async (e) => {
         const files = Array.from(e.target.files);
-        console.log(files);
         try {
             const imagesUrls = [];
             if (files.length > 0) {
                 const uploadedUrls = await Promise.all(files.map((fileUpload) => uploadToCloudinary(fileUpload)));
                 imagesUrls.push(...uploadedUrls);
-                console.log(imagesUrls);
             }
             await sendMessageToPerson(imagesUrls);
             e.target.value = null;
@@ -474,7 +483,7 @@ const ChatPopup = ({ friend, index }) => {
         }
     };
 
-    const handleUpdateMessage = async (messageId, senderId) => {
+    const handleUpdateMessage = async (messageId, senderId, reactionByUser) => {
         try {
             if (messageId.trim() && userInfo?.id == senderId) {
                 var currentMessage = messages.find((mesage) => mesage.id === messageId);
@@ -485,13 +494,12 @@ const ChatPopup = ({ friend, index }) => {
                     return prev.filter((message) => message.id !== messageId);
                 });
 
-                setcurrentMessageSelect(messageId);
+                setcurrentMessageSelect({ messageId, reactionByUser });
             }
         } catch (error) {
             console.log(error);
         }
     };
-
     return (
         <div
             style={{ right: index === 0 ? '3rem' : '38rem', zIndex: 2 - index }}
@@ -724,22 +732,30 @@ const ChatPopup = ({ friend, index }) => {
                                                         })}
                                                     >
                                                         <li className={clsx(styles['more-popup-item'])}>Phản hồi</li>
-                                                        <li
-                                                            className={clsx(styles['more-popup-item'])}
-                                                            onClick={() => {
-                                                                handleUpdateMessage(message.id, message.sender);
-                                                            }}
-                                                        >
-                                                            Chỉnh sửa
-                                                        </li>
-                                                        <li
-                                                            className={clsx(styles['more-popup-item'])}
-                                                            onClick={() =>
-                                                                handleReamoveMessage(message.id, message.sender)
-                                                            }
-                                                        >
-                                                            Gỡ
-                                                        </li>
+                                                        {message?.sender === userInfo?.id && (
+                                                            <li
+                                                                className={clsx(styles['more-popup-item'])}
+                                                                onClick={() => {
+                                                                    handleUpdateMessage(
+                                                                        message.id,
+                                                                        message.sender,
+                                                                        message.reactionByUser,
+                                                                    );
+                                                                }}
+                                                            >
+                                                                Chỉnh sửa
+                                                            </li>
+                                                        )}
+                                                        {message?.sender === userInfo?.id && (
+                                                            <li
+                                                                className={clsx(styles['more-popup-item'])}
+                                                                onClick={() =>
+                                                                    handleReamoveMessage(message.id, message.sender)
+                                                                }
+                                                            >
+                                                                Gỡ
+                                                            </li>
+                                                        )}
                                                     </ul>
                                                 </div>
                                             </div>

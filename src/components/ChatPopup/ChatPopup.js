@@ -1,7 +1,14 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faPaperclip, faThumbsUp, faXmark } from '@fortawesome/free-solid-svg-icons';
+import {
+    faChevronDown,
+    faPaperclip,
+    faPhone,
+    faThumbsUp,
+    faVideoCamera,
+    faXmark,
+} from '@fortawesome/free-solid-svg-icons';
 import styles from './ChatPopup.module.scss';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,6 +21,7 @@ import useClickOutside from '~/hook/useClickOutside';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import { calculateTime, uploadToCloudinary } from '~/utils/commonUtils';
 import { AngryIcon, HaHaIcon, LikeIcon, LoveIcon, SadIcon, WowIcon } from '~/components/Icons';
+import Call from '../Call';
 
 const ChatPopup = ({ friend, index }) => {
     const { ref: chatPopupRef, isComponentVisible: isFocus, setIsComponentVisible: setIsFocus } = useClickOutside(true);
@@ -44,11 +52,16 @@ const ChatPopup = ({ friend, index }) => {
 
     const [currentMessageSelect, setcurrentMessageSelect] = useState({});
 
+    const [isCalling, setIsCalling] = useState(false);
+
+    const [isVideoCall, setIsVideoCall] = useState(false);
+
     let typingTimeout = null;
 
     useEffect(() => {
         (async () => {
             try {
+                var x = (await getAllMessageService(friend?.id)).data;
                 const messages = (await getAllMessageService(friend?.id)).data.map((message) => ({
                     id: message.messageID,
                     sender: message.senderID,
@@ -66,8 +79,8 @@ const ChatPopup = ({ friend, index }) => {
                                       emotionType: Number(item.emotionType),
                                   };
                               }),
+                    createdAt: message.createdAt,
                 }));
-                console.log(messages);
                 setMessages(messages);
             } catch (error) {
                 console.log(error);
@@ -109,7 +122,6 @@ const ChatPopup = ({ friend, index }) => {
                                     receiver: userInfo?.id,
                                     message: messageResponse.content,
                                     pictures: messageResponse.images,
-                                    sendDate: messageResponse.sendDate,
                                     symbol: messageResponse.symbol,
                                     reactionByUser: messageResponse.reactionByUser
                                         ? messageResponse.reactionByUser.map((reaction) => {
@@ -120,6 +132,7 @@ const ChatPopup = ({ friend, index }) => {
                                               };
                                           })
                                         : [],
+                                    createdAt: messageResponse.createdAt,
                                 },
                             ];
                         });
@@ -286,7 +299,7 @@ const ChatPopup = ({ friend, index }) => {
                     images: imagesUrls,
                     symbol: symbol,
                 };
-                var messageId = await conn.invoke('SendMessageToPerson', messageParameter);
+                var messageResult = await conn.invoke('SendMessageToPerson', messageParameter);
 
                 setSymbol(0);
 
@@ -297,7 +310,11 @@ const ChatPopup = ({ friend, index }) => {
 
                     const updatedMessages = _.cloneDeep(prev);
 
-                    updatedMessages[index] = { ...updatedMessages[index], id: messageId };
+                    updatedMessages[index] = {
+                        ...updatedMessages[index],
+                        id: messageResult.messageID,
+                        createdAt: messageResult.createdAt,
+                    };
 
                     return updatedMessages;
                 });
@@ -500,6 +517,18 @@ const ChatPopup = ({ friend, index }) => {
             console.log(error);
         }
     };
+
+    const handCall = async (isVideoCall) => {
+        if (!isCalling) {
+            setIsVideoCall(isVideoCall);
+            setIsCalling(true);
+        }
+    };
+
+    const endCall = () => {
+        setIsCalling(false);
+        setIsVideoCall(false);
+    };
     return (
         <div
             style={{ right: index === 0 ? '3rem' : '38rem', zIndex: 2 - index }}
@@ -528,6 +557,24 @@ const ChatPopup = ({ friend, index }) => {
                         icon={faChevronDown}
                         onClick={handleShowSetting}
                     />
+
+                    <div className={clsx(styles['call-wrapper'])}>
+                        <FontAwesomeIcon
+                            className={clsx(styles['call'])}
+                            icon={faPhone}
+                            onClick={() => {
+                                handCall(false);
+                            }}
+                        ></FontAwesomeIcon>
+
+                        <FontAwesomeIcon
+                            className={clsx(styles['call-video'])}
+                            icon={faVideoCamera}
+                            onClick={() => {
+                                handCall(true);
+                            }}
+                        ></FontAwesomeIcon>
+                    </div>
                 </div>
                 <FontAwesomeIcon
                     icon={faXmark}
@@ -759,7 +806,7 @@ const ChatPopup = ({ friend, index }) => {
                                                     </ul>
                                                 </div>
                                             </div>
-                                            {message.emotionType !== null && (
+                                            {message.reactionByUser.length > 0 && (
                                                 <div className={clsx(styles['reaction-wrapper'])}>
                                                     {message.reactionByUser !== null &&
                                                         message.reactionByUser.map((emotion, index) => (
@@ -893,7 +940,7 @@ const ChatPopup = ({ friend, index }) => {
                     <input
                         value={sendMessage}
                         className={clsx(styles['send-message'])}
-                        placeholder="Aa"
+                        placeholder="Dien dep trai"
                         onChange={(e) => {
                             setSendMessage(e.target.value);
                             handlerTyping();
@@ -915,6 +962,9 @@ const ChatPopup = ({ friend, index }) => {
                     )}
                 </div>
             </div>
+            {isCalling && (
+                <Call isCalling={isCalling} endCall={endCall} isVideoCall={isVideoCall} friendId={friend?.id} />
+            )}
         </div>
     );
 };

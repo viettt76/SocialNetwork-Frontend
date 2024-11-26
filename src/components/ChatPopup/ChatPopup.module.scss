@@ -45,6 +45,26 @@
             .chat-close {
                 color: #fff;
             }
+
+            .call-wrapper {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 5rem;
+
+                .call,
+                .call-video {
+                    color: #ffffff;
+                    padding: 0.5rem;
+                }
+
+                .call:hover,
+                .call-video:hover {
+                    cursor: pointer;
+                    background-color: #4c8efa;
+                    border-radius: 50%;
+                }
+            }
         }
 
         .chat-receiver {
@@ -364,7 +384,7 @@
 
                 &::after {
                     content: '';
-                    z-index: 100;
+                    z-index: 10;
                     background-color: #f1f2f6;
                     position: absolute;
                     left: 50%;

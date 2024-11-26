@@ -14,6 +14,7 @@ import { loadingSelector, userInfoSelector } from '~/redux/selectors';
 import * as actions from '~/redux/actions';
 import LoadingOverlay from '~/components/LoadingOverlay';
 import { uploadToCloudinary } from '~/utils/commonUtils';
+import signalRClient from '~/components/Post/signalRClient';
 
 const WritePost = () => {
     const dispatch = useDispatch();
@@ -24,10 +25,9 @@ const WritePost = () => {
     const handleShowModalWritePost = () => setShowModalWritePost(true);
     const handleCloseModalWritePost = () => setShowModalWritePost(false);
 
-    const [visibility, setVisibility] = useState(1);
     const [content, setContent] = useState('');
-    const [images, setImages] = useState([]);
     const [imagesUpload, setImagesUpload] = useState([]);
+    const [images, setImages] = useState([]);
 
     const maxVisibleImages = 4;
     const [visibleImages, setVisibleImages] = useState([]);
@@ -56,7 +56,6 @@ const WritePost = () => {
     };
 
     const deleteAllImages = () => {
-        setImages([]);
         setImagesUpload([]);
     };
 
@@ -64,18 +63,25 @@ const WritePost = () => {
         try {
             const imagesUrl = [];
             dispatch(actions.startLoading('writePost'));
+
             if (imagesUpload.length > 0) {
                 const uploadPromises = imagesUpload.map((fileUpload) => uploadToCloudinary(fileUpload));
-
                 const uploadedUrls = await Promise.all(uploadPromises);
                 imagesUrl.push(...uploadedUrls);
             }
 
-            await submitPostService({ visibility, content, images: imagesUrl });
+            const newPost = await submitPostService({ content, images: images.map((imgUrl) => ({ imgUrl })) });
+            if (!newPost) {
+                throw new Error('Post submission failed or invalid response');
+            }
+            // console.log('vinhbr', newPost);
             dispatch(actions.stopLoading('writePost'));
             handleCloseModalWritePost();
+            setContent('');
+            deleteAllImages();
         } catch (error) {
             console.log(error);
+            dispatch(actions.stopLoading('writePost'));
         }
     };
 
@@ -108,7 +114,7 @@ const WritePost = () => {
                         placeholder="Viết nội dung"
                         onChange={(e) => setContent(e.target.value)}
                     />
-
+                    {/* Phần cho việc thêm ảnh/video */}
                     {images?.length > 0 ? (
                         <div className={clsx(styles['images-layout-wrapper'])}>
                             <div className={clsx(styles['image-btn-wrapper'])}>
@@ -158,7 +164,7 @@ const WritePost = () => {
                     <button
                         className={clsx(styles['post-btn'])}
                         onClick={handleSubmitPost}
-                        disabled={!content && images?.length == 0}
+                        disabled={!content && imagesUpload.length === 0}
                     >
                         Đăng bài
                     </button>

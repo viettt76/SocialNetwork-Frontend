@@ -8,6 +8,9 @@ import { getCommentsService, sendCommentService } from '~/services/postServices'
 import PostContent from './PostContent';
 import socket from '~/socket';
 import _ from 'lodash';
+import signalRClient from '~/components/Post/signalRClient';
+import { format } from 'date-fns';
+import * as signalR from '@microsoft/signalr';
 
 // eslint-disable-next-line react/display-name
 const CustomToggle = forwardRef(({ children, onClick }, ref) => (
@@ -25,7 +28,7 @@ const CustomToggle = forwardRef(({ children, onClick }, ref) => (
 
 const Comment = ({ comment, postId }) => {
     const [showChildComments, setShowChildComments] = useState(false);
-    // const [showReplyCommentInput, setShowReplyCommentInput] = useState(false);
+    const [showReplyCommentInput, setShowReplyCommentInput] = useState(false);
 
     const [replyComment, setReplyComment] = useState({
         content: '',
@@ -67,20 +70,19 @@ const Comment = ({ comment, postId }) => {
 
     return (
         <div className={clsx(styles['comment'])}>
-            <img
-                className={clsx(styles['commentator-avatar'])}
-                src={comment?.commentatorInfo?.avatar || defaultAvatar}
-            />
+            <img className={clsx(styles['commentator-avatar'])} src={comment?.avatar || defaultAvatar} />
             <div className={clsx(styles['comment-info-wrapper'])}>
                 <div className={clsx(styles['commentator-name-comment-content'])}>
                     <div
                         className={clsx(styles['commentator-name'])}
-                    >{`${comment?.commentatorInfo?.lastName} ${comment?.commentatorInfo?.firstName}`}</div>
+                    >{`${comment?.lastName} ${comment?.firstName}`}</div>
                     <div className={clsx(styles['comment-content'])}>{comment?.content}</div>
                 </div>
                 {/* {comment?.attachment} */}
                 <div className={clsx(styles['comment-previous-time-action'])}>
-                    <span className={clsx(styles['comment-previous-time'])}>{comment?.createdAt}</span>
+                    <span className={clsx(styles['comment-previous-time'])}>
+                        {format(new Date(comment?.createdAt), 'dd/MM')}
+                    </span>
                     <div className={clsx(styles['comment-action'])}>
                         <span className={clsx(styles['comment-action-item'], styles['comment-action-item-emo'])}>
                             Thích
@@ -123,11 +125,11 @@ const Comment = ({ comment, postId }) => {
                         <input
                             value={replyComment.content}
                             className={clsx(styles['reply-comment-input'])}
-                            placeholder={`Phản hồi ${comment?.commentatorInfo?.lastName} ${comment?.commentatorInfo?.firstName}`}
+                            placeholder={`Phản hồi ${comment?.lastName} ${comment?.firstName}`}
                             onChange={(e) =>
                                 setReplyComment({
                                     content: e.target.value,
-                                    parentCommentId: comment?.id,
+                                    parentCommentId: comment?.commentID,
                                 })
                             }
                             onKeyDown={handleReplyComment}
@@ -167,53 +169,57 @@ const Comment = ({ comment, postId }) => {
 };
 
 const ModalPost = ({ postInfo, show, handleClose }) => {
-    const { id } = postInfo;
+    const { id: postId } = postInfo;
 
     const [writeComment, setWriteComment] = useState('');
-
-    const wRef = useRef(null);
-
     const [comments, setComments] = useState([]);
 
-    useEffect(() => {
-        const fetchComments = async () => {
-            try {
-                const res = await getCommentsService(id);
-                setComments(res?.comments);
-            } catch (error) {
-                console.log(error);
-            }
-        };
-        fetchComments();
-    }, [id]);
+    const wRef = useRef(null);
 
     const handleFocusSendComment = () => {
         wRef.current.focus();
     };
 
-    const handleSendComment = async (e) => {
-        if (e.key === 'Enter') {
-            try {
-                await sendCommentService({ postId: id, content: writeComment });
-                setWriteComment('');
-            } catch (error) {
-                console.log(error);
-            }
-        }
-    };
-
     useEffect(() => {
-        // socket.emit('joinPost', id);
-    }, [id]);
+        const fetchComments = async () => {
+            try {
+                const res = await getCommentsService({ postId });
+                setComments(res?.comment);
+                // {
+                //     "commentID": "6d55b085-8030-4729-889a-e86200db4a59",
+                //     "postID": "196b6f6d-7421-437b-a1cb-98bd6e777a70",
+                //     "parentCommentID": null,
+                //     "content": "vvv",
+                //     "firstName": "First1",
+                //     "lastName": "Last1",
+                //     "avatarUrl": null,
+                //     "createdAt": "2024-11-13T13:23:10.6975232",
+                //     "children": []
+                // },
+            } catch (error) {
+                console.error('Error fetching comments:', error);
+                setComments([]);
+            }
+        };
 
+        if (postId) {
+            fetchComments();
+        } else {
+            console.error('Post ID không hợp lệ');
+        }
+    }, [postId]);
+
+    console.log('State comments: ', comments);
     useEffect(() => {
         const handleNewComment = (newComment) => {
-            if (id === newComment?.postId) {
+            if (postId === newComment?.postID) {
                 setComments((prev) => [
                     {
-                        id: newComment?.id,
+                        commentID: newComment?.commentID,
                         content: newComment?.content,
-                        commentatorInfo: newComment?.commentatorInfo,
+                        firstName: newComment?.firstName,
+                        lastName: newComment?.lastName,
+                        avatar: newComment?.avatarUrl,
                         createdAt: newComment?.createdAt,
                         children: newComment?.children,
                     },
@@ -221,47 +227,59 @@ const ModalPost = ({ postInfo, show, handleClose }) => {
                 ]);
             }
         };
+        // console.log('State comments: ', newComment);
+
         const handleNewChildComment = (newChildComment) => {
-            if (id === newChildComment?.postId) {
+            if (postId === newChildComment?.postID) {
                 setComments((prev) => {
                     const newComments = _.cloneDeep(prev);
 
                     const addChildComment = (comments) => {
                         const commentParent = _.find(comments, (comment) => {
-                            if (comment?.id === newChildComment?.parentCommentId) return true;
+                            if (comment?.commentID === newChildComment?.parentCommentID) return true;
                             if (comment?.children?.length > 0) return addChildComment(comment.children);
                             return false;
                         });
 
                         if (commentParent) {
-                            commentParent?.children?.push({
-                                id: newChildComment?.id,
-                                content: newChildComment?.content,
-                                commentatorInfo: newChildComment?.commentatorInfo,
-                                createdAt: newChildComment?.createdAt,
-                                children: newChildComment?.children,
-                            });
+                            commentParent?.children?.push(newChildComment);
                         }
-
-                        return false;
                     };
 
                     addChildComment(newComments);
-
                     return newComments;
                 });
             }
         };
 
-        // socket.on('newComment', handleNewComment);
-        // socket.on('newChildComment', handleNewChildComment);
+        const handleReceiveComment = (newComment) => {
+            console.log(newComment);
+            if (newComment?.parentCommentID) {
+                handleNewChildComment(newComment);
+            } else {
+                handleNewComment(newComment);
+            }
+        };
+
+        signalRClient.invoke('StartPostRoom', postId);
+
+        signalRClient.on('ReceiveComment', handleReceiveComment);
 
         return () => {
-            // socket.off('newComment', handleNewComment);
-            // socket.off('newChildComment', handleNewChildComment);
+            signalRClient.off('ReceiveComment', handleReceiveComment);
         };
-    }, [id]);
+    }, [postId]);
 
+    const handleSendComment = async (e) => {
+        if (e.key === 'Enter') {
+            try {
+                await sendCommentService({ postId, content: writeComment });
+                setWriteComment('');
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    };
     return (
         <Modal className={clsx(styles['modal'])} show={show} onHide={handleClose}>
             <Modal.Body className={clsx(styles['modal-body'])}>
@@ -283,8 +301,8 @@ const ModalPost = ({ postInfo, show, handleClose }) => {
                             <div className={clsx(styles['comment-list'])}>
                                 {comments?.map((comment) => {
                                     return (
-                                        <div key={`comment-${comment?.id}`}>
-                                            <Comment comment={comment} postId={id} />
+                                        <div key={`comment-${comment?.commentID}`}>
+                                            <Comment comment={comment} postId={postId} />
                                         </div>
                                     );
                                 })}

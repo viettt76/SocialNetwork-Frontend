@@ -1,30 +1,93 @@
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import ChatPopup from '~/components/ChatPopup';
 import Post from '~/components/Post';
 import WritePost from '~/components/WritePost';
 import { openChatsSelector } from '~/redux/selectors';
+import { getAllPostsService } from '~/services/postServices';
+import signalRClient from '~/components/Post/signalRClient';
 
 const Home = () => {
-    const friendList = [
-        {
-            id: '80fe9c6d-3b7b-44e0-a8bf-226d4c52384e',
-            firstName: 'Trang',
-            lastName: 'Dinh Thi',
-            avatar: 'https://res.cloudinary.com/du19iyqz9/image/upload/v1727446956/file_1727446954211.jpg',
-            isOnline: true,
-        },
-    ];
+    const [posts, setPosts] = useState([]);
+    useEffect(() => {
+        const fetchAllPosts = async () => {
+            try {
+                const res = await getAllPostsService();
+                setPosts(
+                    res.map((post) => {
+                        console.log(post);
+                        return {
+                            id: post.postID,
+                            posterId: post.userID,
+                            firstName: post.firstName,
+                            lastName: post.lastName,
+                            avatar: post.avatarUser,
+                            content: post.content,
+                            createdAt: post.createdAt,
+                            pictures:
+                                post.images?.length > 0 &&
+                                post.images.map((image) => {
+                                    return {
+                                        pictureUrl: image?.imgUrl,
+                                    };
+                                }),
+                            currentEmotionId: post?.emotionTypeID,
+                            currentEmotionName: post?.emotionName,
+                            emotions: post?.reactions?.map((emo) => {
+                                return {
+                                    id: emo?.reactionID,
+                                    emotion: {
+                                        id: emo?.emotionTypeID,
+                                        name: emo?.emotionName,
+                                    },
+                                    userInfo: {
+                                        id: emo?.userID,
+                                    },
+                                };
+                            }),
+                        };
+                    }),
+                    // console.log(post),
+                );
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchAllPosts();
+        const startSignalR = () => {
+            signalRClient.on('ReceivePost', (newPost) => {
+                console.log('vinhbr6666 kết nối', newPost);
+                setPosts((prevPosts) => [newPost, ...prevPosts]);
+                console.log('vinhbr6666 kết nối 9999', prevPosts);
+            });
+            // console.log('vinhbr', newPost);
+        };
+
+        startSignalR();
+
+        return () => {
+            signalRClient.stop();
+        };
+    }, []);
 
     const openChats = useSelector(openChatsSelector);
+
     return (
         <div className="d-flex justify-content-center mt-5">
             <div>
                 <WritePost />
-                <Post postInfo={{ id: 1 }} />
+                {posts.length === 0 ? (
+                    <div className="text-center fz-16">
+                        <div>Hãy kết bạn để xem những bài viết thú vị hơn</div>
+                    </div>
+                ) : (
+                    posts.map((post) => <Post key={`post-${post.id}`} postInfo={post} />)
+                )}
             </div>
-            {openChats?.map((friend, index) => {
-                return <ChatPopup key={`friend-${friend?.id}`} friend={friend} index ={index}/>;
-            })}
+            {openChats.map((friend, index) => (
+                <ChatPopup key={`friend-${friend.id}`} friend={friend} index={index} />
+            ))}
         </div>
     );
 };

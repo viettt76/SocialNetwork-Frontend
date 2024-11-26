@@ -6,6 +6,7 @@ import { SetupInterceptors } from '~/utils/axios';
 import DefaultLayout from '~/layouts/DefaultLayout';
 import { getMyInfoService } from './services/userServices';
 import * as actions from './redux/actions';
+import signalRClient from './components/Post/signalRClient';
 function NavigateFunctionComponent() {
     let navigate = useNavigate();
     const [ran, setRan] = useState(false);
@@ -76,6 +77,7 @@ function FetchUserInfo() {
         if (location.pathname !== '/login') {
             fetchPersonalInfo();
         }
+        signalRClient.start();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

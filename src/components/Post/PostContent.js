@@ -17,51 +17,51 @@ import _ from 'lodash';
 import socket from '~/socket';
 import { useSelector } from 'react-redux';
 import { userInfoSelector } from '~/redux/selectors';
+import signalRClient from './signalRClient';
+import * as signalR from '@microsoft/signalr';
 
 const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowModal, handleFocusSendComment }) => {
     const {
         id,
         posterId,
-        firstName = 'Việt',
-        lastName = 'Hoàng',
+        firstName,
+        lastName,
         avatar,
         groupName,
-        createdAt = '20/09/2024',
+        createdAt,
         visibility,
-        content = `Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.
-Nunc viverra imperdiet enim. Fusce est. Vivamus a tellus.
-Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin pharetra nonummy pede. Mauris et orci.
-Aenean nec lorem. In porttitor. Donec laoreet nonummy augue.
-Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Mauris eget neque at sem venenatis eleifend. Ut nonummy.`,
+        content,
         currentEmotionId,
         currentEmotionName,
         emotions = [],
         pictures = [],
     } = postInfo;
+
     const userInfo = useSelector(userInfoSelector);
 
     const [copyEmotions, setCopyEmotions] = useState(emotions);
-    const [emotionsCustom, setEmotionsCustom] = useState([]);
     const [mostEmotions, setMostEmotions] = useState([]);
     const [currentEmotionNameCustom, setCurrentEmotionNameCustom] = useState(currentEmotionName);
 
     const [numberOfComments, setNumberOfComments] = useState(0);
-
     useEffect(() => {
         const fetchComments = async () => {
             try {
-                const res = await getCommentsService(id);
-                setNumberOfComments(res?.numberOfComments);
+                const res = await getCommentsService({ postId: id });
+                setNumberOfComments(res?.numberOfComment);
             } catch (error) {
                 console.log(error);
             }
         };
+
         fetchComments();
+        // signalRClient.invoke('StartPostRoom', id);
+
+        signalRClient.on('ReceiveComment', fetchComments);
     }, [id]);
 
     useEffect(() => {
         const emoCus = _.groupBy(copyEmotions, 'emotion.name');
-        setEmotionsCustom(emoCus);
 
         const mostEmo = _.sortBy(emoCus, 'length').reverse();
         if (mostEmo.length > 0) {
@@ -80,70 +80,69 @@ Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Ma
     if (pictures?.length > maxVisibleImages) {
         visibleImages = pictures.slice(0, maxVisibleImages - 1);
         remainingImages = pictures.length - maxVisibleImages + 1;
-    } else {
+    } else if (pictures?.length > 0) {
         visibleImages = [...pictures];
     }
 
-    const [emotionsType, setEmotionsType] = useState([
-        { name: 'Thích' },
-        { name: 'Yêu thích' },
-        { name: 'Thương thương' },
-        { name: 'Haha' },
-        { name: 'Wow' },
-        { name: 'Buồn' },
-        { name: 'Phẫn nộ' },
-    ]);
-
-    // useEffect(() => {
-    //     const fetchAllEmotions = async () => {
-    //         try {
-    //             const res = await getAllEmotionsService();
-    //             setEmotionsType(res);
-    //         } catch (error) {
-    //             console.log(error);
-    //         }
-    //     };
-    //     fetchAllEmotions();
-    // }, []);
+    const [emotionsType, setEmotionsType] = useState([]);
+    // { name: 'Like' },
+    // { name: 'Love' },
+    // // { name: 'Thương thương' },
+    // { name: 'Haha' },
+    // { name: 'Wow' },
+    // { name: 'Sad' },
+    // { name: 'Angry' },
+    useEffect(() => {
+        const fetchAllEmotions = async () => {
+            try {
+                const res = await getAllEmotionsService();
+                setEmotionsType(
+                    res?.map((item) => ({
+                        id: item?.emotionTypeID,
+                        name: item?.emotionName,
+                    })),
+                );
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchAllEmotions();
+    }, []);
 
     const emotionComponentMap = {
-        Thích: LikeIcon,
-        'Yêu thích': LoveIcon,
-        'Thương thương': LoveLoveIcon,
+        Like: LikeIcon,
+        Love: LoveIcon,
         Haha: HaHaIcon,
         Wow: WowIcon,
-        Buồn: SadIcon,
-        'Phẫn nộ': AngryIcon,
+        Sad: SadIcon,
+        Angry: AngryIcon,
     };
 
     const emotionClassMap = {
-        Thích: styles['like-emotion'],
-        'Yêu thích': styles['love-emotion'],
-        'Thương thương': styles['loveLove-emotion'],
+        Like: styles['like-emotion'],
+        Love: styles['love-emotion'],
         Haha: styles['haha-emotion'],
         Wow: styles['wow-emotion'],
-        Buồn: styles['sad-emotion'],
-        'Phẫn nộ': styles['angry-emotion'],
+        Sad: styles['sad-emotion'],
+        Angry: styles['angry-emotion'],
     };
 
     const CurrentEmotion = emotionComponentMap[currentEmotionNameCustom];
 
     useEffect(() => {
         const handleReleaseEmotion = ({
-            id: emoPostId,
-            postId,
-            userId: reactorId,
+            postID: postId,
+            userID: reactorId,
             firstName: reactorFirstName,
             lastName: reactorLastName,
-            avatar: reactorAvatar,
-            emotionTypeId,
-            emotionTypeName,
+            avatarUrl: reactorAvatar,
+            emotionTypeID: emotionTypeId,
+            emotionName: emotionTypeName,
         }) => {
             if (id === postId) {
                 setCopyEmotions((prev) => [
                     ...prev,
                     {
-                        id: emoPostId,
                         emotion: {
                             id: emotionTypeId,
                             name: emotionTypeName,
@@ -159,26 +158,50 @@ Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Ma
             }
         };
 
-        const handleUpdateEmotion = ({ id: emoPostId, postId, emotionTypeId, emotionTypeName }) => {
+        signalRClient.on('ReceiveReaction', handleReleaseEmotion);
+        return () => {
+            signalRClient.off('ReceiveReaction', handleReleaseEmotion);
+        };
+    }, [id]);
+
+    useEffect(() => {
+        const handleUpdateEmotion = ({
+            postID: postId,
+            userID: reactorId,
+            emotionTypeID: emotionTypeId,
+            emotionName: emotionTypeName,
+            firstName: reactorFirstName,
+            lastName: reactorLastName,
+            avatarUrl: reactorAvatar,
+        }) => {
             if (id === postId) {
                 setCopyEmotions((prev) => {
-                    const clone = _.cloneDeep(prev);
-                    const emo = _.find(clone, { id: emoPostId });
-                    if (emo) {
-                        emo.emotion.id = emotionTypeId;
-                        emo.emotion.name = emotionTypeName;
-                    }
-                    return clone;
+                    return prev.map((emo) => {
+                        if (emo.userInfo.id === reactorId) {
+                            return {
+                                ...emo,
+                                emotion: {
+                                    id: emotionTypeId,
+                                    name: emotionTypeName,
+                                },
+                                userInfo: {
+                                    id: reactorId,
+                                    firstName: reactorFirstName,
+                                    lastName: reactorLastName,
+                                    avatar: reactorAvatar,
+                                },
+                            };
+                        }
+                        return emo;
+                    });
                 });
             }
         };
 
-        // socket.on('releaseEmotion', handleReleaseEmotion);
-        // socket.on('updateEmotion', handleUpdateEmotion);
+        signalRClient.on('updateEmotion', handleUpdateEmotion);
 
         return () => {
-            // socket.off('releaseEmotiff', handleReleaseEmotion);
-            // socket.off('updateEmotion', handleUpdateEmotion);
+            signalRClient.off('updateEmotion', handleUpdateEmotion);
         };
     }, [id]);
 
@@ -193,23 +216,29 @@ Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Ma
         }
     };
 
-    // useEffect(() => {
-    //     const handleCancelReleasedEmotion = ({ postId, userId: userCancelReleaseEmotionId }) => {
-    //         if (userInfo.id === userCancelReleaseEmotionId && id === postId) {
-    //             setCurrentEmotionNameCustom(null);
+    useEffect(() => {
+        const handleCancelReleasedEmotion = ({
+            // postId, userId: userCancelReleaseEmotionId
+            postID: userCancelReleaseEmotionId,
+            userID: postId,
+        }) => {
+            if (userInfo.id === userCancelReleaseEmotionId && id === postId) {
+                setCurrentEmotionNameCustom(null);
 
-    //             setCopyEmotions((prev) => {
-    //                 const clone = _.filter(prev, (e) => e?.userInfo?.id !== userCancelReleaseEmotionId);
-    //                 return clone;
-    //             });
-    //         }
-    //     };
-    //     socket.on('cancelReleasedEmotion', handleCancelReleasedEmotion);
+                setCopyEmotions((prev) => {
+                    const clone = _.filter(prev, (e) => e?.userInfo?.id !== userCancelReleaseEmotionId);
+                    return clone;
+                });
+            }
+            // console.log('vinh', postId, userCancelReleaseEmotionId);
+        };
 
-    //     return () => {
-    //         socket.off('cancelReleasedEmotion', handleCancelReleasedEmotion);
-    //     };
-    // }, [id, userInfo.id]);
+        signalRClient.on('cancelReleasedEmotion', handleCancelReleasedEmotion);
+
+        return () => {
+            signalRClient.off('cancelReleasedEmotion', handleCancelReleasedEmotion);
+        };
+    }, [id, userInfo.id]);
 
     const handleCancelReleasedEmotion = async () => {
         try {
@@ -218,19 +247,6 @@ Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Ma
             console.log(error);
         }
     };
-
-    // useEffect(() => {
-    //     const handleNewCommentNumberOfComments = (postId) => {
-    //         if (id === postId) {
-    //             setNumberOfComments((prev) => prev + 1);
-    //         }
-    //     };
-    //     socket.on('newComment-numberOfComments', handleNewCommentNumberOfComments);
-
-    //     return () => {
-    //         socket.off('newComment-numberOfComments', handleNewCommentNumberOfComments);
-    //     };
-    // }, [id]);
 
     return (
         <div className={clsx(styles['post-content-wrapper'])}>
@@ -244,7 +260,7 @@ Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Ma
                             e.target.src = defaultAvatar;
                         }}
                     />
-                </Link>
+                </Link>{' '}
                 <div>
                     <h5 className={clsx(styles['post-username'])}>{`${lastName} ${firstName}`}</h5>
                     <span className="fz-12">{createdAt}</span>
@@ -301,7 +317,16 @@ Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Ma
                             </span>
                         </div>
                     ) : (
-                        <div className={clsx(styles['user-action-emotion'])} onClick={() => handleReleaseEmotion(1)}>
+                        <div
+                            className={clsx(styles['user-action-emotion'])}
+                            // onClick={() =>
+                            //     handleReleaseEmotion(
+                            //         emotionsType?.find((i) => {
+                            //             return i.name === 'Like';
+                            //         })?.id,
+                            //     )
+                            // }
+                        >
                             <FontAwesomeIcon icon={faThumbsUp} />
                             <span>Thích</span>
                         </div>

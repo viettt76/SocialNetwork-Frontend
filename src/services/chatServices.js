@@ -13,7 +13,7 @@ export const sendMessageWithFriendService = ({ friendId, message, file }) => {
 };
 
 export const createGroupChatService = ({ name, avatar, members }) => {
-    return axios.post('/chat/group-chat', {
+    return axios.post('/Chat/createGroupChat', {
         name,
         avatar,
         members,
@@ -52,7 +52,7 @@ export const leaveGroupChatService = (groupChatId) => {
 };
 
 export const getLatestConversationsService = () => {
-    return axios.get('/chat/latest');
+    return axios.get('/Chat/getAllConversation');
 };
 
 export const updateGroupAvatarService = ({ groupChatId, avatar }) => {
@@ -60,9 +60,9 @@ export const updateGroupAvatarService = ({ groupChatId, avatar }) => {
 };
 
 export const getAllMessageService = (receiverId) => {
-    return axios.get(`/MessagePersonalChat/getAllMessage`, { params: { receiverId } });
+    return axios.get(`/Chat/getAllPersonalMessage`, { params: { receiverId } });
 };
 
 export const sendReactionMessage = ({ messageId, emotionType }) => {
-    return axios.post(``)
-}
+    return axios.post(``);
+};

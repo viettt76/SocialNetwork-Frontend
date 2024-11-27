@@ -1,15 +1,17 @@
 import clsx from 'clsx';
-import styles from './Messenger.module.scss';
-import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faMagnifyingGlass, faUsers } from '@fortawesome/free-solid-svg-icons';
-import { createGroupChatService, getGroupChatsService, getLatestConversationsService } from '~/services/chatServices';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import socket from '~/socket';
 import { useDispatch, useSelector } from 'react-redux';
 import * as actions from '~/redux/actions';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 import { notificationsMessengerSelector, userInfoSelector } from '~/redux/selectors';
+
+import styles from './Messenger.module.scss';
+import defaultAvatar from '~/assets/imgs/default-avatar.png';
+import { createGroupChatService, getGroupChatsService, getLatestConversationsService } from '~/services/chatServices';
+import { getFriendsOnlineService } from '~/services/relationshipServices';
 
 const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
     const userInfo = useSelector(userInfoSelector);
@@ -43,7 +45,20 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
     //     };
     // }, []);
 
+    useEffect(() => {
+        const getFriendsOnlineServiceHandler = async () => {
+            const response = await getFriendsOnlineService();
+            setOnlineFriends(response.data);
+        };
+
+        getFriendsOnlineServiceHandler();
+    }, []);
+
     const [isInValidNameGroup, setIsInvalidNameGroup] = useState(false);
+
+    const [searchConversationValue, setSearchConversationValue] = useState('');
+
+    const timeoutRef = useRef(null);
 
     const handleCreateGroupChat = async () => {
         try {
@@ -70,8 +85,8 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
         const fetchLatestConversations = async () => {
             try {
                 const res = await getLatestConversationsService();
-                // setLatestConversations(res);
-                setLatestConversations([]);
+                setLatestConversations(res.data);
+                //setLatestConversations([]);
             } catch (error) {
                 console.log(error);
             }
@@ -81,6 +96,17 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
         }
     }, [showMessenger]);
 
+    const handlSearchConversationKeyUp = async (e) => {
+        clearTimeout(timeoutRef.current);
+
+        timeoutRef.current = setTimeout(() => {
+            setSearchConversationValue(e.target.value);
+
+            //todo call tới api Chat/SearchConversation
+        }, 500);
+    };
+
+    const handlSearchConversationKeyDown = async () => {};
     return (
         <div
             ref={messengerRef}
@@ -93,7 +119,12 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
                     <div className={clsx('d-flex align-items-center', styles['messenger-header'])}>
                         <div className={clsx(styles['search-wrapper'])}>
                             <FontAwesomeIcon className={clsx(styles['search-icon'])} icon={faMagnifyingGlass} />
-                            <input className={clsx(styles['search-input'])} placeholder="Tìm kiếm" />
+                            <input
+                                onKeyUp={handlSearchConversationKeyUp}
+                                onKeyDown={handlSearchConversationKeyDown}
+                                className={clsx(styles['search-input'])}
+                                placeholder="Tìm kiếm"
+                            />
                         </div>
                         <div
                             className={clsx('fz-15', styles['create-group-chat-btn-wrapper'])}
@@ -108,10 +139,10 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
                         </div>
                     </div>
 
-                    {latestConversations?.map((conversation) => {
+                    {latestConversations?.map((conversation, index) => {
                         return (
                             <div
-                                key={`group-chat-${conversation?.id}`}
+                                key={`group-chat-${index}`}
                                 className={clsx(styles['conversation-wrapper'], {
                                     [[styles['unread']]]: notificationsMessenger?.some(
                                         (noti) => noti?.senderId === conversation?.friendId && !noti?.isRead,
@@ -123,15 +154,15 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
                                             ? {
                                                   id: conversation?.groupId,
                                                   name: conversation?.groupName,
-                                                  avatar: conversation?.groupAvatar,
+                                                  avatar: conversation?.avatar,
                                                   administratorId: conversation?.administratorId,
                                                   isGroupChat: true,
                                               }
                                             : {
                                                   id: conversation?.friendId,
-                                                  firstName: conversation?.friendFirstName,
-                                                  lastName: conversation?.friendLastName,
-                                                  avatar: conversation?.friendAvatar,
+                                                  firstName: conversation?.firstName,
+                                                  lastName: conversation?.lastName,
+                                                  avatar: conversation?.avatar,
                                               },
                                     )
                                 }
@@ -140,16 +171,15 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
                                     <img
                                         className={clsx(styles['avatar'])}
                                         src={
-                                            (conversation?.groupId
-                                                ? conversation?.groupAvatar
-                                                : conversation?.friendAvatar) || defaultAvatar
+                                            (conversation?.groupId ? conversation?.avatar : conversation?.avatar) ||
+                                            defaultAvatar
                                         }
                                     />
                                     <div>
                                         <h6 className={clsx(styles['name'])}>
                                             {conversation?.groupId
                                                 ? conversation?.groupName
-                                                : `${conversation?.friendLastName} ${conversation?.friendFirstName}`}
+                                                : `${conversation?.lastName} ${conversation?.firstName}`}
                                         </h6>
                                         <div className={clsx(styles['last-message'])}>
                                             {conversation?.senderId === userInfo?.id

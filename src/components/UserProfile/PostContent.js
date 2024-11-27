@@ -283,7 +283,6 @@ Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Ma
 
                 <div className={clsx(styles['amount-of-comments-wrapper'])}>
                     <span onClick={handleShowModal}>{numberOfComments || 0} bình luận</span>
-                    <span>32 chia sẻ</span>
                 </div>
             </div>
             <div className={clsx(styles['user-actions-wrapper'])}>
@@ -329,10 +328,6 @@ Suspendisse dui purus, scelerisque at, vulputate vitae, pretium mattis, nunc. Ma
                 >
                     <FontAwesomeIcon icon={faComment} />
                     <span>Bình luận</span>
-                </div>
-                <div className={clsx(styles['user-action'])}>
-                    <FontAwesomeIcon icon={faShare} />
-                    <span>Chia sẻ</span>
                 </div>
             </div>
         </div>

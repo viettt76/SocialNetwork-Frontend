@@ -17,7 +17,7 @@ const FriendsList = () => {
             const friends = (await getFriendsOnlineService()).data;
             setOnlineFriends(friends);
         };
-    
+
         getFriendsOnlineServiceHandler();
         // socket.emit('getFriendsOnline');
 
@@ -51,7 +51,7 @@ const FriendsList = () => {
                                     [[styles['is-online']]]: friend?.isOnline,
                                 })}
                             >
-                                <img src={friend?.avatar || defaultAvatar} />
+                                <img src={friend?.avatarUrl || defaultAvatar} />
                             </div>
                             <div
                                 className={clsx(styles['friend-name'])}

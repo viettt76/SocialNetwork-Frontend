@@ -12,9 +12,9 @@ export const sendMessageWithFriendService = ({ friendId, message, file }) => {
     });
 };
 
-export const createGroupChatService = ({ name, avatar, members }) => {
+export const createGroupChatService = ({ groupName, avatar, members }) => {
     return axios.post('/Chat/createGroupChat', {
-        name,
+        groupName,
         avatar,
         members,
     });

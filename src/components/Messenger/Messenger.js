@@ -23,7 +23,7 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
     const handleHideCreateNewGroup = () => setShowCreateNewGroup(false);
 
     const [infoNewGroupChat, setInfoNewGroupChat] = useState({
-        name: '',
+        groupName: '',
         avatar: null,
         members: [],
     });
@@ -62,14 +62,14 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
 
     const handleCreateGroupChat = async () => {
         try {
-            if (!infoNewGroupChat.name) {
+            if (!infoNewGroupChat.groupName) {
                 setIsInvalidNameGroup(true);
                 return;
             }
             await createGroupChatService({
-                name: infoNewGroupChat.name,
+                groupName: infoNewGroupChat.groupName,
                 avatar: infoNewGroupChat.avatar,
-                members: infoNewGroupChat.members,
+                members: [...infoNewGroupChat.members, userInfo?.id],
             });
         } catch (error) {
             console.log(error);
@@ -208,10 +208,11 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
                         </div>
                         <div
                             className={clsx(styles['create-group-header-btn'], {
-                                [[styles['inactive']]]: !infoNewGroupChat.name || infoNewGroupChat.members?.length < 2,
+                                [[styles['inactive']]]:
+                                    !infoNewGroupChat.groupName || infoNewGroupChat.members?.length < 2,
                             })}
                             onClick={() =>
-                                infoNewGroupChat.name &&
+                                infoNewGroupChat.groupName &&
                                 infoNewGroupChat.members?.length >= 2 &&
                                 handleCreateGroupChat()
                             }
@@ -227,7 +228,7 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
                         onChange={(e) => {
                             setInfoNewGroupChat((prev) => ({
                                 ...prev,
-                                name: e.target.value,
+                                groupName: e.target.value,
                             }));
                         }}
                         onFocus={() => setIsInvalidNameGroup(false)}
@@ -252,7 +253,7 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
                                     <div className={clsx(styles['create-group-suggestion-member-info'])}>
                                         <img
                                             className={clsx(styles['create-group-suggestion-member-avatar'])}
-                                            src={friend?.avatar || defaultAvatar}
+                                            src={friend?.avatarUrl || defaultAvatar}
                                         />
                                         <div className={clsx(styles['create-group-suggestion-member-name'])}>
                                             {friend?.lastName} {friend?.firstName}

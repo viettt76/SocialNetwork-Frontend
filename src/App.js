@@ -8,6 +8,7 @@ import { getMyInfoService } from './services/userServices';
 import * as actions from './redux/actions';
 import signalRClient from './components/Post/signalRClient';
 import { openChatsSelector, userInfoSelector } from './redux/selectors';
+import ChatPopup from './components/ChatPopup';
 
 function NavigateFunctionComponent() {
     let navigate = useNavigate();

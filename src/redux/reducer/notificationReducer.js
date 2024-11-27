@@ -4,6 +4,7 @@ import {
     ADD_NOTIFICATION_OTHER,
     REMOVE_NOTIFICATION_OTHER,
     READ_MESSAGE,
+    READ_NOTIFICATION_OTHER,
 } from '../actions';
 
 const initialState = {
@@ -48,6 +49,14 @@ const notificationReducer = (state = initialState, action) => {
             return {
                 ...state,
                 other: state.other?.filter((noti) => noti?.id !== action?.payload),
+            };
+        case READ_NOTIFICATION_OTHER:
+            return {
+                ...state,
+                other: state.other.map((noti) => ({
+                    ...noti,
+                    isOpenMenu: true,
+                })),
             };
         default:
             return state;

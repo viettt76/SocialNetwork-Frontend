@@ -116,6 +116,4 @@ const Menu = forwardRef(
     },
 );
 
-Menu.displayName = 'Menu';
-
 export default Menu;

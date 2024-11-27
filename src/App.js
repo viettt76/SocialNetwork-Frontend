@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import routes from '~/routes';
+import routes, { protectedRoutes } from '~/routes';
 import { SetupInterceptors } from '~/utils/axios';
 import DefaultLayout from '~/layouts/DefaultLayout';
 import { getMyInfoService } from './services/userServices';
 import * as actions from './redux/actions';
 import signalRClient from './components/Post/signalRClient';
+import { openChatsSelector, userInfoSelector } from './redux/selectors';
+
 function NavigateFunctionComponent() {
     let navigate = useNavigate();
     const [ran, setRan] = useState(false);
@@ -19,10 +21,19 @@ function NavigateFunctionComponent() {
 }
 
 function App() {
+    const openChats = useSelector(openChatsSelector);
+    const userInfo = useSelector(userInfoSelector);
+
     return (
         <BrowserRouter>
             <NavigateFunctionComponent />
             <FetchUserInfo />
+            {openChats?.slice(0, 2)?.map((item, index) => {
+                if (item?.isGroupChat) {
+                    return <ChatGroupPopup index={index} key={`group-chat-${item?.id}`} group={item} />;
+                }
+                return <ChatPopup index={index} key={`friend-chat-${item?.id}`} friend={item} />;
+            })}
             <Routes>
                 {routes.map((route, index) => {
                     const Page = route.component;
@@ -44,6 +55,27 @@ function App() {
                         />
                     );
                 })}
+                {userInfo?.role !== 'admin' &&
+                    protectedRoutes.map((route, index) => {
+                        const Page = route.element;
+                        let Layout = DefaultLayout;
+                        if (route.layout) {
+                            Layout = route.layout;
+                        } else if (route.layout === null) {
+                            Layout = React.Fragment;
+                        }
+                        return (
+                            <Route
+                                key={`route-admin-${index}`}
+                                path={route.path}
+                                element={
+                                    <Layout>
+                                        <Page />
+                                    </Layout>
+                                }
+                            ></Route>
+                        );
+                    })}
             </Routes>
         </BrowserRouter>
     );
@@ -74,7 +106,7 @@ function FetchUserInfo() {
             }
         };
 
-        if (location.pathname !== '/login') {
+        if (location.pathname.toLowerCase() !== '/login') {
             fetchPersonalInfo();
         }
         signalRClient.start();

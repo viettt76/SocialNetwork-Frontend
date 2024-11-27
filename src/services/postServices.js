@@ -53,3 +53,7 @@ export const getCommentsService = ({ postId, sortField = 'createdAt', sortType =
         },
     });
 };
+
+export const postsNotApprovedService = () => {
+    return axios.get('/posts/not-approved');
+};

@@ -28,7 +28,7 @@ const Sidebar = () => {
                 <Link
                     to="/"
                     className={clsx(styles['sidebar-item'], styles['sidebar-item-link'], {
-                        [[styles['active']]]: location.pathname === '/',
+                        [[styles['active']]]: location.pathname.toLowerCase() === '/',
                     })}
                 >
                     <FontAwesomeIcon icon={faHouse} />
@@ -36,7 +36,7 @@ const Sidebar = () => {
                 <Link
                     to="/search"
                     className={clsx(styles['sidebar-item'], styles['sidebar-item-link'], {
-                        [[styles['active']]]: location.pathname === '/search',
+                        [[styles['active']]]: location.pathname.toLowerCase() === '/search',
                     })}
                 >
                     <FontAwesomeIcon icon={faMagnifyingGlass} />
@@ -44,7 +44,7 @@ const Sidebar = () => {
                 <Link
                     to="/profile"
                     className={clsx(styles['sidebar-item'], styles['sidebar-item-link'], {
-                        [[styles['active']]]: location.pathname === '/profile',
+                        [[styles['active']]]: location.pathname.toLowerCase() === '/profile',
                     })}
                 >
                     <FontAwesomeIcon icon={faUser} />

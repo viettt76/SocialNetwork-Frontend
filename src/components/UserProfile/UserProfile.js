@@ -4,7 +4,7 @@ import styles from './Profile.module.scss';
 // import { getProfileService, getUserPostsService } from '~/services/userServices';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import PostContent from '~/components/UserProfile/PostContent';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { userInfoSelector } from '~/redux/selectors';
 import ModalUserProfile from './ModalUserProfile';
 import clsx from 'clsx';
@@ -12,9 +12,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencil } from '@fortawesome/free-solid-svg-icons';
 import { Button, Modal } from 'react-bootstrap';
 import Cropper from 'react-easy-crop';
+import { getCroppedImg, uploadToCloudinary } from '~/utils/commonUtils';
+import * as actions from '~/redux/actions';
+import { updateMyInfoService } from '~/services/userServices';
 
 const UserProfile = () => {
     const userInfo = useSelector(userInfoSelector);
+    const dispatch = useDispatch();
 
     const [userPosts, setUserPosts] = useState([1, 2]);
 

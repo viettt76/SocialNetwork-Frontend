@@ -1,0 +1,91 @@
+@import '~/styles/variables';
+
+.btn-show__mobile-label {
+    position: fixed;
+    left: 0.8rem;
+    display: none;
+    margin-right: 1rem;
+    margin-top: 1rem;
+    width: 5rem;
+    height: 5rem;
+    background-color: $background-color-medium-gray;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px $box-shadow;
+}
+
+.btn-show__mobile-checkbox {
+    display: none;
+}
+
+.sidebar-wrapper {
+    width: 36rem;
+    height: calc(100vh - 5.6rem);
+    position: sticky;
+    top: 5.6rem;
+    box-shadow: 0.1rem 0 0.3rem $box-shadow;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 0.6rem 1.2rem;
+
+    .sidebar-title {
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        margin-left: 1.2rem;
+    }
+
+    .sidebar-item {
+        font-size: 1.7rem;
+        color: $text;
+        font-weight: 600;
+        padding: 0.8rem 1.2rem;
+        border-radius: 0.8rem;
+
+        &:hover {
+            background-color: $background-color-medium-gray;
+        }
+
+        &.active {
+            background-color: $background-color-gray;
+        }
+    }
+}
+
+@media (min-width: 890px) and (max-width: 1240px) {
+    .sidebar-wrapper {
+        width: 25rem;
+    }
+}
+
+@media (min-width: 740px) and (max-width: 889px) {
+    .sidebar-wrapper {
+        width: 30rem;
+    }
+}
+
+@media (max-width: 739px) {
+    .sidebar-wrapper {
+        display: none;
+        position: fixed;
+        box-shadow: 0 0 0 2px $box-shadow;
+        padding: 1.2rem 1.2rem;
+        top: 12.4rem;
+    }
+
+    .btn-show__mobile-label {
+        display: flex;
+
+        .btn-show__mobile-icon {
+            font-size: 2rem;
+        }
+    }
+
+    .btn-show__mobile-checkbox:checked ~ .sidebar-wrapper {
+        display: flex;
+        width: 20rem;
+    }
+}

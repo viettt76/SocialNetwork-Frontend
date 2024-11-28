@@ -209,7 +209,6 @@ const ModalPost = ({ postInfo, show, handleClose }) => {
         }
     }, [postId]);
 
-    console.log('State comments: ', comments);
     useEffect(() => {
         const handleNewComment = (newComment) => {
             if (postId === newComment?.postID) {

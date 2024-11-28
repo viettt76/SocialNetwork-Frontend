@@ -12,7 +12,6 @@ const Home = () => {
                 const res = await getAllPostsService();
                 setPosts(
                     res.map((post) => {
-                        console.log(post);
                         return {
                             id: post.postID,
                             posterId: post.userID,

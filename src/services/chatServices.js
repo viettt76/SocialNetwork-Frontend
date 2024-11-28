@@ -12,9 +12,9 @@ export const sendMessageWithFriendService = ({ friendId, message, file }) => {
     });
 };
 
-export const createGroupChatService = ({ name, avatar, members }) => {
-    return axios.post('/chat/group-chat', {
-        name,
+export const createGroupChatService = ({ groupName, avatar, members }) => {
+    return axios.post('/Chat/createGroupChat', {
+        groupName,
         avatar,
         members,
     });
@@ -51,8 +51,13 @@ export const leaveGroupChatService = (groupChatId) => {
     return axios.delete(`/chat/group-chat/member/${groupChatId}`);
 };
 
-export const getLatestConversationsService = () => {
-    return axios.get('/chat/latest');
+export const getLatestConversationsService = ({ textSearch, pageIndex, isTotalCount }) => {
+    if (pageIndex == undefined) {
+        pageIndex = 0;
+    }
+    return axios.get('/Chat/getAllConversation', {
+        params: { TextSearch: textSearch, PageIndex: pageIndex, IsTotalCount: isTotalCount },
+    });
 };
 
 export const updateGroupAvatarService = ({ groupChatId, avatar }) => {
@@ -60,9 +65,9 @@ export const updateGroupAvatarService = ({ groupChatId, avatar }) => {
 };
 
 export const getAllMessageService = (receiverId) => {
-    return axios.get(`/MessagePersonalChat/getAllMessage`, { params: { receiverId } });
+    return axios.get(`/Chat/getAllPersonalMessage`, { params: { receiverId } });
 };
 
 export const sendReactionMessage = ({ messageId, emotionType }) => {
-    return axios.post(``)
-}
+    return axios.post(``);
+};

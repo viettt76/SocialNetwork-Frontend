@@ -113,7 +113,12 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
         }
 
         return () => {
-            setTotalPage(0); // Đặt totalPage về 0 khi component unmount
+            if (messengerRef.current) {
+                // Reset scroll về đầu trang
+                messengerRef.current.scrollTop = 0;
+            }
+            setTotalPage(0);
+            setpageIndexValue(0); // Đặt totalPage về 0 khi component unmount
         };
     }, [showMessenger]);
 
@@ -138,14 +143,13 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
         const scrollElement = messengerRef.current;
 
         const handleScroll = debounce(async () => {
-            console.log('kkk total', totalPage);
             const currentPageIndex = pageIndexValue;
             if (currentPageIndex < totalPage) {
                 const { scrollTop, scrollHeight, clientHeight } = scrollElement;
                 if (scrollHeight - (scrollTop + clientHeight) <= 50) {
                     const param = {
                         textSearch: searchConversationValue.trim(),
-                        pageIndex: currentPageIndex,
+                        pageIndex: currentPageIndex + 1,
                     };
 
                     try {
@@ -167,7 +171,6 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
             handleScroll.cancel(); // Hủy debounce để tránh rò rỉ bộ nhớ
         };
     }, [messengerRef, searchConversationValue, pageIndexValue, totalPage]);
-
     return (
         <div
             ref={messengerRef}

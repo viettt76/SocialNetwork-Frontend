@@ -1,8 +1,6 @@
 import axios from '~/utils/axios';
 
 export const submitPostService = ({ content = '', images = [] }) => {
-    console.log(content, images);
-
     return axios.post(`/Post`, {
         content,
         images,

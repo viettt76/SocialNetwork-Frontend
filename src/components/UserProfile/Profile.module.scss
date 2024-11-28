@@ -1,15 +1,5 @@
-$text: #050505;
-$font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
-$text-color-gray: #65676b;
-$main-color: rgb(8, 102, 255);
+@use '~/styles/variables' as *;
 
-$background-color-greyish: #f8f9fa;
-$background-color-medium-gray: #f1f2f6;
-$background-color-gray: #ebebeb;
-$background-color-dark-gray: #e4e6eb;
-
-$box-shadow: #d8d3d3;
-$border: #dadde1;
 .user-profile-wrapper {
     padding: 20px;
 }
@@ -36,7 +26,7 @@ $border: #dadde1;
 
 .modal-body {
     padding: 20px;
-    text-align: center;
+    // text-align: center;
 }
 
 .profileContainer {
@@ -88,9 +78,16 @@ $border: #dadde1;
     margin-left: 0;
     padding: 4px 12px;
     text-align: center;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    // border: 1px solid #ccc;
+    font-weight: 500;
+    background-color: $background-color-medium-gray;
+    border: none;
+    border-radius: 8px;
     font-size: 16px;
+
+    &:hover {
+        background-color: $background-color-dark-gray;
+    }
 }
 
 .edit-profile-btn {

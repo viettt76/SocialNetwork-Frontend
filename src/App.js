@@ -4,10 +4,12 @@ import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-ro
 import routes, { protectedRoutes } from '~/routes';
 import { SetupInterceptors } from '~/utils/axios';
 import DefaultLayout from '~/layouts/DefaultLayout';
-import { getMyInfoService } from './services/userServices';
-import * as actions from './redux/actions';
-import signalRClient from './components/Post/signalRClient';
-import { openChatsSelector, userInfoSelector } from './redux/selectors';
+import { getMyInfoService } from '~/services/userServices';
+import * as actions from '~/redux/actions';
+import signalRClient from '~/components/Post/signalRClient';
+import { openChatsSelector, userInfoSelector } from '~/redux/selectors';
+import ChatPopup from '~/components/ChatPopup';
+import ChatGroupPopup from '~/components/ChatGroupPopup';
 
 function NavigateFunctionComponent() {
     let navigate = useNavigate();

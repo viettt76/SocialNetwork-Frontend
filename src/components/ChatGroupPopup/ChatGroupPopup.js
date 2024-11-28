@@ -186,7 +186,7 @@ const AddGroupMembersLayout = ({ groupId, handleSetActiveMenu }) => {
     );
 };
 
-const ChatPopupGroup = ({ index, group }) => {
+const ChatGroupPopup = ({ index, group }) => {
     const modalUpdateAvatarRef = useRef(null);
 
     const {
@@ -649,4 +649,4 @@ const ChatPopupGroup = ({ index, group }) => {
     );
 };
 
-export default ChatPopupGroup;
+export default ChatGroupPopup;

@@ -27,6 +27,23 @@
         }
     }
 
+    &.scroll:hover {
+        overflow-y: auto;
+
+        &::-webkit-scrollbar {
+            width: 0.8rem;
+        }
+        &::-webkit-scrollbar-track {
+            background: #fff;
+            border-radius: 0.4rem;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 0.4rem;
+        }
+    }
+
     .title {
         font-size: 1.7rem;
         font-weight: 600;

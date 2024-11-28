@@ -61,7 +61,6 @@ const ChatPopup = ({ friend, index }) => {
     useEffect(() => {
         (async () => {
             try {
-                var x = (await getAllMessageService(friend?.id)).data;
                 const messages = (await getAllMessageService(friend?.id)).data.map((message) => ({
                     id: message.messageID,
                     sender: message.senderID,

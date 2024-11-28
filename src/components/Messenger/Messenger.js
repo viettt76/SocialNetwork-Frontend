@@ -11,8 +11,7 @@ import { debounce } from 'lodash';
 
 import styles from './Messenger.module.scss';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
-import { createGroupChatService, getGroupChatsService, getLatestConversationsService } from '~/services/chatServices';
-import { getFriendsOnlineService } from '~/services/relationshipServices';
+import { createGroupChatService, getLatestConversationsService, getFriendService } from '~/services/chatServices';
 
 const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
     const userInfo = useSelector(userInfoSelector);
@@ -31,9 +30,13 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
 
     const [onlineFriends, setOnlineFriends] = useState([]);
 
+    const [allFriends, setAllFriends] = useState([]);
+
     const [latestConversations, setLatestConversations] = useState([]);
 
     const [searchConversationValue, setSearchConversationValue] = useState('');
+
+    const [searchFriendValue, setSearchFriendValue] = useState('');
 
     const [pageIndexValue, setpageIndexValue] = useState(0);
 
@@ -52,15 +55,6 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
     //         socket.off('friendsOnline', handleFriendOnline);
     //     };
     // }, []);
-
-    useEffect(() => {
-        const getFriendsOnlineServiceHandler = async () => {
-            const response = await getFriendsOnlineService();
-            setOnlineFriends(response.data);
-        };
-
-        getFriendsOnlineServiceHandler();
-    }, []);
 
     const [isInValidNameGroup, setIsInvalidNameGroup] = useState(false);
 
@@ -88,28 +82,9 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
     };
 
     useEffect(() => {
-        const fetchLatestConversations = async () => {
-            try {
-                const param = {
-                    textSearch: searchConversationValue.trim(),
-                    pageIndex: pageIndexValue,
-                };
-                const param2 = {
-                    textSearch: searchConversationValue.trim(),
-                    pageIndex: pageIndexValue,
-                    isTotalCount: true,
-                };
-
-                const res = await getLatestConversationsService(param);
-                const totalRecord = await getLatestConversationsService(param2);
-                setTotalPage(totalRecord.data.totalPage);
-                setLatestConversations(res.data.conversations);
-            } catch (error) {
-                console.log(error);
-            }
-        };
         if (showMessenger) {
-            fetchLatestConversations();
+            fetchLatestConversations(searchConversationValue);
+            fetchAllFriends(searchFriendValue);
         }
 
         return () => {
@@ -117,25 +92,42 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
                 // Reset scroll về đầu trang
                 messengerRef.current.scrollTop = 0;
             }
-            setTotalPage(0);
-            setpageIndexValue(0); // Đặt totalPage về 0 khi component unmount
+            setSearchConversationValue('');
+            setSearchFriendValue('');
+            setTotalPage(0); // set total page về 0 tránh lỗi khi search sau khi đã unmounted
+            setpageIndexValue(0); //set  page index về 0 tránh lỗi khi search sau khi đã unmounted
         };
     }, [showMessenger]);
 
-    console.log('total Page', totalPage);
-    const handlSearchConversationKeyUp = async (e) => {
-        clearTimeout(timeoutRef.current);
+    const handleSeachFriendOnChange = (e) => {
+        const value = e.target.value;
+        if (value.startsWith(' ')) {
+            setSearchFriendValue('');
+        } else {
+            clearTimeout(timeoutRef.current);
 
-        timeoutRef.current = setTimeout(async () => {
-            setSearchConversationValue(e.target.value);
-            const res = await getLatestConversationsService({ textSearch: e.target.value.trim() });
-            setLatestConversations(res.data.conversations);
-        }, 500);
+            timeoutRef.current = setTimeout(async () => {
+                var textSearch = e.target.value.trim();
+                fetchAllFriends(textSearch);
+            }, 500);
+            setSearchFriendValue(value);
+        }
     };
 
-    const handlSearchConversationKeyDown = async () => {};
-
-    // const Update
+    const handleSearchConverSationOnChange = (e) => {
+        const value = e.target.value;
+        if (value.startsWith(' ')) {
+            setSearchConversationValue('');
+        } else {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = setTimeout(async () => {
+                var textSearch = e.target.value.trim();
+                fetchLatestConversations(textSearch);
+            }, 500);
+            setSearchConversationValue(value);
+            setpageIndexValue(0);
+        }
+    };
 
     useEffect(() => {
         if (!messengerRef.current) return;
@@ -160,6 +152,9 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
                         console.log('Error fetching conversations:', error);
                     }
                 }
+            } else {
+                setTotalPage(0);
+                setpageIndexValue(0);
             }
         }, 500);
 
@@ -168,9 +163,51 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
         // Cleanup function
         return () => {
             scrollElement.removeEventListener('scroll', handleScroll);
-            handleScroll.cancel(); // Hủy debounce để tránh rò rỉ bộ nhớ
+            handleScroll.cancel();
         };
     }, [messengerRef, searchConversationValue, pageIndexValue, totalPage]);
+
+    const fetchLatestConversations = async (textSearch) => {
+        try {
+            const param = {
+                textSearch: textSearch.trim(),
+                pageIndex: pageIndexValue,
+            };
+            const param2 = {
+                textSearch: textSearch.trim(),
+                pageIndex: pageIndexValue,
+                isTotalCount: true,
+            };
+
+            const res = await getLatestConversationsService(param);
+            const totalRecord = await getLatestConversationsService(param2);
+            setTotalPage(totalRecord.data.totalPage);
+            setLatestConversations(res.data.conversations);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const fetchAllFriends = async (textSearch) => {
+        try {
+            const param = {
+                textSearch: textSearch,
+                pageIndex: pageIndexValue,
+            };
+            const param2 = {
+                textSearch: textSearch,
+                pageIndex: pageIndexValue,
+                isTotalCount: true,
+            };
+
+            const res = await getFriendService(param);
+            const totalRecord = await getFriendService(param2);
+            setTotalPage(totalRecord.data.totalPage);
+            setAllFriends(res.data.friends);
+        } catch (error) {
+            console.log(error);
+        }
+    };
     return (
         <div
             ref={messengerRef}
@@ -184,8 +221,8 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
                         <div className={clsx(styles['search-wrapper'])}>
                             <FontAwesomeIcon className={clsx(styles['search-icon'])} icon={faMagnifyingGlass} />
                             <input
-                                onKeyUp={handlSearchConversationKeyUp}
-                                onKeyDown={handlSearchConversationKeyDown}
+                                value={searchConversationValue}
+                                onChange={handleSearchConverSationOnChange}
                                 className={clsx(styles['search-input'])}
                                 placeholder="Tìm kiếm"
                             />
@@ -303,11 +340,16 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
                             className={clsx(styles['create-group-search-icon'])}
                             icon={faMagnifyingGlass}
                         />
-                        <input className={clsx(styles['create-group-search-input'])} placeholder="Tìm kiếm" />
+                        <input
+                            value={searchFriendValue}
+                            onChange={handleSeachFriendOnChange}
+                            className={clsx(styles['create-group-search-input'])}
+                            placeholder="Tìm kiếm"
+                        />
                     </div>
                     <div className={clsx(styles['create-group-suggestion-title'])}>Gợi ý</div>
                     <div className={clsx(styles['create-group-suggestion-members'])}>
-                        {onlineFriends?.map((friend) => {
+                        {allFriends?.map((friend) => {
                             return (
                                 <label
                                     key={`friend-${friend?.id}`}

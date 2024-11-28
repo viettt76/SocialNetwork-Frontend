@@ -60,6 +60,15 @@ export const getLatestConversationsService = ({ textSearch, pageIndex, isTotalCo
     });
 };
 
+export const getFriendService = ({ textSearch, pageIndex, isTotalCount }) => {
+    if (pageIndex == undefined) {
+        pageIndex = 0;
+    }
+    return axios.get('/Chat/getFriends', {
+        params: { TextSearch: textSearch, PageIndex: pageIndex, IsTotalCount: isTotalCount },
+    });
+};
+
 export const updateGroupAvatarService = ({ groupChatId, avatar }) => {
     return axios.patch(`/chat/group-chat/avatar/${groupChatId}`, { avatar });
 };

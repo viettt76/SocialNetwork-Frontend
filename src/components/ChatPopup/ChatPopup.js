@@ -547,7 +547,7 @@ const ChatPopup = ({ friend, index }) => {
                             [[styles['is-online']]]: friend?.isOnline,
                         })}
                     >
-                        <img src={friend?.avatar || defaultAvatar} />
+                        <img src={friend?.avatarUrl || defaultAvatar} />
                     </div>
                     {friend?.lastName && friend?.firstName && (
                         <div className={clsx(styles['name'])}>{`${friend?.lastName} ${friend?.firstName}`}</div>

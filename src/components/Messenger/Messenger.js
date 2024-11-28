@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as actions from '~/redux/actions';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 import { notificationsMessengerSelector, userInfoSelector } from '~/redux/selectors';
+import { debounce } from 'lodash';
 
 import styles from './Messenger.module.scss';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
@@ -32,6 +33,13 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
 
     const [latestConversations, setLatestConversations] = useState([]);
 
+    const [searchConversationValue, setSearchConversationValue] = useState('');
+
+    const [pageIndexValue, setpageIndexValue] = useState(0);
+
+    const [totalPage, setTotalPage] = useState(0);
+
+    const scrollRef = useRef(null);
     // useEffect(() => {
     //     socket.emit('getFriendsOnline');
 
@@ -55,8 +63,6 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
     }, []);
 
     const [isInValidNameGroup, setIsInvalidNameGroup] = useState(false);
-
-    const [searchConversationValue, setSearchConversationValue] = useState('');
 
     const timeoutRef = useRef(null);
 
@@ -84,9 +90,20 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
     useEffect(() => {
         const fetchLatestConversations = async () => {
             try {
-                const res = await getLatestConversationsService();
-                setLatestConversations(res.data);
-                //setLatestConversations([]);
+                const param = {
+                    textSearch: searchConversationValue.trim(),
+                    pageIndex: pageIndexValue,
+                };
+                const param2 = {
+                    textSearch: searchConversationValue.trim(),
+                    pageIndex: pageIndexValue,
+                    isTotalCount: true,
+                };
+
+                const res = await getLatestConversationsService(param);
+                const totalRecord = await getLatestConversationsService(param2);
+                setTotalPage(totalRecord.data.totalPage);
+                setLatestConversations(res.data.conversations);
             } catch (error) {
                 console.log(error);
             }
@@ -94,19 +111,63 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
         if (showMessenger) {
             fetchLatestConversations();
         }
+
+        return () => {
+            setTotalPage(0); // Đặt totalPage về 0 khi component unmount
+        };
     }, [showMessenger]);
 
+    console.log('total Page', totalPage);
     const handlSearchConversationKeyUp = async (e) => {
         clearTimeout(timeoutRef.current);
 
-        timeoutRef.current = setTimeout(() => {
+        timeoutRef.current = setTimeout(async () => {
             setSearchConversationValue(e.target.value);
-
-            //todo call tới api Chat/SearchConversation
+            const res = await getLatestConversationsService({ textSearch: e.target.value.trim() });
+            setLatestConversations(res.data.conversations);
         }, 500);
     };
 
     const handlSearchConversationKeyDown = async () => {};
+
+    // const Update
+
+    useEffect(() => {
+        if (!messengerRef.current) return;
+
+        const scrollElement = messengerRef.current;
+
+        const handleScroll = debounce(async () => {
+            console.log('kkk total', totalPage);
+            const currentPageIndex = pageIndexValue;
+            if (currentPageIndex < totalPage) {
+                const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+                if (scrollHeight - (scrollTop + clientHeight) <= 50) {
+                    const param = {
+                        textSearch: searchConversationValue.trim(),
+                        pageIndex: currentPageIndex,
+                    };
+
+                    try {
+                        const res = await getLatestConversationsService(param);
+                        setLatestConversations((prev) => [...prev, ...res.data.conversations]);
+                        setpageIndexValue((prev) => prev + 1);
+                    } catch (error) {
+                        console.log('Error fetching conversations:', error);
+                    }
+                }
+            }
+        }, 500);
+
+        scrollElement.addEventListener('scroll', handleScroll);
+
+        // Cleanup function
+        return () => {
+            scrollElement.removeEventListener('scroll', handleScroll);
+            handleScroll.cancel(); // Hủy debounce để tránh rò rỉ bộ nhớ
+        };
+    }, [messengerRef, searchConversationValue, pageIndexValue, totalPage]);
+
     return (
         <div
             ref={messengerRef}

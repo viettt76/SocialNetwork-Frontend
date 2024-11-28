@@ -51,8 +51,13 @@ export const leaveGroupChatService = (groupChatId) => {
     return axios.delete(`/chat/group-chat/member/${groupChatId}`);
 };
 
-export const getLatestConversationsService = () => {
-    return axios.get('/Chat/getAllConversation');
+export const getLatestConversationsService = ({ textSearch, pageIndex, isTotalCount }) => {
+    if (pageIndex == undefined) {
+        pageIndex = 0;
+    }
+    return axios.get('/Chat/getAllConversation', {
+        params: { TextSearch: textSearch, PageIndex: pageIndex, IsTotalCount: isTotalCount },
+    });
 };
 
 export const updateGroupAvatarService = ({ groupChatId, avatar }) => {

@@ -1,15 +1,39 @@
 import clsx from 'clsx';
 import styles from './Profile.module.scss';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
+import { useSelector } from 'react-redux';
+import { userInfoSelector } from '~/redux/selectors';
 
 const ModalUserProfile = ({ show, handleClose, onSave }) => {
+    const userInfo = useSelector(userInfoSelector);
+
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
-        createdAt: '',
-        isPublic: true,
+        gender: '',
+        birthday: '',
+        avatar: null,
+        homeTown: '',
+        school: '',
+        workplace: '',
+        isPrivate: false,
     });
+
+    useEffect(() => {
+        setFormData({
+            firstName: userInfo?.firstName,
+            lastName: userInfo?.lastName,
+            gender: userInfo?.gender,
+            birthday: userInfo?.birthday,
+            avatar: userInfo?.avatar,
+            homeTown: userInfo?.homeTown,
+            school: userInfo?.school,
+            workplace: userInfo?.workplace,
+            isPrivate: userInfo?.isPrivate,
+        });
+    }, [userInfo]);
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData({
@@ -28,37 +52,69 @@ const ModalUserProfile = ({ show, handleClose, onSave }) => {
             </Modal.Header>
             <Modal.Body className={clsx(styles['modal-body'])}>
                 <Form>
-                    <Form.Group className="mb-3" controlId="formFirstName">
-                        <Form.Label>First Name</Form.Label>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Tên</Form.Label>
                         <Form.Control
                             type="text"
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleChange}
-                            placeholder="Enter your first name"
+                            placeholder="Nhập tên"
                         />
                     </Form.Group>
-                    <Form.Group className="mb-3" controlId="formLastName">
-                        <Form.Label>Last Name</Form.Label>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Họ</Form.Label>
                         <Form.Control
                             type="text"
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleChange}
-                            placeholder="Enter your last name"
+                            placeholder="Nhập họ"
+                        />
+                    </Form.Group>
+                    <Form.Group className="mb-3 fz-16 d-flex align-items-center">
+                        <Form.Label className="me-4">Giới tính</Form.Label>
+                        <Form.Check
+                            inline
+                            type="radio"
+                            name="gender"
+                            label="Nam"
+                            value={formData.gender}
+                            checked={formData?.gender === 'male'}
+                            onChange={handleChange}
+                        />
+                        <Form.Check
+                            inline
+                            type="radio"
+                            name="gender"
+                            label="Nữ"
+                            value={formData.gender}
+                            checked={formData?.gender === 'female'}
+                            onChange={handleChange}
                         />
                     </Form.Group>
                     <Form.Group className="mb-3" controlId="formCreatedAt">
-                        <Form.Label>Created At</Form.Label>
-                        <Form.Control type="date" name="createdAt" value={formData.createdAt} onChange={handleChange} />
+                        <Form.Label>Ngày sinh</Form.Label>
+                        <Form.Control type="date" name="birthday" value={formData.birthday} onChange={handleChange} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Địa chỉ</Form.Label>
+                        <Form.Control
+                            type="text"
+                            name="address"
+                            value={formData.address}
+                            onChange={handleChange}
+                            placeholder="Nhập địa chỉ"
+                        />
                     </Form.Group>
                     <Form.Group className="mb-3" controlId="formPrivacy">
                         <Form.Check
                             type="checkbox"
-                            name="isPublic"
-                            checked={formData.isPublic}
+                            name="isPrivate"
+                            className="fz-16"
+                            checked={formData.isPrivate}
                             onChange={handleChange}
-                            label="Make profile public"
+                            label="Trang cá nhân riêng tư"
                         />
                     </Form.Group>
                 </Form>

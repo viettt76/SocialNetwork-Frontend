@@ -29,6 +29,26 @@
         border-top-right-radius: 1rem;
         border-top-left-radius: 1rem;
 
+        .call-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 5rem;
+
+            .call,
+            .call-video {
+                color: black;
+                padding: 0.5rem;
+            }
+
+            .call:hover,
+            .call-video:hover {
+                cursor: pointer;
+                background-color: #e5e5e5;
+                border-radius: 50%;
+            }
+        }
+
         &.is-focus {
             background-color: $main-color;
 
@@ -46,24 +66,17 @@
                 color: #fff;
             }
 
-            .call-wrapper {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                width: 5rem;
+            .call,
+            .call-video {
+                color: #ffffff;
+                padding: 0.5rem;
+            }
 
-                .call,
-                .call-video {
-                    color: #ffffff;
-                    padding: 0.5rem;
-                }
-
-                .call:hover,
-                .call-video:hover {
-                    cursor: pointer;
-                    background-color: #4c8efa;
-                    border-radius: 50%;
-                }
+            .call:hover,
+            .call-video:hover {
+                cursor: pointer;
+                background-color: #4c8efa;
+                border-radius: 50%;
             }
         }
 

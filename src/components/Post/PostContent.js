@@ -19,6 +19,7 @@ import { useSelector } from 'react-redux';
 import { userInfoSelector } from '~/redux/selectors';
 import signalRClient from './signalRClient';
 import * as signalR from '@microsoft/signalr';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
 
 const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowModal, handleFocusSendComment }) => {
     const {
@@ -267,21 +268,25 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
                 </div>
             </div>
             <div className={clsx(styles['post-content'], styles['background'])}>{content && <div>{content}</div>}</div>
-            <div
-                className={clsx(styles['images-layout'], {
-                    [styles[`layout-${visibleImages?.length}`]]: remainingImages <= 0 || !remainingImages,
-                    [styles[`layout-remaining`]]: remainingImages > 0,
-                })}
-            >
-                {visibleImages?.map((img, index) => {
-                    return (
-                        <Link className={clsx(styles['image-wrapper'])} key={`image-${index}`}>
-                            <img src={img?.pictureUrl} />
-                        </Link>
-                    );
-                })}
-                {remainingImages > 0 && <Link className={clsx(styles['overlay'])}>+{remainingImages}</Link>}
-            </div>
+            <PhotoProvider>
+                <div
+                    className={clsx(styles['images-layout'], {
+                        [styles[`layout-${visibleImages?.length}`]]: remainingImages <= 0 || !remainingImages,
+                        [styles[`layout-remaining`]]: remainingImages > 0,
+                    })}
+                >
+                    {visibleImages?.map((img) => {
+                        return (
+                            <PhotoView key={`picture-${img?.id}`} src={img?.pictureUrl}>
+                                <div className={clsx(styles['image-wrapper'])}>
+                                    <img src={img?.pictureUrl} alt="" />
+                                </div>
+                            </PhotoView>
+                        );
+                    })}
+                    {remainingImages > 0 && <Link className={clsx(styles['overlay'])}>+{remainingImages}</Link>}
+                </div>
+            </PhotoProvider>
             <div className={clsx(styles['emotions-amount-of-comments'])}>
                 <div className={clsx(styles['emotions-wrapper'])}>
                     {mostEmotions?.map((emo) => {
@@ -299,7 +304,6 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
 
                 <div className={clsx(styles['amount-of-comments-wrapper'])}>
                     <span onClick={handleShowModal}>{numberOfComments || 0} bình luận</span>
-                    <span>32 chia sẻ</span>
                 </div>
             </div>
             <div className={clsx(styles['user-actions-wrapper'])}>
@@ -354,10 +358,6 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
                 >
                     <FontAwesomeIcon icon={faComment} />
                     <span>Bình luận</span>
-                </div>
-                <div className={clsx(styles['user-action'])}>
-                    <FontAwesomeIcon icon={faShare} />
-                    <span>Chia sẻ</span>
                 </div>
             </div>
         </div>

@@ -34,24 +34,51 @@ import { calculateTime, getCroppedImg, uploadToCloudinary } from '~/utils/common
 
 const GroupMembersLayout = ({ groupId }) => {
     const [groupMembers, setGroupMembers] = useState([]);
+    const [pageIndexValue, setpageIndexValue] = useState(0);
+    const [totalPage, setTotalPage] = useState(0);
+    const fetchGroupMembers = async (textSearch, isMounted) => {
+        try {
+            const param = {
+                textSearch: textSearch,
+                pageIndex: pageIndexValue,
+                groupId,
+            };
+            const param2 = {
+                textSearch: textSearch,
+                pageIndex: pageIndexValue,
+                groupId,
+                isTotalCount: true,
+            };
 
+            const res = await getGroupMembersService(param);
+            const totalRecord = await getGroupMembersService(param2);
+            if (isMounted) {
+                setTotalPage(totalRecord.data.totalPage);
+                setGroupMembers(res.data.groupMembers);
+            }
+        } catch (error) {
+            if (isMounted) {
+                console.log(error);
+            }
+        }
+    };
     useEffect(() => {
         let isMounted = true;
 
-        const fetchGroupMembers = async () => {
-            try {
-                const res = await getGroupMembersService(groupId);
-                if (isMounted) {
-                    setGroupMembers(res);
-                }
-            } catch (error) {
-                if (isMounted) {
-                    console.log(error);
-                }
-            }
-        };
+        // const fetchGroupMembers = async () => {
+        //     try {
+        //         const res = await getGroupMembersService(groupId);
+        //         if (isMounted) {
+        //             setGroupMembers(res);
+        //         }
+        //     } catch (error) {
+        //         if (isMounted) {
+        //             console.log(error);
+        //         }
+        //     }
+        // };
 
-        fetchGroupMembers();
+        fetchGroupMembers('', isMounted);
 
         return () => {
             isMounted = false;
@@ -90,24 +117,53 @@ const AddGroupMembersLayout = ({ groupId, handleSetActiveMenu }) => {
     const [groupMembers, setGroupMembers] = useState([]);
     const [friendsCanAddToGroup, setFriendsCanAddToGroup] = useState([]);
     const [addGroupMembers, setAddGroupMembers] = useState([]);
+    const [pageIndexValue, setpageIndexValue] = useState(0);
+    const [totalPage, setTotalPage] = useState(0);
+
+    const fetchGroupMembers = async (textSearch, isMounted) => {
+        try {
+            const param = {
+                textSearch: textSearch,
+                pageIndex: pageIndexValue,
+                groupId,
+            };
+            const param2 = {
+                textSearch: textSearch,
+                pageIndex: pageIndexValue,
+                groupId,
+                isTotalCount: true,
+            };
+
+            const res = await getGroupMembersService(param);
+            const totalRecord = await getGroupMembersService(param2);
+            if (isMounted) {
+                setTotalPage(totalRecord.data.totalPage);
+                setGroupMembers(res.data.groupMembers);
+            }
+        } catch (error) {
+            if (isMounted) {
+                console.log(error);
+            }
+        }
+    };
 
     useEffect(() => {
         let isMounted = true;
 
-        const fetchGroupMembers = async () => {
-            try {
-                const res = await getGroupMembersService(groupId);
-                if (isMounted) {
-                    setGroupMembers(res);
-                }
-            } catch (error) {
-                if (isMounted) {
-                    console.log(error);
-                }
-            }
-        };
+        // const fetchGroupMembers = async () => {
+        //     try {
+        //         const res = await getGroupMembersService(groupId);
+        //         if (isMounted) {
+        //             setGroupMembers(res);
+        //         }
+        //     } catch (error) {
+        //         if (isMounted) {
+        //             console.log(error);
+        //         }
+        //     }
+        // };
 
-        fetchGroupMembers();
+        fetchGroupMembers('', isMounted);
 
         return () => {
             isMounted = false;
@@ -372,7 +428,7 @@ const ChatGroupPopup = ({ index, group }) => {
                                     htmlFor="change-group-chat-avatar-input"
                                     className={clsx(styles['edit-profile-btn'])}
                                 >
-                                    <img src={group?.avatar} className={clsx(styles['menu-item-avatar'])} />
+                                    <img src={group?.avatarUrl} className={clsx(styles['menu-item-avatar'])} />
                                     <span>Ảnh đại diện nhóm</span>
                                 </label>
                                 <input
@@ -430,18 +486,18 @@ const ChatGroupPopup = ({ index, group }) => {
                 },
             ],
         },
-        {
-            id: 'addGroupMembers',
-            back: 'main',
-            leftIcon: <ArrowIcon />,
-            depthLevel: 2,
-            menu: [
-                {
-                    label: <AddGroupMembersLayout groupId={group?.id} handleSetActiveMenu={handleSetActiveMenu} />,
-                    className: clsx(styles['hover-not-background']),
-                },
-            ],
-        },
+        // {
+        //     id: 'addGroupMembers',
+        //     back: 'main',
+        //     leftIcon: <ArrowIcon />,
+        //     depthLevel: 2,
+        //     menu: [
+        //         {
+        //             label: <AddGroupMembersLayout groupId={group?.id} handleSetActiveMenu={handleSetActiveMenu} />,
+        //             className: clsx(styles['hover-not-background']),
+        //         },
+        //     ],
+        // },
     ];
 
     const menuRef = useRef(null);
@@ -527,7 +583,7 @@ const ChatGroupPopup = ({ index, group }) => {
             >
                 <div className={clsx(styles['chat-receiver'])}>
                     <div className={clsx(styles['avatar'])}>
-                        <img src={group?.avatar || defaultAvatar} />
+                        <img src={group?.avatarUrl || defaultAvatar} />
                     </div>
                     {group?.name && <div className={clsx(styles['name'])}>{`${group?.name}`}</div>}
                     <FontAwesomeIcon

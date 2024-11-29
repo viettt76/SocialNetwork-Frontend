@@ -1,34 +1,37 @@
 import clsx from 'clsx';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { debounce } from 'lodash';
 import styles from './FriendsList.module.scss';
 import socket from '~/socket';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import * as actions from '~/redux/actions';
 import { useDispatch } from 'react-redux';
 import { getFriendsOnlineService } from '~/services/relationshipServices';
+import { getGroupChatsService } from '~/services/chatServices';
 
 const FriendsList = () => {
     const dispatch = useDispatch();
 
     const [onlineFriends, setOnlineFriends] = useState([]);
-    const [myChatGroups, setMyChatGroups] = useState([
-        {
-            name: 'Nhóm 1',
-            avatar: null,
-        },
-        {
-            name: 'Nhóm 2',
-            avatar: null,
-        },
-    ]);
-
+    const [myChatGroups, setMyChatGroups] = useState([]);
+    const [pageIndexValue, setpageIndexValue] = useState(0);
+    const [totalPage, setTotalPage] = useState(0);
+    const groupChatsRef = useRef(null);
+    const [searchGroupChatValue, setSearchGroupChatValue] = useState('');
     useEffect(() => {
         const getFriendsOnlineServiceHandler = async () => {
             const friends = (await getFriendsOnlineService()).data;
             setOnlineFriends(friends);
         };
 
+        const getGroupChats = async () => {
+            const groupChats = (await getGroupChatsService()).data;
+            setMyChatGroups(groupChats);
+        };
+
         getFriendsOnlineServiceHandler();
+
+        fetchGroupChats('');
         // socket.emit('getFriendsOnline');
 
         // const handleFriendOnline = (resOnlineFriends) => {
@@ -43,6 +46,65 @@ const FriendsList = () => {
 
     const addToChatList = (friend) => {
         dispatch(actions.openChat(friend));
+    };
+
+    useEffect(() => {
+        if (!groupChatsRef.current) return;
+
+        const scrollElement = groupChatsRef.current;
+
+        const handleScroll = debounce(async () => {
+            const currentPageIndex = pageIndexValue;
+            if (currentPageIndex < totalPage) {
+                const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+                if (scrollHeight - (scrollTop + clientHeight) <= 50) {
+                    const param = {
+                        textSearch: searchGroupChatValue.trim(),
+                        pageIndex: currentPageIndex + 1,
+                    };
+
+                    try {
+                        const res = await getGroupChatsService(param);
+                        setMyChatGroups((prev) => [...prev, ...res.data.groups]);
+                        setpageIndexValue((prev) => prev + 1);
+                    } catch (error) {
+                        console.log('Error fetching conversations:', error);
+                    }
+                }
+            } else {
+                setTotalPage(0);
+                setpageIndexValue(0);
+            }
+        }, 500);
+
+        scrollElement.addEventListener('scroll', handleScroll);
+
+        // Cleanup function
+        return () => {
+            scrollElement.removeEventListener('scroll', handleScroll);
+            handleScroll.cancel();
+        };
+    }, [groupChatsRef, searchGroupChatValue, pageIndexValue, totalPage]);
+
+    const fetchGroupChats = async (textSearch) => {
+        try {
+            const param = {
+                textSearch: textSearch,
+                pageIndex: pageIndexValue,
+            };
+            const param2 = {
+                textSearch: textSearch,
+                pageIndex: pageIndexValue,
+                isTotalCount: true,
+            };
+
+            const res = await getGroupChatsService(param);
+            const totalRecord = await getGroupChatsService(param2);
+            setTotalPage(totalRecord.data.totalPage);
+            setMyChatGroups(res.data.groups);
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     return (
@@ -71,7 +133,8 @@ const FriendsList = () => {
                 })}
             </ul>
             <ul
-                className={clsx(styles['friends-list-wrapper'], {
+                ref={groupChatsRef}
+                className={clsx(styles['group-list-wrapper'], {
                     [['scroll']]: myChatGroups?.length > 0,
                 })}
             >
@@ -84,7 +147,7 @@ const FriendsList = () => {
                             onClick={() => addToChatList({ ...group, isGroupChat: true })}
                         >
                             <div className={clsx(styles['friend-avatar'])}>
-                                <img src={group?.avatar || defaultAvatar} />
+                                <img src={group?.avatarUrl || defaultAvatar} />
                             </div>
                             <div className={clsx(styles['friend-name'])}>{group?.name}</div>
                         </li>

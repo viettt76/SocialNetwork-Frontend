@@ -20,9 +20,9 @@ export const createGroupChatService = ({ groupName, avatar, members }) => {
     });
 };
 
-export const getGroupChatsService = () => {
-    return axios.get('/chat/group-chat');
-};
+// export const getGroupChatsService = () => {
+//     return axios.get('/chat/group-chat');
+// };
 
 export const getMessagesOfGroupChatService = (groupChatId) => {
     return axios.get(`/chat/group-chat/messages/${groupChatId}`);
@@ -36,9 +36,9 @@ export const sendGroupChatMessageService = ({ groupChatId, message, picture }) =
     });
 };
 
-export const getGroupMembersService = (groupChatId) => {
-    return axios.get(`/chat/group-chat/members/${groupChatId}`);
-};
+// export const getGroupMembersService = (groupChatId) => {
+//     return axios.get(`/chat/group-chat/getGroupChatMembers/${groupChatId}`);
+// };
 
 export const updateGroupMembersService = ({ groupChatId, members }) => {
     return axios.post(`/chat/group-chat/members`, {
@@ -46,7 +46,14 @@ export const updateGroupMembersService = ({ groupChatId, members }) => {
         members,
     });
 };
-
+export const getGroupMembersService = ({ groupId, textSearch, pageIndex, isTotalCount }) => {
+    if (pageIndex == undefined) {
+        pageIndex = 0;
+    }
+    return axios.get('/Chat/getGroupChatMembers', {
+        params: { TextSearch: textSearch, GroupChatId: groupId, PageIndex: pageIndex, IsTotalCount: isTotalCount },
+    });
+};
 export const leaveGroupChatService = (groupChatId) => {
     return axios.delete(`/chat/group-chat/member/${groupChatId}`);
 };
@@ -65,6 +72,15 @@ export const getFriendService = ({ textSearch, pageIndex, isTotalCount }) => {
         pageIndex = 0;
     }
     return axios.get('/Chat/getFriends', {
+        params: { TextSearch: textSearch, PageIndex: pageIndex, IsTotalCount: isTotalCount },
+    });
+};
+
+export const getGroupChatsService = ({ textSearch, pageIndex, isTotalCount }) => {
+    if (pageIndex == undefined) {
+        pageIndex = 0;
+    }
+    return axios.get('/Chat/getGroupChats', {
         params: { TextSearch: textSearch, PageIndex: pageIndex, IsTotalCount: isTotalCount },
     });
 };

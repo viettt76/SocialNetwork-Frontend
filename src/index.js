@@ -5,6 +5,7 @@ import store from './redux/store';
 import App from './App';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'react-photo-view/dist/react-photo-view.css';
 import '~/styles/index.scss';
 
 ReactDOM.render(

@@ -70,7 +70,7 @@ const WritePost = () => {
                 imagesUrl.push(...uploadedUrls);
             }
 
-            const newPost = await submitPostService({ content, images: images.map((imgUrl) => ({ imgUrl })) });
+            const newPost = await submitPostService({ content, images: imagesUrl.map((imgUrl) => ({ imgUrl })) });
             if (!newPost) {
                 throw new Error('Post submission failed or invalid response');
             }

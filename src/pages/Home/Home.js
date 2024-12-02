@@ -17,7 +17,7 @@ const Home = () => {
                             posterId: post.userID,
                             firstName: post.firstName,
                             lastName: post.lastName,
-                            avatar: post.avatarUser,
+                            avatar: post.avatarUrl,
                             content: post.content,
                             createdAt: post.createdAt,
                             pictures:

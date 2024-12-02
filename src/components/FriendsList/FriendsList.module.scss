@@ -1,4 +1,9 @@
 @import '~/styles/variables';
+.contact-wrapper {
+    position: fixed;
+    right: 0;
+    top: 7.6rem;
+}
 
 .friends-list-wrapper,
 .group-list-wrapper {
@@ -7,9 +12,9 @@
     margin-right: 2.6rem;
     overflow-y: scroll;
     max-height: 50vh;
-    position: sticky;
-    right: 0;
-    top: 7.6rem;
+    // position: sticky;
+    // right: 0;
+    // top: 7.6rem;
 
     &:hover {
         overflow-y: scroll;

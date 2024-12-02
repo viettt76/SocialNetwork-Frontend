@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -20,6 +20,7 @@ import { userInfoSelector } from '~/redux/selectors';
 import signalRClient from './signalRClient';
 import * as signalR from '@microsoft/signalr';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
+import { EmotionsTypeContext } from '~/App';
 
 const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowModal, handleFocusSendComment }) => {
     const {
@@ -85,30 +86,7 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
         visibleImages = [...pictures];
     }
 
-    const [emotionsType, setEmotionsType] = useState([]);
-    // { name: 'Like' },
-    // { name: 'Love' },
-    // // { name: 'Thương thương' },
-    // { name: 'Haha' },
-    // { name: 'Wow' },
-    // { name: 'Sad' },
-    // { name: 'Angry' },
-    useEffect(() => {
-        const fetchAllEmotions = async () => {
-            try {
-                const res = await getAllEmotionsService();
-                setEmotionsType(
-                    res?.map((item) => ({
-                        id: item?.emotionTypeID,
-                        name: item?.emotionName,
-                    })),
-                );
-            } catch (error) {
-                console.log(error);
-            }
-        };
-        fetchAllEmotions();
-    }, []);
+    const emotionsType = useContext(EmotionsTypeContext);
 
     const emotionComponentMap = {
         Like: LikeIcon,

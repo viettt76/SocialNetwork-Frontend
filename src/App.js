@@ -27,39 +27,19 @@ function App() {
     const userInfo = useSelector(userInfoSelector);
 
     return (
-        <BrowserRouter>
-            <NavigateFunctionComponent />
-            <FetchUserInfo />
-            {openChats?.slice(0, 2)?.map((item, index) => {
-                if (item?.isGroupChat) {
-                    return <ChatGroupPopup index={index} key={`group-chat-${item?.id}`} group={item} />;
-                }
-                return <ChatPopup index={index} key={`friend-chat-${item?.id}`} friend={item} />;
-            })}
-            <Routes>
-                {routes.map((route, index) => {
-                    const Page = route.component;
-                    let Layout = DefaultLayout;
-                    if (route.layout) {
-                        Layout = route.layout;
-                    } else if (route.layout === null) {
-                        Layout = React.Fragment;
+        <FetchAllEmotionsPost>
+            <BrowserRouter>
+                <NavigateFunctionComponent />
+                <FetchUserInfo />
+                {openChats?.slice(0, 2)?.map((item, index) => {
+                    if (item?.isGroupChat) {
+                        return <ChatGroupPopup index={index} key={`group-chat-${item?.id}`} group={item} />;
                     }
-                    return (
-                        <Route
-                            key={`route-${index}`}
-                            path={route.path}
-                            element={
-                                <Layout>
-                                    <Page />
-                                </Layout>
-                            }
-                        />
-                    );
+                    return <ChatPopup index={index} key={`friend-chat-${item?.id}`} friend={item} />;
                 })}
-                {userInfo?.role !== 'admin' &&
-                    protectedRoutes.map((route, index) => {
-                        const Page = route.element;
+                <Routes>
+                    {routes.map((route, index) => {
+                        const Page = route.component;
                         let Layout = DefaultLayout;
                         if (route.layout) {
                             Layout = route.layout;
@@ -68,18 +48,40 @@ function App() {
                         }
                         return (
                             <Route
-                                key={`route-admin-${index}`}
+                                key={`route-${index}`}
                                 path={route.path}
                                 element={
                                     <Layout>
                                         <Page />
                                     </Layout>
                                 }
-                            ></Route>
+                            />
                         );
                     })}
-            </Routes>
-        </BrowserRouter>
+                    {userInfo?.role !== 'admin' &&
+                        protectedRoutes.map((route, index) => {
+                            const Page = route.element;
+                            let Layout = DefaultLayout;
+                            if (route.layout) {
+                                Layout = route.layout;
+                            } else if (route.layout === null) {
+                                Layout = React.Fragment;
+                            }
+                            return (
+                                <Route
+                                    key={`route-admin-${index}`}
+                                    path={route.path}
+                                    element={
+                                        <Layout>
+                                            <Page />
+                                        </Layout>
+                                    }
+                                ></Route>
+                            );
+                        })}
+                </Routes>
+            </BrowserRouter>
+        </FetchAllEmotionsPost>
     );
 }
 
@@ -116,6 +118,30 @@ function FetchUserInfo() {
     }, []);
 
     return null;
+}
+
+export const EmotionsTypeContext = createContext(null);
+
+function FetchAllEmotionsPost({ children }) {
+    const [emotionsType, setEmotionsType] = useState(null);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await getAllEmotionsService();
+                setEmotionsType(
+                    res?.map((item) => ({
+                        id: item?.emotionTypeID,
+                        name: item?.emotionName,
+                    })),
+                );
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+    }, []);
+
+    return <EmotionsTypeContext.Provider value={emotionsType}>{children}</EmotionsTypeContext.Provider>;
 }
 
 export default App;

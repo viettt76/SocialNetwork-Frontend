@@ -253,15 +253,16 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
                         [styles[`layout-remaining`]]: remainingImages > 0,
                     })}
                 >
-                    {visibleImages?.map((img) => {
-                        return (
-                            <PhotoView key={`picture-${img?.id}`} src={img?.pictureUrl}>
-                                <div className={clsx(styles['image-wrapper'])}>
-                                    <img src={img?.pictureUrl} alt="" />
-                                </div>
-                            </PhotoView>
-                        );
-                    })}
+                    {pictures?.length > 0 &&
+                        pictures.map((img) => {
+                            return (
+                                <PhotoView key={`picture-${img?.id}`} src={img?.pictureUrl}>
+                                    <div className={clsx(styles['image-wrapper'])}>
+                                        <img src={img?.pictureUrl} alt="" />
+                                    </div>
+                                </PhotoView>
+                            );
+                        })}
                     {remainingImages > 0 && <Link className={clsx(styles['overlay'])}>+{remainingImages}</Link>}
                 </div>
             </PhotoProvider>

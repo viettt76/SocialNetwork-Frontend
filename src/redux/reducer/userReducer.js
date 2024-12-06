@@ -4,11 +4,14 @@ const initialState = {
     id: null,
     firstName: null,
     lastName: null,
+    gender: null,
     birthday: null,
+    role: null,
     avatar: null,
     homeTown: null,
     school: null,
     workplace: null,
+    isPrivate: false,
 };
 
 const userReducer = (state = initialState, action) => {
@@ -28,11 +31,14 @@ const userReducer = (state = initialState, action) => {
                 id: null,
                 firstName: null,
                 lastName: null,
+                gender: null,
                 birthday: null,
+                role: null,
                 avatar: null,
                 homeTown: null,
                 school: null,
                 workplace: null,
+                isPrivate: false,
             };
         default:
             return state;

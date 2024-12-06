@@ -1,17 +1,40 @@
 @import '~/styles/variables';
+.contact-wrapper {
+    position: fixed;
+    right: 0;
+    top: 7.6rem;
+}
 
-.friends-list-wrapper {
+.friends-list-wrapper,
+.group-list-wrapper {
     margin-top: 2rem;
     width: 28rem;
     margin-right: 2.6rem;
-    overflow-y: hidden;
-    max-height: 84vh;
-    position: sticky;
-    right: 0;
-    top: 7.6rem;
+    overflow-y: scroll;
+    max-height: 50vh;
+    // position: sticky;
+    // right: 0;
+    // top: 7.6rem;
 
     &:hover {
         overflow-y: scroll;
+
+        &::-webkit-scrollbar {
+            width: 0.8rem;
+        }
+        &::-webkit-scrollbar-track {
+            background: #fff;
+            border-radius: 0.4rem;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 0.4rem;
+        }
+    }
+
+    &.scroll:hover {
+        overflow-y: auto;
 
         &::-webkit-scrollbar {
             width: 0.8rem;
@@ -32,6 +55,10 @@
         font-weight: 600;
         margin-bottom: 0.6rem;
         margin-left: 0.8rem;
+        position: fixed;
+        z-index: 1;
+        background-color: #fff;
+        width: 100%;
     }
 
     .friend {
@@ -40,6 +67,10 @@
         padding: 0.8rem;
         cursor: pointer;
         border-radius: 0.8rem;
+
+        &:first-of-type {
+            margin-top: 20px;
+        }
 
         &:hover {
             background-color: $background-color-gray;
@@ -74,4 +105,7 @@
             font-weight: 500;
         }
     }
+}
+.group-list-wrapper {
+    max-height: 45vh;
 }

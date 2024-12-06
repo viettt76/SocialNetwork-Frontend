@@ -61,7 +61,6 @@ const ChatPopup = ({ friend, index }) => {
     useEffect(() => {
         (async () => {
             try {
-                var x = (await getAllMessageService(friend?.id)).data;
                 const messages = (await getAllMessageService(friend?.id)).data.map((message) => ({
                     id: message.messageID,
                     sender: message.senderID,
@@ -547,7 +546,7 @@ const ChatPopup = ({ friend, index }) => {
                             [[styles['is-online']]]: friend?.isOnline,
                         })}
                     >
-                        <img src={friend?.avatar || defaultAvatar} />
+                        <img src={friend?.avatarUrl || defaultAvatar} />
                     </div>
                     {friend?.lastName && friend?.firstName && (
                         <div className={clsx(styles['name'])}>{`${friend?.lastName} ${friend?.firstName}`}</div>

@@ -19,13 +19,11 @@ const Post = ({ postInfo }) => {
     const handleCloseModal = () => setShowModal(false);
 
     const handleSendComment = async (e) => {
-        if (e.key === 'Enter') {
-            try {
-                await sendCommentService({ postId: id, content: writeComment });
-                setWriteComment('');
-            } catch (error) {
-                console.log(error);
-            }
+        try {
+            await sendCommentService({ postId: id, content: writeComment });
+            setWriteComment('');
+        } catch (error) {
+            console.log(error);
         }
     };
 
@@ -64,9 +62,14 @@ const Post = ({ postInfo }) => {
                         className={clsx(styles['write-comment'])}
                         placeholder="Viết bình luận"
                         onChange={(e) => setWriteComment(e.target.value)}
-                        onKeyDown={handleSendComment}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleSendComment();
+                            }
+                        }}
                     />
                     <i
+                        onClick={handleSendComment}
                         className={clsx(styles['send-comment-btn'], {
                             [[styles['active']]]: writeComment,
                         })}

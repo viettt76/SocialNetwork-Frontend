@@ -4,6 +4,8 @@ export const READ_MESSAGE = 'READ_MESSAGE';
 export const ADD_NOTIFICATION_OTHER = 'ADD_NOTIFICATION_OTHER';
 export const REMOVE_NOTIFICATION_OTHER = 'REMOVE_NOTIFICATION_OTHER';
 export const SET_NOTIFICATIONS_OTHER = 'SET_NOTIFICATIONS_OTHER';
+export const READ_NOTIFICATION_OTHER = 'READ_NOTIFICATION_OTHER';
+
 export const addNotificationMessenger = (payload) => {
     return {
         type: ADD_NOTIFICATION_MESSENGER,
@@ -44,3 +46,8 @@ export const setNotificationsOther = (payload) => {
         payload,
     };
 };
+// export const readNotificationOther = () => {
+//     return {
+//         type: READ_NOTIFICATION_OTHER,
+//     };
+// };

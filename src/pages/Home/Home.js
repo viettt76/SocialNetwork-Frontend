@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import ChatPopup from '~/components/ChatPopup';
 import Post from '~/components/Post';
 import WritePost from '~/components/WritePost';
-import { openChatsSelector } from '~/redux/selectors';
 import { getAllPostsService } from '~/services/postServices';
 import signalRClient from '~/components/Post/signalRClient';
 
@@ -16,13 +13,12 @@ const Home = () => {
                 console.log('vinhbr1', res);
                 setPosts(
                     res.map((post) => {
-                        // console.log(post);
                         return {
                             id: post.postID,
                             posterId: post.userID,
                             firstName: post.firstName,
                             lastName: post.lastName,
-                            avatar: post.avatarUser,
+                            avatar: post.avatarUrl,
                             content: post.content,
                             createdAt: post.createdAt,
                             pictures:
@@ -100,8 +96,6 @@ const Home = () => {
         };
     }, []);
 
-    const openChats = useSelector(openChatsSelector);
-
     return (
         <div className="d-flex justify-content-center mt-5">
             <div>
@@ -114,9 +108,6 @@ const Home = () => {
                     posts.map((post) => <Post key={`post-${post.id}`} postInfo={post} />)
                 )}
             </div>
-            {openChats.map((friend, index) => (
-                <ChatPopup key={`friend-${friend.id}`} friend={friend} index={index} />
-            ))}
         </div>
     );
 };

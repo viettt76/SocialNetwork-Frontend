@@ -4,12 +4,21 @@ import styles from './Profile.module.scss';
 // import { getProfileService, getUserPostsService } from '~/services/userServices';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import PostContent from '~/components/UserProfile/PostContent';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { userInfoSelector } from '~/redux/selectors';
 import ModalUserProfile from './ModalUserProfile';
+import clsx from 'clsx';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPencil } from '@fortawesome/free-solid-svg-icons';
+import { Button, Modal } from 'react-bootstrap';
+import Cropper from 'react-easy-crop';
+import { getCroppedImg, uploadToCloudinary } from '~/utils/commonUtils';
+import * as actions from '~/redux/actions';
+import { updateMyInfoService } from '~/services/userServices';
 
-const UserProfile = (userInfo) => {
-    const { userId } = userInfo;
+const UserProfile = () => {
+    const userInfo = useSelector(userInfoSelector);
+    const dispatch = useDispatch();
 
     const [userPosts, setUserPosts] = useState([1, 2]);
 
@@ -44,6 +53,53 @@ const UserProfile = (userInfo) => {
 
     // if (!userInfo) return <div>Loading...</div>;
 
+    const [updateAvatar, setUpdateAvatar] = useState(null);
+    const [showModalUpdateAvatar, setShowModalUpdateAvatar] = useState(false);
+
+    const handleChooseFile = (e) => {
+        const file = e.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = (s) => {
+                setUpdateAvatar(s.target.result);
+                setShowModalUpdateAvatar(true);
+            };
+
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleHideModalUpdateAvatar = () => setShowModalUpdateAvatar(false);
+
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+
+    const onCropComplete = (croppedArea, croppedAreaPixels) => {
+        setCroppedAreaPixels(croppedAreaPixels);
+    };
+
+    const handleSave = async () => {
+        try {
+            dispatch(actions.startLoading('updateAvatar'));
+            const croppedImage = await getCroppedImg(updateAvatar, croppedAreaPixels);
+            const file = await fetch(croppedImage)
+                .then((res) => res.blob())
+                .then((blob) => new File([blob], 'cropped-image.jpg', { type: 'image/jpeg' }));
+            const imageUrl = await uploadToCloudinary(file);
+            await updateMyInfoService({ avatar: imageUrl });
+
+            dispatch(actions.saveUserInfo({ avatar: imageUrl }));
+            handleHideModalUpdateAvatar();
+        } catch (error) {
+            console.error('Failed to crop image', error);
+        } finally {
+            dispatch(actions.stopLoading('updateAvatar'));
+        }
+    };
+
     return (
         <div className={styles.profileContainer}>
             {/* Phần header hồ sơ */}
@@ -59,17 +115,71 @@ const UserProfile = (userInfo) => {
                 />
                 <div className={styles.userInfo}>
                     <h2>{`${userInfo.firstName} ${userInfo.lastName}`}</h2>
-                    <p>{userInfo.bio || 'Người dùng này chưa có tiểu sử.'}</p>
                     <div className={styles.userStats}>
-                        <span>{userInfo.friendsCount || 0} Bạn bè</span>
+                        <span className="fz-13">{userInfo.friendsCount || 0} Bạn bè</span>
                     </div>
                 </div>
             </div>
             <br></br>
-            {/* Phần bài viết của người dùng */}
-            <button className={styles.xemtt} onClick={handleShowModal}>
-                Xem thêm thông tin
-            </button>
+            <div className="d-flex">
+                <label htmlFor="change-avatar-input" className={clsx(styles['edit-profile-btn'])}>
+                    <FontAwesomeIcon icon={faPencil} />
+                    <span>Đổi ảnh đại diện</span>
+                </label>
+                <input type="file" id="change-avatar-input" hidden onChange={handleChooseFile} />
+                <Modal
+                    className={clsx(styles['modal'])}
+                    show={showModalUpdateAvatar}
+                    onHide={handleHideModalUpdateAvatar}
+                >
+                    <Modal.Header>
+                        <Modal.Title>Chọn ảnh đại diện</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body className={clsx(styles['modal-body'])}>
+                        <div className={clsx(styles['crop-container'])}>
+                            <Cropper
+                                image={updateAvatar}
+                                crop={crop}
+                                zoom={zoom}
+                                aspect={1}
+                                onCropChange={setCrop}
+                                onCropComplete={onCropComplete}
+                                onZoomChange={setZoom}
+                                cropShape="round"
+                                showGrid={false}
+                            />
+                        </div>
+                        <div className={clsx(styles['controls'])}>
+                            <input
+                                type="range"
+                                value={zoom}
+                                min={1}
+                                max={3}
+                                step={0.1}
+                                aria-labelledby="Zoom"
+                                onChange={(e) => {
+                                    setZoom(e.target.value);
+                                }}
+                                className={clsx(styles['zoom-range'])}
+                            />
+                        </div>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <div className="d-flex align-items-revert">
+                            <div className={clsx(styles['btn-cancel'])} onClick={handleHideModalUpdateAvatar}>
+                                Huỷ
+                            </div>
+                            <Button variant="primary" className="fz-16" onClick={handleSave}>
+                                Xác nhận
+                            </Button>
+                        </div>
+                    </Modal.Footer>
+                </Modal>
+                {/* Phần bài viết của người dùng */}
+                <button className={styles.xemtt} onClick={handleShowModal}>
+                    Xem thêm thông tin
+                </button>
+            </div>
             <br></br>
             <br></br>
             <div>

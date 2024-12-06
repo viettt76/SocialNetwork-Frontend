@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { createContext, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import routes from '~/routes';
+import routes, { protectedRoutes } from '~/routes';
 import { SetupInterceptors } from '~/utils/axios';
 import DefaultLayout from '~/layouts/DefaultLayout';
-import { getMyInfoService } from './services/userServices';
-import * as actions from './redux/actions';
-import signalRClient from './components/Post/signalRClient';
+import { getMyInfoService } from '~/services/userServices';
+import * as actions from '~/redux/actions';
+import signalRClient from '~/components/Post/signalRClient';
+import { openChatsSelector, userInfoSelector } from '~/redux/selectors';
+import ChatPopup from '~/components/ChatPopup';
+import ChatGroupPopup from '~/components/ChatGroupPopup';
+import { getAllEmotionsService } from '~/services/postServices';
+
 function NavigateFunctionComponent() {
     let navigate = useNavigate();
     const [ran, setRan] = useState(false);
@@ -19,33 +24,65 @@ function NavigateFunctionComponent() {
 }
 
 function App() {
+    const openChats = useSelector(openChatsSelector);
+    const userInfo = useSelector(userInfoSelector);
+
     return (
-        <BrowserRouter>
-            <NavigateFunctionComponent />
-            <FetchUserInfo />
-            <Routes>
-                {routes.map((route, index) => {
-                    const Page = route.component;
-                    let Layout = DefaultLayout;
-                    if (route.layout) {
-                        Layout = route.layout;
-                    } else if (route.layout === null) {
-                        Layout = React.Fragment;
+        <FetchAllEmotionsPost>
+            <BrowserRouter>
+                <NavigateFunctionComponent />
+                <FetchUserInfo />
+                {openChats?.slice(0, 2)?.map((item, index) => {
+                    if (item?.isGroupChat) {
+                        return <ChatGroupPopup index={index} key={`group-chat-${item?.id}`} group={item} />;
                     }
-                    return (
-                        <Route
-                            key={`route-${index}`}
-                            path={route.path}
-                            element={
-                                <Layout>
-                                    <Page />
-                                </Layout>
-                            }
-                        />
-                    );
+                    return <ChatPopup index={index} key={`friend-chat-${item?.id}`} friend={item} />;
                 })}
-            </Routes>
-        </BrowserRouter>
+                <Routes>
+                    {routes.map((route, index) => {
+                        const Page = route.component;
+                        let Layout = DefaultLayout;
+                        if (route.layout) {
+                            Layout = route.layout;
+                        } else if (route.layout === null) {
+                            Layout = React.Fragment;
+                        }
+                        return (
+                            <Route
+                                key={`route-${index}`}
+                                path={route.path}
+                                element={
+                                    <Layout>
+                                        <Page />
+                                    </Layout>
+                                }
+                            />
+                        );
+                    })}
+                    {userInfo?.role !== 'admin' &&
+                        protectedRoutes.map((route, index) => {
+                            const Page = route.element;
+                            let Layout = DefaultLayout;
+                            if (route.layout) {
+                                Layout = route.layout;
+                            } else if (route.layout === null) {
+                                Layout = React.Fragment;
+                            }
+                            return (
+                                <Route
+                                    key={`route-admin-${index}`}
+                                    path={route.path}
+                                    element={
+                                        <Layout>
+                                            <Page />
+                                        </Layout>
+                                    }
+                                ></Route>
+                            );
+                        })}
+                </Routes>
+            </BrowserRouter>
+        </FetchAllEmotionsPost>
     );
 }
 
@@ -74,7 +111,7 @@ function FetchUserInfo() {
             }
         };
 
-        if (location.pathname !== '/login') {
+        if (location.pathname.toLowerCase() !== '/login') {
             fetchPersonalInfo();
         }
         signalRClient.start();
@@ -82,6 +119,30 @@ function FetchUserInfo() {
     }, []);
 
     return null;
+}
+
+export const EmotionsTypeContext = createContext(null);
+
+function FetchAllEmotionsPost({ children }) {
+    const [emotionsType, setEmotionsType] = useState(null);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await getAllEmotionsService();
+                setEmotionsType(
+                    res?.map((item) => ({
+                        id: item?.emotionTypeID,
+                        name: item?.emotionName,
+                    })),
+                );
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+    }, []);
+
+    return <EmotionsTypeContext.Provider value={emotionsType}>{children}</EmotionsTypeContext.Provider>;
 }
 
 export default App;

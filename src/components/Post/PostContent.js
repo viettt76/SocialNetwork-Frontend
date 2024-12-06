@@ -57,7 +57,7 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
         fetchComments();
         // signalRClient.invoke('StartPostRoom', id);
 
-        signalRClient.on('ReceiveComment', fetchComments);
+        signalRClient.on('ReceiveComment', fetchComments());
     }, [id]);
 
     useEffect(() => {
@@ -85,13 +85,7 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
     }
 
     const [emotionsType, setEmotionsType] = useState([]);
-    // { name: 'Like' },
-    // { name: 'Love' },
-    // // { name: 'Thương thương' },
-    // { name: 'Haha' },
-    // { name: 'Wow' },
-    // { name: 'Sad' },
-    // { name: 'Angry' },
+
     useEffect(() => {
         const fetchAllEmotions = async () => {
             try {
@@ -317,16 +311,7 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
                             </span>
                         </div>
                     ) : (
-                        <div
-                            className={clsx(styles['user-action-emotion'])}
-                            // onClick={() =>
-                            //     handleReleaseEmotion(
-                            //         emotionsType?.find((i) => {
-                            //             return i.name === 'Like';
-                            //         })?.id,
-                            //     )
-                            // }
-                        >
+                        <div className={clsx(styles['user-action-emotion'])}>
                             <FontAwesomeIcon icon={faThumbsUp} />
                             <span>Thích</span>
                         </div>

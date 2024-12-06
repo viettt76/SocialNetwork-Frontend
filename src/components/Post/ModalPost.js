@@ -185,17 +185,6 @@ const ModalPost = ({ postInfo, show, handleClose }) => {
             try {
                 const res = await getCommentsService({ postId });
                 setComments(res?.comment);
-                // {
-                //     "commentID": "6d55b085-8030-4729-889a-e86200db4a59",
-                //     "postID": "196b6f6d-7421-437b-a1cb-98bd6e777a70",
-                //     "parentCommentID": null,
-                //     "content": "vvv",
-                //     "firstName": "First1",
-                //     "lastName": "Last1",
-                //     "avatarUrl": null,
-                //     "createdAt": "2024-11-13T13:23:10.6975232",
-                //     "children": []
-                // },
             } catch (error) {
                 console.error('Error fetching comments:', error);
                 setComments([]);
@@ -261,7 +250,7 @@ const ModalPost = ({ postInfo, show, handleClose }) => {
             }
         };
 
-        signalRClient.invoke('StartPostRoom', postId);
+        // signalRClient.invoke('StartPostRoom', postId);
 
         signalRClient.on('ReceiveComment', handleReceiveComment);
 

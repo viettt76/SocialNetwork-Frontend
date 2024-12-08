@@ -108,7 +108,7 @@ const FriendsList = () => {
     };
 
     return (
-        <div>
+        <div className={clsx(styles['contact-wrapper'])}>
             <ul className={clsx(styles['friends-list-wrapper'])}>
                 <div className={clsx(styles['title'])}>Bạn bè</div>
                 {onlineFriends?.map((friend, index) => {

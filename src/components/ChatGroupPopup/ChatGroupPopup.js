@@ -36,48 +36,35 @@ const GroupMembersLayout = ({ groupId }) => {
     const [groupMembers, setGroupMembers] = useState([]);
     const [pageIndexValue, setpageIndexValue] = useState(0);
     const [totalPage, setTotalPage] = useState(0);
-    const fetchGroupMembers = async (textSearch, isMounted) => {
-        try {
-            const param = {
-                textSearch: textSearch,
-                pageIndex: pageIndexValue,
-                groupId,
-            };
-            const param2 = {
-                textSearch: textSearch,
-                pageIndex: pageIndexValue,
-                groupId,
-                isTotalCount: true,
-            };
 
-            const res = await getGroupMembersService(param);
-            const totalRecord = await getGroupMembersService(param2);
-            if (isMounted) {
-                setTotalPage(totalRecord.data.totalPage);
-                setGroupMembers(res.data.groupMembers);
-            }
-        } catch (error) {
-            if (isMounted) {
-                console.log(error);
-            }
-        }
-    };
     useEffect(() => {
         let isMounted = true;
+        const fetchGroupMembers = async (textSearch, isMounted) => {
+            try {
+                const param = {
+                    textSearch: textSearch,
+                    pageIndex: pageIndexValue,
+                    groupId,
+                };
+                const param2 = {
+                    textSearch: textSearch,
+                    pageIndex: pageIndexValue,
+                    groupId,
+                    isTotalCount: true,
+                };
 
-        // const fetchGroupMembers = async () => {
-        //     try {
-        //         const res = await getGroupMembersService(groupId);
-        //         if (isMounted) {
-        //             setGroupMembers(res);
-        //         }
-        //     } catch (error) {
-        //         if (isMounted) {
-        //             console.log(error);
-        //         }
-        //     }
-        // };
-
+                const res = await getGroupMembersService(param);
+                const totalRecord = await getGroupMembersService(param2);
+                if (isMounted) {
+                    setTotalPage(totalRecord.data.totalPage);
+                    setGroupMembers(res.data.groupMembers);
+                }
+            } catch (error) {
+                if (isMounted) {
+                    console.log(error);
+                }
+            }
+        };
         fetchGroupMembers('', isMounted);
 
         return () => {
@@ -92,17 +79,17 @@ const GroupMembersLayout = ({ groupId }) => {
                 {groupMembers?.map((member) => {
                     return (
                         <Link
-                            to={`/profile/${member?.memberId}`}
+                            to={`/profile/${member?.id}`}
                             className={clsx(styles['group-member-item-wrapper'])}
-                            key={`member-${member?.memberId}`}
+                            key={`member-${member?.id}`}
                         >
                             <img
                                 className={clsx(styles['group-member-item-avatar'])}
-                                src={member?.user?.avatar || defaultAvatar}
-                                alt={`${member?.user?.lastName} ${member?.user?.firstName}`}
+                                src={member?.avatarUrl || defaultAvatar}
+                                alt={`${member?.lastName} ${member?.firstName}`}
                             />
                             <div className={clsx(styles['group-member-item-name'])}>
-                                {member?.user?.lastName} {member?.user?.firstName}
+                                {member?.lastName} {member?.firstName}
                             </div>
                         </Link>
                     );
@@ -120,36 +107,34 @@ const AddGroupMembersLayout = ({ groupId, handleSetActiveMenu }) => {
     const [pageIndexValue, setpageIndexValue] = useState(0);
     const [totalPage, setTotalPage] = useState(0);
 
-    const fetchGroupMembers = async (textSearch, isMounted) => {
-        try {
-            const param = {
-                textSearch: textSearch,
-                pageIndex: pageIndexValue,
-                groupId,
-            };
-            const param2 = {
-                textSearch: textSearch,
-                pageIndex: pageIndexValue,
-                groupId,
-                isTotalCount: true,
-            };
-
-            const res = await getGroupMembersService(param);
-            const totalRecord = await getGroupMembersService(param2);
-            if (isMounted) {
-                setTotalPage(totalRecord.data.totalPage);
-                setGroupMembers(res.data.groupMembers);
-            }
-        } catch (error) {
-            if (isMounted) {
-                console.log(error);
-            }
-        }
-    };
-
     useEffect(() => {
         let isMounted = true;
+        const fetchGroupMembers = async (textSearch, isMounted) => {
+            try {
+                const param = {
+                    textSearch: textSearch,
+                    pageIndex: pageIndexValue,
+                    groupId,
+                };
+                const param2 = {
+                    textSearch: textSearch,
+                    pageIndex: pageIndexValue,
+                    groupId,
+                    isTotalCount: true,
+                };
 
+                const res = await getGroupMembersService(param);
+                const totalRecord = await getGroupMembersService(param2);
+                if (isMounted) {
+                    setTotalPage(totalRecord.data.totalPage);
+                    setGroupMembers(res.data.groupMembers);
+                }
+            } catch (error) {
+                if (isMounted) {
+                    console.log(error);
+                }
+            }
+        };
         // const fetchGroupMembers = async () => {
         //     try {
         //         const res = await getGroupMembersService(groupId);
@@ -452,7 +437,7 @@ const ChatGroupPopup = ({ index, group }) => {
                               {
                                   leftIcon: <FontAwesomeIcon icon={faUserPlus} />,
                                   label: 'Thêm thành viên',
-                                  goToMenu: 'addGroupMembers',
+                                  //   goToMenu: 'addGroupMembers',
                               },
                           ]
                         : []),
@@ -486,18 +471,18 @@ const ChatGroupPopup = ({ index, group }) => {
                 },
             ],
         },
-        // {
-        //     id: 'addGroupMembers',
-        //     back: 'main',
-        //     leftIcon: <ArrowIcon />,
-        //     depthLevel: 2,
-        //     menu: [
-        //         {
-        //             label: <AddGroupMembersLayout groupId={group?.id} handleSetActiveMenu={handleSetActiveMenu} />,
-        //             className: clsx(styles['hover-not-background']),
-        //         },
-        //     ],
-        // },
+        {
+            id: 'addGroupMembers',
+            back: 'main',
+            leftIcon: <ArrowIcon />,
+            depthLevel: 2,
+            menu: [
+                {
+                    label: <AddGroupMembersLayout groupId={group?.id} handleSetActiveMenu={handleSetActiveMenu} />,
+                    className: clsx(styles['hover-not-background']),
+                },
+            ],
+        },
     ];
 
     const menuRef = useRef(null);

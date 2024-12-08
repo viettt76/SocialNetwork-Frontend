@@ -10,6 +10,7 @@ const Home = () => {
         const fetchAllPosts = async () => {
             try {
                 const res = await getAllPostsService();
+                console.log('vinhbr1', res);
                 setPosts(
                     res.map((post) => {
                         return {
@@ -17,7 +18,7 @@ const Home = () => {
                             posterId: post.userID,
                             firstName: post.firstName,
                             lastName: post.lastName,
-                            avatar: post.avatarUser,
+                            avatar: post.avatarUrl,
                             content: post.content,
                             createdAt: post.createdAt,
                             pictures:
@@ -27,8 +28,10 @@ const Home = () => {
                                         pictureUrl: image?.imgUrl,
                                     };
                                 }),
-                            currentEmotionId: post?.emotionTypeID,
-                            currentEmotionName: post?.emotionName,
+                            currentEmotionId: post.userReaction?.emotionTypeID || null, // Emotion của user hiện tại
+                            currentEmotionName: post.userReaction?.emotionName || null,
+                            // currentEmotionId: post.reactions?.emotionTypeID || null, // Emotion của user hiện tại
+                            // currentEmotionName: post.reactions?.emotionName || null,
                             emotions: post?.reactions?.map((emo) => {
                                 return {
                                     id: emo?.reactionID,
@@ -50,14 +53,40 @@ const Home = () => {
             }
         };
 
+        // signalRClient.on('ReceivePost', fetchAllPosts());
         fetchAllPosts();
         const startSignalR = () => {
             signalRClient.on('ReceivePost', (newPost) => {
-                console.log('vinhbr6666 kết nối', newPost);
-                setPosts((prevPosts) => [newPost, ...prevPosts]);
-                console.log('vinhbr6666 kết nối 9999', prevPosts);
+                // setPosts((prevPosts) => [newPost, ...prevPosts]);
+                setPosts((prevPosts) => [
+                    {
+                        id: newPost.postID,
+                        posterId: newPost.userID,
+                        firstName: newPost.firstName,
+                        lastName: newPost.lastName,
+                        avatar: newPost.avatarUser,
+                        content: newPost.content,
+                        createdAt: newPost.createdAt,
+                        pictures:
+                            newPost.images?.length > 0
+                                ? newPost.images.map((image) => ({ pictureUrl: image.imgUrl }))
+                                : [],
+                        currentEmotionId: newPost.userReaction?.emotionTypeID || null,
+                        currentEmotionName: newPost.userReaction?.emotionName || null,
+                        emotions: newPost.reactions?.map((emo) => ({
+                            id: emo.reactionID,
+                            emotion: {
+                                id: emo.emotionTypeID,
+                                name: emo.emotionName,
+                            },
+                            userInfo: { id: emo.userID },
+                        })),
+                    },
+                    ...prevPosts,
+                ]);
+
+                console.log('vinhbr', newPost);
             });
-            // console.log('vinhbr', newPost);
         };
 
         startSignalR();

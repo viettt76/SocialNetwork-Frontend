@@ -10,40 +10,60 @@ import { timeDifferenceFromNow } from '~/utils/commonUtils';
 import { Link } from 'react-router-dom';
 import { acceptFriendshipService, refuseFriendRequestService } from '~/services/relationshipServices';
 import * as actions from '~/redux/actions';
+import signalRClient from '../Post/signalRClient';
 
 const Notification = ({ notificationRef, showNotification, setShowNotification }) => {
     const dispatch = useDispatch();
     const notificationsOther = useSelector(notificationsOtherSelector);
     const [notificationsType, setNotificationsType] = useState([]);
+    console.log('notificationsOther ', notificationsOther);
 
     useEffect(() => {
-        (async () => {
+        const fetchNotification = async () => {
             try {
-                const res = await getNotificationsTypeService();
-                setNotificationsType(res);
+                const res = await getNotificationsService();
+
+                if (res.data && Array.isArray(res.data)) {
+                    dispatch(actions.setNotificationsOther(res.data));
+                }
+                // console.log('Notifications loaded:', res.data);
             } catch (error) {
-                console.log(error);
+                console.error('Error fetching notifications:', error);
             }
-        })();
-    }, []);
+        };
 
-    const handleAcceptFriendship = async ({ notificationId, senderId }) => {
-        try {
-            await acceptFriendshipService(senderId);
-            dispatch(actions.removeNotificationOther(notificationId));
-        } catch (error) {
-            console.log(error);
-        }
-    };
+        fetchNotification();
 
-    const handleRefuseFriendRequest = async ({ notificationId, senderId }) => {
-        try {
-            await refuseFriendRequestService(senderId);
-            dispatch(actions.removeNotificationOther(notificationId));
-        } catch (error) {
-            console.log(error);
-        }
-    };
+        // const handleRealtimeNotification = (notification) => {
+        //     console.log('Realtime Notification Received:', notification);
+
+        //     dispatch(actions.addNotificationOther(notification));
+        // };
+
+        signalRClient.on('ReceiveNotification', fetchNotification());
+
+        return () => {
+            signalRClient.off('ReceiveNotification', fetchNotification());
+        };
+    }, [dispatch]);
+
+    // const handleAcceptFriendship = async ({ notificationId, senderId }) => {
+    //     try {
+    //         await acceptFriendshipService(senderId);
+    //         dispatch(actions.removeNotificationOther(notificationId));
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // };
+
+    // const handleRefuseFriendRequest = async ({ notificationId, senderId }) => {
+    //     try {
+    //         await refuseFriendRequestService(senderId);
+    //         dispatch(actions.removeNotificationOther(notificationId));
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // };
 
     return (
         <div

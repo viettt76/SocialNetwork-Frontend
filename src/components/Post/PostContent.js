@@ -90,7 +90,24 @@ const PostContent = ({
         visibleImages = [...pictures];
     }
 
-    const emotionsType = useContext(EmotionsTypeContext);
+    const [emotionsType, setEmotionsType] = useState([]);
+
+    useEffect(() => {
+        const fetchAllEmotions = async () => {
+            try {
+                const res = await getAllEmotionsService();
+                setEmotionsType(
+                    res?.map((item) => ({
+                        id: item?.emotionTypeID,
+                        name: item?.emotionName,
+                    })),
+                );
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchAllEmotions();
+    }, []);
 
     const emotionComponentMap = {
         Like: LikeIcon,
@@ -303,16 +320,7 @@ const PostContent = ({
                             </span>
                         </div>
                     ) : (
-                        <div
-                            className={clsx(styles['user-action-emotion'])}
-                            // onClick={() =>
-                            //     handleReleaseEmotion(
-                            //         emotionsType?.find((i) => {
-                            //             return i.name === 'Like';
-                            //         })?.id,
-                            //     )
-                            // }
-                        >
+                        <div className={clsx(styles['user-action-emotion'])}>
                             <FontAwesomeIcon icon={faThumbsUp} />
                             <span>Thích</span>
                         </div>

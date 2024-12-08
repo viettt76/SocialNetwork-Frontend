@@ -17,7 +17,7 @@ import _ from 'lodash';
 import socket from '~/socket';
 import { useSelector } from 'react-redux';
 import { userInfoSelector } from '~/redux/selectors';
-import signalRClient from './signalRClient';
+import signalRClient from '~/components/Post/signalRClient';
 import * as signalR from '@microsoft/signalr';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import { EmotionsTypeContext } from '~/App';
@@ -59,7 +59,10 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
         fetchComments();
         // signalRClient.invoke('StartPostRoom', id);
 
-        signalRClient.on('ReceiveComment', fetchComments());
+        signalRClient.on('ReceiveComment', fetchComments);
+        return () => {
+            signalRClient.off('ReceiveComment', fetchComments);
+        };
     }, [id]);
 
     useEffect(() => {
@@ -86,7 +89,6 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
         visibleImages = [...pictures];
     }
 
-<<<<<<< HEAD
     const [emotionsType, setEmotionsType] = useState([]);
 
     useEffect(() => {
@@ -105,9 +107,7 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
         };
         fetchAllEmotions();
     }, []);
-=======
-    const emotionsType = useContext(EmotionsTypeContext);
->>>>>>> 72cc951742eb66ba0ab10c7bb3901c353f87c6b7
+    // const emotionsType = useContext(EmotionsTypeContext);
 
     const emotionComponentMap = {
         Like: LikeIcon,

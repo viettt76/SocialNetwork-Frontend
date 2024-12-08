@@ -74,7 +74,6 @@ const WritePost = () => {
             if (!newPost) {
                 throw new Error('Post submission failed or invalid response');
             }
-            // console.log('vinhbr', newPost);
             dispatch(actions.stopLoading('writePost'));
             handleCloseModalWritePost();
             setContent('');

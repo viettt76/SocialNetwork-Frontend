@@ -10,6 +10,9 @@ export const submitPostService = ({ content = '', images = [] }) => {
 export const getAllPostsService = () => {
     return axios.get('/Post/All');
 };
+export const getAllUserPostsService = ({ userId }) => {
+    return axios.get(`/Post/Me`, { params: { userId } });
+};
 
 export const getAllEmotionsService = () => {
     return axios.get('/Post/AllEmotion');

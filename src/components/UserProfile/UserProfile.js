@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import styles from './Profile.module.scss';
 // import { getProfileService, getUserPostsService } from '~/services/userServices';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
-import PostContent from '~/components/UserProfile/PostContent';
+import Post from '~/components/Post';
 import { useDispatch, useSelector } from 'react-redux';
 import { userInfoSelector } from '~/redux/selectors';
 import ModalUserProfile from './ModalUserProfile';
@@ -15,6 +15,8 @@ import Cropper from 'react-easy-crop';
 import { getCroppedImg, uploadToCloudinary } from '~/utils/commonUtils';
 import * as actions from '~/redux/actions';
 import { updateMyInfoService } from '~/services/userServices';
+import signalRClient from '../Post/signalRClient';
+import { getAllUserPostsService } from '~/services/postServices';
 
 const UserProfile = () => {
     const userInfo = useSelector(userInfoSelector);
@@ -52,6 +54,100 @@ const UserProfile = () => {
     // }, [userId]);
 
     // if (!userInfo) return <div>Loading...</div>;
+
+    const [posts, setPosts] = useState([]);
+    useEffect(() => {
+        const fetchAllPosts = async () => {
+            try {
+                if (userInfo.id === null) {
+                    return;
+                }
+                const res = await getAllUserPostsService({ userId: userInfo.id });
+                // console.log('vinhbr1', res);
+                setPosts(
+                    res.map((post) => {
+                        return {
+                            id: post.postID,
+                            posterId: post.userID,
+                            firstName: post.firstName,
+                            lastName: post.lastName,
+                            avatar: post.avatarUrl,
+                            content: post.content,
+                            createdAt: post.createdAt,
+                            pictures:
+                                post.images?.length > 0 &&
+                                post.images.map((image) => {
+                                    return {
+                                        pictureUrl: image?.imgUrl,
+                                    };
+                                }),
+                            currentEmotionId: post.userReaction?.emotionTypeID || null, // Emotion của user hiện tại
+                            currentEmotionName: post.userReaction?.emotionName || null,
+                            // currentEmotionId: post.reactions?.emotionTypeID || null, // Emotion của user hiện tại
+                            // currentEmotionName: post.reactions?.emotionName || null,
+                            emotions: post?.reactions?.map((emo) => {
+                                return {
+                                    id: emo?.reactionID,
+                                    emotion: {
+                                        id: emo?.emotionTypeID,
+                                        name: emo?.emotionName,
+                                    },
+                                    userInfo: {
+                                        id: emo?.userID,
+                                    },
+                                };
+                            }),
+                        };
+                    }),
+                    // console.log(post),
+                );
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        // signalRClient.on('ReceivePost', fetchAllPosts());
+        fetchAllPosts();
+        const startSignalR = () => {
+            signalRClient.on('ReceivePost', (newPost) => {
+                // setPosts((prevPosts) => [newPost, ...prevPosts]);
+                setPosts((prevPosts) => [
+                    {
+                        id: newPost.postID,
+                        posterId: newPost.userID,
+                        firstName: newPost.firstName,
+                        lastName: newPost.lastName,
+                        avatar: newPost.avatarUser,
+                        content: newPost.content,
+                        createdAt: newPost.createdAt,
+                        pictures:
+                            newPost.images?.length > 0
+                                ? newPost.images.map((image) => ({ pictureUrl: image.imgUrl }))
+                                : [],
+                        currentEmotionId: newPost.userReaction?.emotionTypeID || null,
+                        currentEmotionName: newPost.userReaction?.emotionName || null,
+                        emotions: newPost.reactions?.map((emo) => ({
+                            id: emo.reactionID,
+                            emotion: {
+                                id: emo.emotionTypeID,
+                                name: emo.emotionName,
+                            },
+                            userInfo: { id: emo.userID },
+                        })),
+                    },
+                    ...prevPosts,
+                ]);
+
+                // console.log('vinhbr', newPost);
+            });
+        };
+
+        startSignalR();
+
+        return () => {
+            signalRClient.stop();
+        };
+    }, [userInfo]);
 
     const [updateAvatar, setUpdateAvatar] = useState(null);
     const [showModalUpdateAvatar, setShowModalUpdateAvatar] = useState(false);
@@ -186,8 +282,8 @@ const UserProfile = () => {
                 <h2>Dòng Thời Gian</h2>
             </div>
             <div className={styles.postsContainer}>
-                {userPosts.length > 0 ? (
-                    userPosts.map((post) => <PostContent key={post.id} postInfo={post} />)
+                {posts.length > 0 ? (
+                    posts.map((post) => <Post key={post.id} postInfo={post} />)
                 ) : (
                     <p>Người dùng này chưa có bài viết nào.</p>
                 )}

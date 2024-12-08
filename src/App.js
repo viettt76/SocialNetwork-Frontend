@@ -11,6 +11,7 @@ import { openChatsSelector, userInfoSelector } from '~/redux/selectors';
 import ChatPopup from '~/components/ChatPopup';
 import ChatGroupPopup from '~/components/ChatGroupPopup';
 import { getAllEmotionsService } from '~/services/postServices';
+import { HubConnectionBuilder } from '@microsoft/signalr';
 
 function NavigateFunctionComponent() {
     let navigate = useNavigate();
@@ -26,7 +27,37 @@ function NavigateFunctionComponent() {
 function App() {
     const openChats = useSelector(openChatsSelector);
     const userInfo = useSelector(userInfoSelector);
+    const [notificationConnection, setNotificationConnection] = useState(null);
 
+    useEffect(() => {
+        const connectNotificationHub = async () => {
+            const connection = new HubConnectionBuilder()
+                .withUrl('https://localhost:7072/notification')
+                .withAutomaticReconnect()
+                .build();
+
+            // connection.on('ReceiveNotification', (notification) => {
+            //     console.log('New Notification:', notification);
+            //     // Xử lý thông báo tại đây (ví dụ: lưu vào state)
+            // });
+
+            try {
+                await connection.start();
+                console.log('Notification Hub Connected!');
+                setNotificationConnection(connection);
+            } catch (error) {
+                console.error('Notification Hub Connection Failed:', error);
+            }
+        };
+
+        connectNotificationHub();
+
+        return () => {
+            if (notificationConnection) {
+                notificationConnection.stop();
+            }
+        };
+    }, []);
     return (
         <FetchAllEmotionsPost>
             <BrowserRouter>
@@ -52,7 +83,7 @@ function App() {
                                 key={`route-${index}`}
                                 path={route.path}
                                 element={
-                                    <Layout>
+                                    <Layout notificationConnection={notificationConnection}>
                                         <Page />
                                     </Layout>
                                 }

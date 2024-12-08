@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
@@ -18,10 +18,11 @@ import * as actions from '~/redux/actions';
 import { notificationsMessengerSelector, notificationsOtherSelector } from '~/redux/selectors';
 import Notification from '~/components/Notification';
 
-const Header = () => {
+const Header = ({ notificationConnection }) => {
     const dispatch = useDispatch();
     const notificationsMessenger = useSelector(notificationsMessengerSelector);
     const notificationsOther = useSelector(notificationsOtherSelector);
+    const [notifications, setNotifications] = useState(0);
 
     const messengerIconRef = useRef(null);
     const {
@@ -37,6 +38,23 @@ const Header = () => {
         setIsComponentVisible: setShowNotification,
     } = useClickOutside(false, notificationIconRef);
 
+    useEffect(() => {
+        if (!notificationConnection) return;
+
+        // Lắng nghe thông báo mới từ SignalR
+        notificationConnection.on('ReceiveNotification', (notification) => {
+            console.log('New Notification:', notification);
+            setNotifications((prev) => prev + 1); // Thêm thông báo mới vào danh sách
+        });
+
+        return () => {
+            if (notificationConnection) {
+                notificationConnection.off('ReceiveNotification');
+            }
+        };
+    }, [notificationConnection]);
+
+    console.log('notification is: ', notifications);
     useEffect(() => {
         (async () => {
             try {

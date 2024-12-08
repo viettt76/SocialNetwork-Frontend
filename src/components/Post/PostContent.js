@@ -86,28 +86,7 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
         visibleImages = [...pictures];
     }
 
-<<<<<<< HEAD
-    const [emotionsType, setEmotionsType] = useState([]);
-
-    useEffect(() => {
-        const fetchAllEmotions = async () => {
-            try {
-                const res = await getAllEmotionsService();
-                setEmotionsType(
-                    res?.map((item) => ({
-                        id: item?.emotionTypeID,
-                        name: item?.emotionName,
-                    })),
-                );
-            } catch (error) {
-                console.log(error);
-            }
-        };
-        fetchAllEmotions();
-    }, []);
-=======
     const emotionsType = useContext(EmotionsTypeContext);
->>>>>>> 72cc951742eb66ba0ab10c7bb3901c353f87c6b7
 
     const emotionComponentMap = {
         Like: LikeIcon,

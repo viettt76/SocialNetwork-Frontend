@@ -22,7 +22,15 @@ import * as signalR from '@microsoft/signalr';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import { EmotionsTypeContext } from '~/App';
 
-const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowModal, handleFocusSendComment }) => {
+const PostContent = ({
+    postInfo,
+    handleShowWriteComment,
+    showModal,
+    numberOfComments,
+    setNumberOfComments,
+    handleShowModal,
+    handleFocusSendComment,
+}) => {
     const {
         id,
         posterId,
@@ -45,21 +53,17 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
     const [mostEmotions, setMostEmotions] = useState([]);
     const [currentEmotionNameCustom, setCurrentEmotionNameCustom] = useState(currentEmotionName);
 
-    const [numberOfComments, setNumberOfComments] = useState(0);
     useEffect(() => {
-        const fetchComments = async () => {
-            try {
-                const res = await getCommentsService({ postId: id });
-                setNumberOfComments(res?.numberOfComment);
-            } catch (error) {
-                console.log(error);
-            }
-        };
-
-        fetchComments();
+        // const fetchComments = async () => {
+        //     try {
+        //         const res = await getCommentsService({ postId: id });
+        //         setNumberOfComments(res?.numberOfComment);
+        //     } catch (error) {
+        //         console.log(error);
+        //     }
+        // };
+        // fetchComments();
         // signalRClient.invoke('StartPostRoom', id);
-
-        signalRClient.on('ReceiveComment', fetchComments);
     }, [id]);
 
     useEffect(() => {
@@ -253,7 +257,7 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
                         [styles[`layout-remaining`]]: remainingImages > 0,
                     })}
                 >
-                    {visibleImages?.map((img) => {
+                    {pictures?.map((img) => {
                         return (
                             <PhotoView key={`picture-${img?.id}`} src={img?.pictureUrl}>
                                 <div className={clsx(styles['image-wrapper'])}>

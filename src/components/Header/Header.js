@@ -7,7 +7,6 @@ import styles from './Header.module.scss';
 import useClickOutside from '~/hook/useClickOutside';
 import Messenger from '~/components/Messenger';
 import { BellIcon, MessengerIcon } from '~/components/Icons';
-import socket from '~/socket';
 import {
     getNotificationsService,
     readMenuNotificationMessengerService,
@@ -31,6 +30,16 @@ const Header = ({ notificationConnection }) => {
         setIsComponentVisible: setShowMessenger,
     } = useClickOutside(false, messengerIconRef);
 
+    //{
+    //     "id": "aedd8a8d-00f3-4851-9384-be88fa966735",
+    //     "messeage": "You have a new message",
+    //     "receiverId": "31206e67-e732-4c86-bd4b-8347dc4acce2",
+    //     "groupId": null,
+    //     "senderId": "4e696323-6843-4237-8426-84ee8c99e42c",
+    //     "isNotificationMessage": true,
+    //     "createdAt": "2024-12-08T07:30:54.9127291Z",
+    //     "updatedAt": "2024-12-08T07:30:54.9127291Z"
+    // }
     const notificationIconRef = useRef(null);
     const {
         ref: notificationRef,
@@ -39,12 +48,34 @@ const Header = ({ notificationConnection }) => {
     } = useClickOutside(false, notificationIconRef);
 
     useEffect(() => {
-        if (!notificationConnection) return;
+        const initialNotificationMessage = async () => {
+            var totalNotification = await getNotificationsService();
+            totalNotification.map((noti) => {
+                dispatch(
+                    actions.addNotificationMessenger({
+                        id: noti.id,
+                        senderId: noti.senderId,
+                        type: 'messenger',
+                    }),
+                );
+            });
+        };
 
-        // Lắng nghe thông báo mới từ SignalR
+        initialNotificationMessage();
+    }, []);
+
+    useEffect(() => {
+        if (!notificationConnection) return;
         notificationConnection.on('ReceiveNotification', (notification) => {
             console.log('New Notification:', notification);
-            setNotifications((prev) => prev + 1); // Thêm thông báo mới vào danh sách
+            //setNotifications((prev) => prev + 1); // Thêm thông báo mới vào danh sách
+            dispatch(
+                actions.addNotificationMessenger({
+                    id: notification.id,
+                    senderId: notification.senderId,
+                    type: 'messenger',
+                }),
+            );
         });
 
         return () => {

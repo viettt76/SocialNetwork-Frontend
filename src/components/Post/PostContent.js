@@ -17,7 +17,7 @@ import _ from 'lodash';
 import socket from '~/socket';
 import { useSelector } from 'react-redux';
 import { userInfoSelector } from '~/redux/selectors';
-import signalRClient from './signalRClient';
+import signalRClient from '~/components/Post/signalRClient';
 import * as signalR from '@microsoft/signalr';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import { EmotionsTypeContext } from '~/App';
@@ -54,16 +54,20 @@ const PostContent = ({
     const [currentEmotionNameCustom, setCurrentEmotionNameCustom] = useState(currentEmotionName);
 
     useEffect(() => {
-        // const fetchComments = async () => {
-        //     try {
-        //         const res = await getCommentsService({ postId: id });
-        //         setNumberOfComments(res?.numberOfComment);
-        //     } catch (error) {
-        //         console.log(error);
-        //     }
-        // };
-        // fetchComments();
-        // signalRClient.invoke('StartPostRoom', id);
+        const fetchComments = async () => {
+            try {
+                const res = await getCommentsService({ postId: id });
+                setNumberOfComments(res?.numberOfComment);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchComments();
+
+        signalRClient.on('ReceiveComment', fetchComments);
+        return () => {
+            signalRClient.off('ReceiveComment', fetchComments);
+        };
     }, [id]);
 
     useEffect(() => {

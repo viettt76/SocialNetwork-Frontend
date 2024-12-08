@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
@@ -7,7 +7,6 @@ import styles from './Header.module.scss';
 import useClickOutside from '~/hook/useClickOutside';
 import Messenger from '~/components/Messenger';
 import { BellIcon, MessengerIcon } from '~/components/Icons';
-import socket from '~/socket';
 import {
     getNotificationsService,
     readMenuNotificationMessengerService,
@@ -18,10 +17,11 @@ import * as actions from '~/redux/actions';
 import { notificationsMessengerSelector, notificationsOtherSelector } from '~/redux/selectors';
 import Notification from '~/components/Notification';
 
-const Header = () => {
+const Header = ({ notificationConnection }) => {
     const dispatch = useDispatch();
     const notificationsMessenger = useSelector(notificationsMessengerSelector);
     const notificationsOther = useSelector(notificationsOtherSelector);
+    const [notifications, setNotifications] = useState(0);
 
     const messengerIconRef = useRef(null);
     const {
@@ -30,6 +30,16 @@ const Header = () => {
         setIsComponentVisible: setShowMessenger,
     } = useClickOutside(false, messengerIconRef);
 
+    //{
+    //     "id": "aedd8a8d-00f3-4851-9384-be88fa966735",
+    //     "messeage": "You have a new message",
+    //     "receiverId": "31206e67-e732-4c86-bd4b-8347dc4acce2",
+    //     "groupId": null,
+    //     "senderId": "4e696323-6843-4237-8426-84ee8c99e42c",
+    //     "isNotificationMessage": true,
+    //     "createdAt": "2024-12-08T07:30:54.9127291Z",
+    //     "updatedAt": "2024-12-08T07:30:54.9127291Z"
+    // }
     const notificationIconRef = useRef(null);
     const {
         ref: notificationRef,
@@ -37,6 +47,45 @@ const Header = () => {
         setIsComponentVisible: setShowNotification,
     } = useClickOutside(false, notificationIconRef);
 
+    useEffect(() => {
+        const initialNotificationMessage = async () => {
+            var totalNotification = await getNotificationsService();
+            totalNotification.map((noti) => {
+                dispatch(
+                    actions.addNotificationMessenger({
+                        id: noti.id,
+                        senderId: noti.senderId,
+                        type: 'messenger',
+                    }),
+                );
+            });
+        };
+
+        initialNotificationMessage();
+    }, []);
+
+    useEffect(() => {
+        if (!notificationConnection) return;
+        notificationConnection.on('ReceiveNotification', (notification) => {
+            console.log('New Notification:', notification);
+            //setNotifications((prev) => prev + 1); // Thêm thông báo mới vào danh sách
+            dispatch(
+                actions.addNotificationMessenger({
+                    id: notification.id,
+                    senderId: notification.senderId,
+                    type: 'messenger',
+                }),
+            );
+        });
+
+        return () => {
+            if (notificationConnection) {
+                notificationConnection.off('ReceiveNotification');
+            }
+        };
+    }, [notificationConnection]);
+
+    console.log('notification is: ', notifications);
     useEffect(() => {
         (async () => {
             try {

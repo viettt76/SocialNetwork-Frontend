@@ -22,7 +22,15 @@ import * as signalR from '@microsoft/signalr';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import { EmotionsTypeContext } from '~/App';
 
-const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowModal, handleFocusSendComment }) => {
+const PostContent = ({
+    postInfo,
+    handleShowWriteComment,
+    showModal,
+    numberOfComments,
+    setNumberOfComments,
+    handleShowModal,
+    handleFocusSendComment,
+}) => {
     const {
         id,
         posterId,
@@ -45,7 +53,6 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
     const [mostEmotions, setMostEmotions] = useState([]);
     const [currentEmotionNameCustom, setCurrentEmotionNameCustom] = useState(currentEmotionName);
 
-    const [numberOfComments, setNumberOfComments] = useState(0);
     useEffect(() => {
         const fetchComments = async () => {
             try {
@@ -55,9 +62,7 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
                 console.log(error);
             }
         };
-
         fetchComments();
-        // signalRClient.invoke('StartPostRoom', id);
 
         signalRClient.on('ReceiveComment', fetchComments);
         return () => {
@@ -89,25 +94,7 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
         visibleImages = [...pictures];
     }
 
-    const [emotionsType, setEmotionsType] = useState([]);
-
-    useEffect(() => {
-        const fetchAllEmotions = async () => {
-            try {
-                const res = await getAllEmotionsService();
-                setEmotionsType(
-                    res?.map((item) => ({
-                        id: item?.emotionTypeID,
-                        name: item?.emotionName,
-                    })),
-                );
-            } catch (error) {
-                console.log(error);
-            }
-        };
-        fetchAllEmotions();
-    }, []);
-    // const emotionsType = useContext(EmotionsTypeContext);
+    const emotionsType = useContext(EmotionsTypeContext);
 
     const emotionComponentMap = {
         Like: LikeIcon,
@@ -275,7 +262,7 @@ const PostContent = ({ postInfo, handleShowWriteComment, showModal, handleShowMo
                     })}
                 >
                     {pictures?.length > 0 &&
-                        pictures.map((img) => {
+                        pictures?.map((img) => {
                             return (
                                 <PhotoView key={`picture-${img?.id}`} src={img?.pictureUrl}>
                                     <div className={clsx(styles['image-wrapper'])}>

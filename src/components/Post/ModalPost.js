@@ -11,6 +11,8 @@ import _ from 'lodash';
 import signalRClient from '~/components/Post/signalRClient';
 import { format } from 'date-fns';
 import * as signalR from '@microsoft/signalr';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
 // eslint-disable-next-line react/display-name
 const CustomToggle = forwardRef(({ children, onClick }, ref) => (
@@ -168,7 +170,7 @@ const Comment = ({ comment, postId }) => {
     );
 };
 
-const ModalPost = ({ postInfo, show, handleClose }) => {
+const ModalPost = ({ postInfo, show, numberOfComments, setNumberOfComments, handleClose }) => {
     const { id: postId } = postInfo;
 
     const [writeComment, setWriteComment] = useState('');
@@ -264,21 +266,28 @@ const ModalPost = ({ postInfo, show, handleClose }) => {
         // };
     }, [postId]);
 
-    const handleSendComment = async (e) => {
-        if (e.key === 'Enter') {
-            try {
-                await sendCommentService({ postId, content: writeComment });
-                setWriteComment('');
-            } catch (error) {
-                console.log(error);
-            }
+    const handleSendComment = async () => {
+        try {
+            if (writeComment.trim() === '') return;
+            await sendCommentService({ postId, content: writeComment });
+            setWriteComment('');
+            setNumberOfComments((prev) => prev + 1);
+        } catch (error) {
+            console.log(error);
         }
     };
+
     return (
         <Modal className={clsx(styles['modal'])} show={show} onHide={handleClose}>
             <Modal.Body className={clsx(styles['modal-body'])}>
                 <div className={clsx(styles['modal-post-content-wrapper'])}>
-                    <PostContent postInfo={postInfo} showModal={true} handleFocusSendComment={handleFocusSendComment} />
+                    <PostContent
+                        postInfo={postInfo}
+                        showModal={true}
+                        numberOfComments={numberOfComments}
+                        setNumberOfComments={setNumberOfComments}
+                        handleFocusSendComment={handleFocusSendComment}
+                    />
                     {comments?.length > 0 ? (
                         <div className={clsx(styles['comment-list-wrapper'])}>
                             <Dropdown>
@@ -313,13 +322,17 @@ const ModalPost = ({ postInfo, show, handleClose }) => {
                         className={clsx(styles['write-comment'])}
                         placeholder="Viết bình luận"
                         onChange={(e) => setWriteComment(e.target.value)}
-                        onKeyDown={handleSendComment}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSendComment();
+                        }}
                     />
-                    <i
+                    <FontAwesomeIcon
+                        icon={faPaperPlane}
                         className={clsx(styles['send-comment-btn'], {
                             [[styles['active']]]: writeComment,
                         })}
-                    ></i>
+                        onClick={handleSendComment}
+                    />
                 </div>
             </Modal.Body>
         </Modal>

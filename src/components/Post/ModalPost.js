@@ -196,11 +196,11 @@ const ModalPost = ({ postInfo, show, numberOfComments, setNumberOfComments, hand
         if (postId) {
             fetchComments();
 
-            signalRClient.on('ReceiveComment', fetchComments);
+            // signalRClient.on('ReceiveComment', fetchComments);
 
-            return () => {
-                signalRClient.off('ReceiveComment', fetchComments);
-            };
+            // return () => {
+            //     signalRClient.off('ReceiveComment', fetchComments);
+            // };
         } else {
             console.error('Post ID không hợp lệ');
         }
@@ -257,13 +257,13 @@ const ModalPost = ({ postInfo, show, numberOfComments, setNumberOfComments, hand
             }
         };
 
-        // signalRClient.invoke('StartPostRoom', postId);
+        signalRClient.invoke('StartPostRoom', postId);
 
-        // signalRClient.on('ReceiveComment', handleReceiveComment);
+        signalRClient.on('ReceiveComment', handleReceiveComment);
 
-        // return () => {
-        //     signalRClient.off('ReceiveComment', handleReceiveComment);
-        // };
+        return () => {
+            signalRClient.off('ReceiveComment', handleReceiveComment);
+        };
     }, [postId]);
 
     const handleSendComment = async () => {

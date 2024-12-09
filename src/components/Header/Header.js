@@ -30,16 +30,6 @@ const Header = ({ notificationConnection }) => {
         setIsComponentVisible: setShowMessenger,
     } = useClickOutside(false, messengerIconRef);
 
-    //{
-    //     "id": "aedd8a8d-00f3-4851-9384-be88fa966735",
-    //     "messeage": "You have a new message",
-    //     "receiverId": "31206e67-e732-4c86-bd4b-8347dc4acce2",
-    //     "groupId": null,
-    //     "senderId": "4e696323-6843-4237-8426-84ee8c99e42c",
-    //     "isNotificationMessage": true,
-    //     "createdAt": "2024-12-08T07:30:54.9127291Z",
-    //     "updatedAt": "2024-12-08T07:30:54.9127291Z"
-    // }
     const notificationIconRef = useRef(null);
     const {
         ref: notificationRef,
@@ -49,13 +39,14 @@ const Header = ({ notificationConnection }) => {
 
     useEffect(() => {
         const initialNotificationMessage = async () => {
-            var totalNotification = await getNotificationsService();
+            var totalNotification = (await getNotificationsService()).data;
             totalNotification.map((noti) => {
                 dispatch(
                     actions.addNotificationMessenger({
                         id: noti.id,
                         senderId: noti.senderId,
                         type: 'messenger',
+                        isRead: noti.isRead,
                     }),
                 );
             });
@@ -64,6 +55,7 @@ const Header = ({ notificationConnection }) => {
         initialNotificationMessage();
     }, []);
 
+    console.log('notificationsMessenger:', notificationsMessenger);
     useEffect(() => {
         if (!notificationConnection) return;
         notificationConnection.on('ReceiveNotification', (notification) => {
@@ -74,6 +66,7 @@ const Header = ({ notificationConnection }) => {
                     id: notification.id,
                     senderId: notification.senderId,
                     type: 'messenger',
+                    isRead: false,
                 }),
             );
         });
@@ -84,43 +77,41 @@ const Header = ({ notificationConnection }) => {
             }
         };
     }, [notificationConnection]);
+    // useEffect(() => {
+    //     (async () => {
+    //         try {
+    //             const res = await getNotificationsService();
+    //             if (res?.messenger?.length > 0) {
+    //                 res.messenger.map((noti) => {
+    //                     dispatch(actions.addNotificationMessenger(noti));
+    //                 });
+    //             }
+    //             if (res?.other?.length > 0) {
+    //                 res.other.map((noti) => {
+    //                     dispatch(actions.addNotificationOther(noti));
+    //                 });
+    //             }
+    //         } catch (error) {
+    //             console.log(error);
+    //         }
+    //     })();
 
-    console.log('notification is: ', notifications);
-    useEffect(() => {
-        (async () => {
-            try {
-                const res = await getNotificationsService();
-                if (res?.messenger?.length > 0) {
-                    res.messenger.map((noti) => {
-                        dispatch(actions.addNotificationMessenger(noti));
-                    });
-                }
-                if (res?.other?.length > 0) {
-                    res.other.map((noti) => {
-                        dispatch(actions.addNotificationOther(noti));
-                    });
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        })();
+    //     const handleNewNotificationMessenger = ({ notification: newNotificationMessenger }) => {
+    //         dispatch(actions.addNotificationMessenger(newNotificationMessenger));
+    //     };
 
-        const handleNewNotificationMessenger = ({ notification: newNotificationMessenger }) => {
-            dispatch(actions.addNotificationMessenger(newNotificationMessenger));
-        };
+    //     const handleNotificationNewFriendRequest = (notificationFriendRequest) => {
+    //         dispatch(actions.addNotificationOther(notificationFriendRequest));
+    //     };
 
-        const handleNotificationNewFriendRequest = (notificationFriendRequest) => {
-            dispatch(actions.addNotificationOther(notificationFriendRequest));
-        };
+    //     // socket.on('newMessage', handleNewNotificationMessenger);
+    //     // socket.on('notificationNewFriendRequest', handleNotificationNewFriendRequest);
 
-        // socket.on('newMessage', handleNewNotificationMessenger);
-        // socket.on('notificationNewFriendRequest', handleNotificationNewFriendRequest);
-
-        return () => {
-            // socket.off('newMessage', handleNewNotificationMessenger);
-            // socket.off('notificationNewFriendRequest', handleNotificationNewFriendRequest);
-        };
-    }, []);
+    //     return () => {
+    //         // socket.off('newMessage', handleNewNotificationMessenger);
+    //         // socket.off('notificationNewFriendRequest', handleNotificationNewFriendRequest);
+    //     };
+    // }, []);
 
     const handleShowMessenger = async () => {
         try {
@@ -155,9 +146,9 @@ const Header = ({ notificationConnection }) => {
                         onClick={handleShowMessenger}
                     >
                         <MessengerIcon className={clsx(styles['action-user-icon'])} />
-                        {notificationsMessenger?.reduce((acc, noti) => acc + (noti?.isOpenMenu ? 0 : 1), 0) > 0 && (
+                        {notificationsMessenger?.reduce((acc, noti) => acc + (noti?.isRead ? 0 : 1), 0) > 0 && (
                             <div className={clsx(styles['number-of-notifications'])}>
-                                {notificationsMessenger?.reduce((acc, noti) => (acc + noti?.isOpenMenu ? 0 : 1), 0)}
+                                {notificationsMessenger?.reduce((acc, noti) => acc + (noti?.isRead ? 0 : 1), 0)}
                             </div>
                         )}
                         <ReactTooltip id="tool-tip-message" place="bottom" content="Tin nhắn" />

@@ -120,15 +120,12 @@ const ModalUserProfile = ({ show, handleClose, onSave }) => {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
+                <Button variant="secondary" className="fz-16" onClick={handleClose}>
                     Cancel
                 </Button>
-                <Button variant="primary" onClick={handleSave}>
+                <Button variant="primary" className="fz-16" onClick={handleSave}>
                     Save Changes
                 </Button>
-                <button className={clsx(styles['close-btn'])} onClick={handleClose}>
-                    Đóng
-                </button>
             </Modal.Footer>
         </Modal>
     );

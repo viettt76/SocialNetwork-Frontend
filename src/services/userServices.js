@@ -17,7 +17,7 @@ export const getPicturesOfUserService = (userId) => {
 };
 
 export const getNotificationsService = () => {
-    return axios.get('/user/notifications');
+    return axios.get('/chat/getAllNotificationMessage');
 };
 
 export const readNotificationService = (notificationId) => {

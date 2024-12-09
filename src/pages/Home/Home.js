@@ -3,6 +3,8 @@ import Post from '~/components/Post';
 import WritePost from '~/components/WritePost';
 import { getAllPostsService } from '~/services/postServices';
 import signalRClient from '~/components/Post/signalRClient';
+import clsx from 'clsx';
+import styles from './Home.module.scss';
 
 const Home = () => {
     const [posts, setPosts] = useState([]);
@@ -97,7 +99,7 @@ const Home = () => {
     }, []);
 
     return (
-        <div className="d-flex justify-content-center mt-5">
+        <div className={clsx('d-flex mt-5', styles['home-wrapper'])}>
             <div>
                 <WritePost />
                 {posts.length === 0 ? (

@@ -1,0 +1,70 @@
+@import '~/styles/variables';
+
+.wrapper {
+    margin-top: 2.6rem;
+    padding-top: 1.2rem;
+    background-color: $background-color-medium-gray;
+    min-height: calc(100vh - 5.6rem);
+
+    .nav-link {
+        display: flex;
+        justify-content: center;
+
+        .nav-link-item {
+            font-size: 1.6rem;
+            padding: 0.4rem 1.2rem;
+            margin: 0 0.6rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: $text;
+
+            &.active {
+                color: $main-color;
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+.friends-wrapper {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
+    background-color: $background-color-medium-gray;
+    padding: 2rem 4rem;
+}
+
+@media (min-width: 890px) and (max-width: 1068px) {
+    .friends-wrapper {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 740px) and (max-width: 889px) {
+    .friends-wrapper {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 560px) and (max-width: 739px) {
+    .friends-wrapper {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 400px) and (max-width: 559px) {
+    .friends-wrapper {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 399px) {
+    .friends-wrapper {
+        grid-template-columns: repeat(1, 1fr);
+
+        .friend-wrapper {
+            justify-self: center;
+        }
+    }
+}

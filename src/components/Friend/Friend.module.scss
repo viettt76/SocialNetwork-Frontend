@@ -1,0 +1,46 @@
+@import '~/styles/variables';
+
+.friend-wrapper {
+    border-radius: 0.8rem;
+    box-shadow: 0 0 0.3rem $box-shadow;
+    max-width: 20rem;
+    height: 33.5rem;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+
+    .friend-avatar {
+        width: 100%;
+        height: 20rem;
+        border-top-left-radius: 0.8rem;
+        border-top-right-radius: 0.8rem;
+    }
+
+    .friend-detail {
+        flex: 1;
+        padding: 0.8rem 1.2rem;
+        display: flex;
+        flex-direction: column;
+
+        .friend-name {
+            font-size: 1.7rem;
+            font-weight: 600;
+            line-height: 2rem;
+            color: $text;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+
+        .mutual-friends {
+            color: #65676b;
+            font-size: 1.5rem;
+        }
+
+        .actions {
+            // justify-items: flex-end;
+            margin-top: auto;
+        }
+    }
+}

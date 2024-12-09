@@ -35,3 +35,13 @@ export const readMenuNotificationMessengerService = () => {
 export const readMenuNotificationOtherService = () => {
     return axios.patch('/user/notification/other/open');
 };
+
+export const getSearchUserService = ({ keyWord, PageIndex, PageSize }) => {
+    return axios.get('/user/SearchUser', {
+        params: {
+            keyword: keyWord,
+            PageIndex: PageIndex,
+            PageSize: PageSize,
+        },
+    });
+};

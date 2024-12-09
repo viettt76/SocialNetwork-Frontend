@@ -20,20 +20,20 @@ const MyFriends = () => {
         },
     ]);
 
-    useEffect(() => {
-        const fetchAllFriends = async () => {
-            try {
-                if (userInfo?.id) {
-                    const res = await getAllFriendsService(userInfo.id);
-                    setFriends(res);
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        };
+    // useEffect(() => {
+    //     const fetchAllFriends = async () => {
+    //         try {
+    //             if (userInfo?.id) {
+    //                 const res = await getAllFriendsService(userInfo.id);
+    //                 setFriends(res);
+    //             }
+    //         } catch (error) {
+    //             console.log(error);
+    //         }
+    //     };
 
-        fetchAllFriends();
-    }, [userInfo?.id]);
+    //     fetchAllFriends();
+    // }, [userInfo?.id]);
 
     useEffect(() => {
         const handleAcceptFriendRequest = (friendInfo) => {

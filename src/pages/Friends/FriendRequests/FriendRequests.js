@@ -21,17 +21,17 @@ const FriendRequests = () => {
         },
     ]);
 
-    useEffect(() => {
-        const fetchFriendRequest = async () => {
-            try {
-                const res = await getFriendRequestService();
-                setFriendRequests(res);
-            } catch (error) {
-                console.log(error);
-            }
-        };
-        fetchFriendRequest();
-    }, []);
+    // useEffect(() => {
+    //     const fetchFriendRequest = async () => {
+    //         try {
+    //             const res = await getFriendRequestService();
+    //             setFriendRequests(res);
+    //         } catch (error) {
+    //             console.log(error);
+    //         }
+    //     };
+    //     fetchFriendRequest();
+    // }, []);
 
     useEffect(() => {
         const handleNewFriendRequest = (friendInfo) => {

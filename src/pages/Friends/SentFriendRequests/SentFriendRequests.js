@@ -17,17 +17,17 @@ const SentFriendRequests = () => {
         },
     ]);
 
-    useEffect(() => {
-        const fetchSentFriendRequests = async () => {
-            try {
-                const res = await getSentFriendRequestsService();
-                setSentFriendRequests(res);
-            } catch (error) {
-                console.log(error);
-            }
-        };
-        fetchSentFriendRequests();
-    }, []);
+    // useEffect(() => {
+    //     const fetchSentFriendRequests = async () => {
+    //         try {
+    //             const res = await getSentFriendRequestsService();
+    //             setSentFriendRequests(res);
+    //         } catch (error) {
+    //             console.log(error);
+    //         }
+    //     };
+    //     fetchSentFriendRequests();
+    // }, []);
 
     useEffect(() => {
         const handleFriendRequestDenied = (denierId) => {

@@ -239,19 +239,33 @@ const ChatGroupPopup = ({ index, group }) => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        socket.emit('joinGroupChat', group?.id);
-    }, [group?.id]);
-
-    useEffect(() => {
-        const handleNewGroupChatMessage = (newGroupChatMessage) => {
-            setMessages((prev) => [...prev, newGroupChatMessage]);
-        };
-        socket.on('newGroupChatMessage', handleNewGroupChatMessage);
-
-        return () => {
-            socket.off('newGroupChatMessage', handleNewGroupChatMessage);
-        };
-    }, [userInfo?.id]);
+        (async () => {
+            try {
+                const messages = (await getAllMessageService(group?.id)).data.map((message) => ({
+                    id: message.messageID,
+                    sender: message.senderID,
+                    receiver: message.reciverID,
+                    message: message.content,
+                    pictures: message.images || [],
+                    symbol: message.symbol,
+                    reactionByUser:
+                        message.reactionByUser === null
+                            ? null
+                            : message.reactionByUser.map((item) => {
+                                  return {
+                                      userId: item.userId,
+                                      reactionId: item.reactionId,
+                                      emotionType: Number(item.emotionType),
+                                  };
+                              }),
+                    createdAt: message.createdAt,
+                }));
+                setMessages(messages);
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+    }, [group]);
 
     const endOfMessagesRef = useRef(null);
 
@@ -260,64 +274,10 @@ const ChatGroupPopup = ({ index, group }) => {
     const [sendMessage, setSendMessage] = useState('');
     const [processingMessage, setProcessingMessage] = useState('');
 
-    useEffect(() => {
-        const fetchMessages = async () => {
-            try {
-                if (group?.id) {
-                    const res = await getMessagesOfGroupChatService(group?.id);
-                    setMessages(res);
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        };
-        fetchMessages();
-    }, [group]);
-
-    useEffect(() => {
-        endOfMessagesRef.current.scrollTop = endOfMessagesRef.current.scrollHeight;
-    }, [messages]);
-
     const handleCloseChatPopup = useCallback(() => {
         dispatch(actions.closeChat(group?.id));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [group?.id]);
-
-    const handleSendMessage = async () => {
-        try {
-            if (sendMessage.trim() === '') return;
-
-            const clone = sendMessage.trim();
-            setMessages((prev) => [
-                ...prev,
-                {
-                    id: null,
-                    sender: userInfo?.id,
-                    message: clone,
-                    createdAt: new Date().toISOString(),
-                },
-            ]);
-            setSendMessage('');
-            setProcessingMessage('Đang xử lý');
-
-            const res = await sendGroupChatMessageService({ groupChatId: group?.id, message: clone });
-            setMessages((prev) => {
-                const index = _.findIndex(prev, { id: null, message: clone });
-
-                if (index === -1) return prev;
-
-                const updatedMessages = _.cloneDeep(prev);
-                updatedMessages[index] = { ...updatedMessages[index], id: res?.id };
-
-                return updatedMessages;
-            });
-
-            setProcessingMessage('');
-        } catch (error) {
-            console.log(error);
-            setProcessingMessage('Lỗi');
-        }
-    };
 
     useEffect(() => {
         window.onkeydown = (e) => {
@@ -344,21 +304,34 @@ const ChatGroupPopup = ({ index, group }) => {
     const [updateAvatar, setUpdateAvatar] = useState(null);
     const [showModalUpdateAvatar, setShowModalUpdateAvatar] = useState(false);
 
-    const handleChooseFile = (e) => {
-        const file = e.target.files[0];
+    // const handleChooseFile = (e) => {
+    //     const file = e.target.files[0];
 
-        if (file) {
-            const reader = new FileReader();
+    //     if (file) {
+    //         const reader = new FileReader();
 
-            reader.onload = (s) => {
-                setUpdateAvatar(s.target.result);
-                setShowModalUpdateAvatar(true);
-            };
+    //         reader.onload = (s) => {
+    //             setUpdateAvatar(s.target.result);
+    //             setShowModalUpdateAvatar(true);
+    //         };
 
-            reader.readAsDataURL(file);
+    //         reader.readAsDataURL(file);
+    //     }
+    // };
+    const handleChooseFile = async (e) => {
+        const files = Array.from(e.target.files);
+        try {
+            const imagesUrls = [];
+            if (files.length > 0) {
+                const uploadedUrls = await Promise.all(files.map((fileUpload) => uploadToCloudinary(fileUpload)));
+                imagesUrls.push(...uploadedUrls);
+            }
+            // await sendMessageToPerson(imagesUrls);
+            e.target.value = null;
+        } catch (error) {
+            console.log(error);
         }
     };
-
     const handleHideModalUpdateAvatar = () => setShowModalUpdateAvatar(false);
 
     const [crop, setCrop] = useState({ x: 0, y: 0 });

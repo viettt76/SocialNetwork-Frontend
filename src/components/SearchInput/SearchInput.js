@@ -2,23 +2,83 @@ import clsx from 'clsx';
 import styles from './SearchInput.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
-import React from 'react';
-import img1 from '~/assets/imgs/image 1.jpg';
-import img3 from '~/assets/imgs/image 3.jpg';
+import React, { useState, useEffect } from 'react';
+import { getSearchUserService } from '~/services/userServices';
 
 const SearchInput = () => {
+    const [keyword, setKeyword] = useState('');
+    const [users, setUsers] = useState([]);
+    const [pageIndex, setPageIndex] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [loading, setLoading] = useState(false);
+
+    const fetchUsers = async () => {
+        setLoading(true);
+        try {
+            const searchQuery = {
+                keyWord: keyword,
+                PageIndex: pageIndex,
+                PageSize: 10,
+            };
+
+            const response = await getSearchUserService(searchQuery);
+
+            setUsers(response.data.data);
+            setTotalCount(response.data.totalCount);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (keyword) {
+            fetchUsers();
+        }
+    }, [keyword, pageIndex]);
+
+    const handleSearch = (e) => {
+        setKeyword(e.target.value);
+        setPageIndex(1);
+    };
     return (
-        <div className={clsx(styles['search-container'])}>
-            <div className={clsx(styles['search-wrapper'])}>
-                <div className={clsx(styles['header'])}>
-                    <h1>Tìm kiếm</h1>
-                    <div className={clsx(styles['more'])}>...</div>
+        <div className="search-container">
+            <h2>Tìm kiếm</h2>
+            <div className="search-box">
+                <input type="text" placeholder="Tìm kiếm" value={keyword} onChange={handleSearch} />
+            </div>
+
+            {loading && <p>Đang tải...</p>}
+
+            {users.length > 0 && (
+                <div className="search-results">
+                    {users.map((user) => (
+                        <div key={user.id} className="user-item">
+                            <img src={user.avatar} alt={user.username} className="user-avatar" />
+                            <div className="user-info">
+                                <span className="user-username">{user.firstName}</span>
+                                <span className="user-displayName">{user.lastName}</span>
+                                <span className="user-followers">{user.followers} người theo dõi</span>
+                            </div>
+                            <button className="follow-button">Theo dõi</button>
+                        </div>
+                    ))}
                 </div>
-                <div className={clsx(styles['search-bar'])}>
-                    <FontAwesomeIcon icon={faSearch} />
-                    <input placeholder="Tìm kiếm" type="text" />
-                </div>
-                <div className={clsx(styles['suggestions'])}>Gợi ý theo dõi</div>
+            )}
+
+            {/* Hiển thị thông báo khi không có kết quả */}
+            {!loading && users.length === 0 && keyword && <p>Không tìm thấy kết quả nào.</p>}
+        </div>
+    );
+};
+
+export default SearchInput;
+
+// export default SearchInput;
+
+// {
+/* <div className={clsx(styles['suggestions'])}>Gợi ý theo dõi</div>
                 <div className={clsx(styles['user'])}>
                     <div className={clsx(styles['user-info'])}>
                         <img alt="Profile picture of liverpool_fc_fanatics_" height="40" src={img1} width="40" />
@@ -140,10 +200,5 @@ const SearchInput = () => {
                         </div>
                     </div>
                     <button className={clsx(styles['follow-btn'])}>Theo dõi</button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-export default SearchInput;
+                </div>*/
+// }

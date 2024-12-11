@@ -1,4 +1,4 @@
-import { faGear, faHouse, faMagnifyingGlass, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faHouse, faMagnifyingGlass, faUser, faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '~/components/Logo';
@@ -48,6 +48,14 @@ const Sidebar = () => {
                     })}
                 >
                     <FontAwesomeIcon icon={faUser} />
+                </Link>
+                <Link
+                    to="/friends"
+                    className={clsx(styles['sidebar-item'], styles['sidebar-item-link'], {
+                        [[styles['active']]]: location.pathname.toLowerCase().includes('/friends'),
+                    })}
+                >
+                    <FontAwesomeIcon icon={faUserGroup} />
                 </Link>
             </div>
             <div className="position-relative">

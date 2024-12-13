@@ -11,7 +11,7 @@ export const getAllPostsService = () => {
     return axios.get('/Post/All');
 };
 export const getAllUserPostsService = ({ userId }) => {
-    return axios.get(`/Post/Me`, { params: { userId } });
+    return axios.get(`/Post/User`, { params: { userId } });
 };
 
 export const getAllEmotionsService = () => {
@@ -56,5 +56,9 @@ export const getCommentsService = ({ postId, sortField = 'createdAt', sortType =
 };
 
 export const postsNotApprovedService = () => {
-    return axios.get('/posts/not-approved');
+    return axios.get('/post/not-approved');
+};
+
+export const RemovePost = (postId) => {
+    return axios.post(`/post/deletePost/${postId}`);
 };

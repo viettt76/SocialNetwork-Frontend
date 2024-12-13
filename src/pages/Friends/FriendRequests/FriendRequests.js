@@ -12,26 +12,28 @@ import socket from '~/socket';
 import { Link } from 'react-router-dom';
 
 const FriendRequests = () => {
-    const [friendRequests, setFriendRequests] = useState([
-        {
-            id: '123652746',
-            firstName: 'Việt',
-            lastName: 'Hoàng',
-            avatar: null,
-        },
-    ]);
+    const [friendRequests, setFriendRequests] = useState([]);
+    // const [friendRequests, setFriendRequests] = useState([
+    //     {
+    //         id: '123652746',
+    //         firstName: 'Việt',
+    //         lastName: 'Hoàng',
+    //         avatar: null,
+    //     },
+    // ]);
 
-    // useEffect(() => {
-    //     const fetchFriendRequest = async () => {
-    //         try {
-    //             const res = await getFriendRequestService();
-    //             setFriendRequests(res);
-    //         } catch (error) {
-    //             console.log(error);
-    //         }
-    //     };
-    //     fetchFriendRequest();
-    // }, []);
+    useEffect(() => {
+        const fetchFriendRequest = async () => {
+            try {
+                const res = await getFriendRequestService();
+                setFriendRequests(res.data);
+                console.log('Friend vinh', res.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchFriendRequest();
+    }, []);
 
     useEffect(() => {
         const handleNewFriendRequest = (friendInfo) => {

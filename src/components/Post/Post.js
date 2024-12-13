@@ -24,9 +24,6 @@ const Post = ({ postInfo }) => {
         };
 
         fetchComments();
-        // signalRClient.invoke('StartPostRoom', id);
-
-        // signalRClient.on('ReceiveComment', fetchComments);
     }, [id]);
 
     const [writeComment, setWriteComment] = useState('');

@@ -22,8 +22,8 @@ const SearchInput = () => {
             };
 
             const response = await getSearchUserService(searchQuery);
-
-            setUsers(response.data.data);
+            const usersData = response.data.data || [];
+            setUsers(usersData);
             setTotalCount(response.data.totalCount);
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -67,7 +67,6 @@ const SearchInput = () => {
                 </div>
             )}
 
-            {/* Hiển thị thông báo khi không có kết quả */}
             {!loading && users.length === 0 && keyword && <p>Không tìm thấy kết quả nào.</p>}
         </div>
     );

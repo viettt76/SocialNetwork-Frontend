@@ -10,30 +10,21 @@ import { useSelector } from 'react-redux';
 import { userInfoSelector } from '~/redux/selectors';
 
 const MyFriends = () => {
+    const [friends, setFriends] = useState([]);
+
     const userInfo = useSelector(userInfoSelector);
-    const [friends, setFriends] = useState([
-        {
-            id: '123652746',
-            firstName: 'Việt',
-            lastName: 'Hoàng',
-            avatar: null,
-        },
-    ]);
+    useEffect(() => {
+        const fetchAllFriends = async () => {
+            try {
+                const res = await getAllFriendsService();
+                setFriends(res.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
 
-    // useEffect(() => {
-    //     const fetchAllFriends = async () => {
-    //         try {
-    //             if (userInfo?.id) {
-    //                 const res = await getAllFriendsService(userInfo.id);
-    //                 setFriends(res);
-    //             }
-    //         } catch (error) {
-    //             console.log(error);
-    //         }
-    //     };
-
-    //     fetchAllFriends();
-    // }, [userInfo?.id]);
+        fetchAllFriends();
+    }, []);
 
     useEffect(() => {
         const handleAcceptFriendRequest = (friendInfo) => {

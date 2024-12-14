@@ -1,5 +1,8 @@
 @use '~/styles/variables' as *;
 
+.post-item {
+    width: 56rem;
+}
 .user-profile-wrapper {
     padding: 20px;
 }

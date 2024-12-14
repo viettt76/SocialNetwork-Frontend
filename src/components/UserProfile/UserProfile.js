@@ -63,7 +63,6 @@ const UserProfile = () => {
                     return;
                 }
                 const res = await getAllUserPostsService({ userId: userInfo.id });
-                // console.log('vinhbr1', res);
                 setPosts(
                     res.map((post) => {
                         return {
@@ -283,7 +282,7 @@ const UserProfile = () => {
             </div>
             <div className={styles.postsContainer}>
                 {posts.length > 0 ? (
-                    posts.map((post) => <Post key={post.id} postInfo={post} />)
+                    posts.map((post) => <Post className={clsx(styles['post-item'])} key={post.id} postInfo={post} />)
                 ) : (
                     <p>Người dùng này chưa có bài viết nào.</p>
                 )}

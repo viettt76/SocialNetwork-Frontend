@@ -8,26 +8,27 @@ import socket from '~/socket';
 import { Link } from 'react-router-dom';
 
 const SentFriendRequests = () => {
-    const [sentFriendRequests, setSentFriendRequests] = useState([
-        {
-            id: '123652746',
-            firstName: 'Việt',
-            lastName: 'Hoàng',
-            avatar: null,
-        },
-    ]);
+    const [sentFriendRequests, setSentFriendRequests] = useState([]);
+    // const [sentFriendRequests, setSentFriendRequests] = useState([
+    //     {
+    //         id: '123652746',
+    //         firstName: 'Việt',
+    //         lastName: 'Hoàng',
+    //         avatar: null,
+    //     },
+    // ]);
 
-    // useEffect(() => {
-    //     const fetchSentFriendRequests = async () => {
-    //         try {
-    //             const res = await getSentFriendRequestsService();
-    //             setSentFriendRequests(res);
-    //         } catch (error) {
-    //             console.log(error);
-    //         }
-    //     };
-    //     fetchSentFriendRequests();
-    // }, []);
+    useEffect(() => {
+        const fetchSentFriendRequests = async () => {
+            try {
+                const res = await getSentFriendRequestsService();
+                setSentFriendRequests(res.data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchSentFriendRequests();
+    }, []);
 
     useEffect(() => {
         const handleFriendRequestDenied = (denierId) => {

@@ -48,18 +48,18 @@ const Home = () => {
                             }),
                         };
                     }),
-                    // console.log(post),
                 );
             } catch (error) {
                 console.error(error);
             }
         };
 
-        // signalRClient.on('ReceivePost', fetchAllPosts());
         fetchAllPosts();
+
+        signalRClient.on('ReceiveRefusePost', fetchAllPosts);
+
         const startSignalR = () => {
             signalRClient.on('ReceivePost', (newPost) => {
-                // setPosts((prevPosts) => [newPost, ...prevPosts]);
                 setPosts((prevPosts) => [
                     {
                         id: newPost.postID,

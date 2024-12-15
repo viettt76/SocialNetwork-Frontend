@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect } from 'react';
 import { getSearchUserService } from '~/services/userServices';
+import useDebounced from '~/hook/useDebounced';
 
 const SearchInput = () => {
     const [keyword, setKeyword] = useState('');
@@ -12,63 +13,96 @@ const SearchInput = () => {
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(false);
 
-    const fetchUsers = async () => {
-        setLoading(true);
-        try {
-            const searchQuery = {
-                keyWord: keyword,
-                PageIndex: pageIndex,
-                PageSize: 10,
-            };
-
-            const response = await getSearchUserService(searchQuery);
-
-            setUsers(response.data.data);
-            setTotalCount(response.data.totalCount);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const keywordDebounced = useDebounced(keyword, 300);
 
     useEffect(() => {
-        if (keyword) {
+        if (keywordDebounced.trim() !== '') {
+            const fetchUsers = async () => {
+                setLoading(true);
+                try {
+                    const searchQuery = {
+                        keyWord: keywordDebounced,
+                        PageIndex: pageIndex,
+                        PageSize: 10,
+                    };
+
+                    const response = await getSearchUserService(searchQuery);
+
+                    setUsers(response.data.data);
+                    setTotalCount(response.data.totalCount);
+                } catch (error) {
+                    console.error('Error fetching users:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
             fetchUsers();
+        } else {
+            setUsers([]);
         }
-    }, [keyword, pageIndex]);
+    }, [keywordDebounced, pageIndex]);
 
     const handleSearch = (e) => {
         setKeyword(e.target.value);
         setPageIndex(1);
     };
     return (
-        <div className="search-container">
-            <h2>Tìm kiếm</h2>
-            <div className="search-box">
-                <input type="text" placeholder="Tìm kiếm" value={keyword} onChange={handleSearch} />
-            </div>
+        // <div className="search-container">
+        //     <h2>Tìm kiếm</h2>
+        //     <div className="search-box">
+        //         <input type="text" placeholder="Tìm kiếm" value={keyword} onChange={handleSearch} />
+        //     </div>
 
-            {loading && <p>Đang tải...</p>}
+        //     {loading && <p>Đang tải...</p>}
 
-            {users.length > 0 && (
-                <div className="search-results">
-                    {users.map((user) => (
-                        <div key={user.id} className="user-item">
-                            <img src={user.avatar} alt={user.username} className="user-avatar" />
-                            <div className="user-info">
-                                <span className="user-username">{user.firstName}</span>
-                                <span className="user-displayName">{user.lastName}</span>
-                                <span className="user-followers">{user.followers} người theo dõi</span>
-                            </div>
-                            <button className="follow-button">Theo dõi</button>
-                        </div>
-                    ))}
+        //     {users.length > 0 && (
+        //         <div className="search-results">
+        //             {users.map((user) => (
+        //                 <div key={user.id} className="user-item">
+        //                     <img src={user.avatar} alt={user.username} className="user-avatar" />
+        //                     <div className="user-info">
+        //                         <span className="user-username">{user.firstName}</span>
+        //                         <span className="user-displayName">{user.lastName}</span>
+        //                         <span className="user-followers">{user.followers} người theo dõi</span>
+        //                     </div>
+        //                     <button className="follow-button">Theo dõi</button>
+        //                 </div>
+        //             ))}
+        //         </div>
+        //     )}
+
+        //     {/* Hiển thị thông báo khi không có kết quả */}
+        //     {!loading && users.length === 0 && keyword && <p>Không tìm thấy kết quả nào.</p>}
+        // </div>
+        <div className={clsx(styles['search-container'])}>
+            <div className={clsx(styles['search-wrapper'])}>
+                <div className={clsx(styles['search-bar'])}>
+                    <FontAwesomeIcon icon={faSearch} />
+                    <input placeholder="Tìm kiếm" type="text" value={keyword} onChange={handleSearch} />
                 </div>
-            )}
-
-            {/* Hiển thị thông báo khi không có kết quả */}
-            {!loading && users.length === 0 && keyword && <p>Không tìm thấy kết quả nào.</p>}
+                {users?.length > 0 && <div className={clsx(styles['suggestions'])}>Danh sách tìm kiếm</div>}
+                {users?.map((user) => {
+                    return (
+                        <div className={clsx(styles['user'])}>
+                            <div className={clsx(styles['user-info'])}>
+                                <img
+                                    alt="Profile picture of liverpool_fc_fanatics_"
+                                    height="40"
+                                    src={user?.avatarUrl}
+                                    width="40"
+                                />
+                                <div>
+                                    <div className={clsx(styles['name'])}>
+                                        {user?.lastName} {user?.firstName}
+                                    </div>
+                                </div>
+                            </div>
+                            <button className={clsx(styles['follow-btn'])}>Thêm bạn</button>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 };

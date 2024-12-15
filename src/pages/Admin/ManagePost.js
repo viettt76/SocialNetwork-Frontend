@@ -3,52 +3,57 @@ import clsx from 'clsx';
 import styles from './ManagePost.module.scss';
 import { postsNotApprovedService } from '~/services/postServices';
 import Post from './Post';
+import signalRClient from '~/components/Post/signalRClient';
 
 const ManagePost = () => {
-    // const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState([]);
 
-    // useEffect(() => {
-    //     (async () => {
-    //         try {
-    //             const res = await postsNotApprovedService();
-    //             setPosts(res);
-    //         } catch (error) {
-    //             console.log(error);
-    //         }
-    //     })();
-    // }, []);
+    useEffect(() => {
+        const getAllPostAwait = async () => {
+            try {
+                const res = await postsNotApprovedService();
+                setPosts(res);
+            } catch (error) {
+                console.log(error);
+            }
+        };
 
-    const posts = [
-        {
-            id: 'e01cea21-9476-44bc-a5a4-9b215105c74d',
-            posterId: 'b71abebf-fe7b-40e8-9720-56749ee5e5fb',
-            visibility: 1,
-            content: 'chào việt',
-            createdAt: '2024-11-14T06:10:13.153Z',
-            pictures: [],
-            posterInfo: {
-                firstName: 'Việt',
-                lastName: 'Hoàng',
-                avatar: null,
-            },
-        },
-    ];
+        getAllPostAwait();
+
+        signalRClient.on('ReceiveRefusePost', getAllPostAwait);
+
+        signalRClient.on('ReceivePost', getAllPostAwait);
+
+        // startSignalR();
+
+        return () => {
+            signalRClient.stop();
+        };
+    }, []);
 
     return (
         <div className={clsx(styles['manage-post-wrapper'])}>
             {posts?.length > 0 &&
                 posts.map((post) => {
+                    const pictures =
+                        post.images.length > 0
+                            ? post.images.map((image) => ({
+                                  pictureUrl: image.imgUrl,
+                              }))
+                            : [];
+
+                    console.log('Processed pictures:', pictures);
                     return (
                         <Post
                             key={`post-${post?.id}`}
-                            id={post?.id}
-                            posterId={post?.posterId}
-                            firstName={post?.posterInfo?.firstName}
-                            lastName={post?.posterInfo?.lastName}
-                            avatar={post?.posterInfo?.avatar}
+                            id={post?.postID}
+                            posterId={post?.userID}
+                            firstName={post?.firstName}
+                            lastName={post?.lastName}
+                            avatar={post?.avatarUrl}
                             content={post?.content}
                             createdAt={post?.createdAt}
-                            pictures={post?.pictures}
+                            pictures={pictures}
                         />
                     );
                 })}

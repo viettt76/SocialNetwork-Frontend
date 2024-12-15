@@ -8,7 +8,7 @@ import signalRClient from './signalRClient';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
-const Post = ({ postInfo }) => {
+const Post = ({ postInfo, className }) => {
     const { id } = postInfo;
 
     const [numberOfComments, setNumberOfComments] = useState(0);
@@ -24,9 +24,6 @@ const Post = ({ postInfo }) => {
         };
 
         fetchComments();
-        // signalRClient.invoke('StartPostRoom', id);
-
-        // signalRClient.on('ReceiveComment', fetchComments);
     }, [id]);
 
     const [writeComment, setWriteComment] = useState('');
@@ -66,7 +63,7 @@ const Post = ({ postInfo }) => {
     }, [showWriteComment]);
 
     return (
-        <div className={clsx(styles['post-wrapper'])}>
+        <div className={clsx(styles['post-wrapper'], className)}>
             <div>
                 <PostContent
                     postInfo={postInfo}

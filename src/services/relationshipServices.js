@@ -11,6 +11,14 @@ export const getFriendsOnlineService = () => {
     return axios.get('/User/getFriendOnline');
 };
 
+export const sendFriendRequestService = (friendId) => {
+    return axios.post('/User/Send', {
+        params: {
+            friendId,
+        },
+    });
+};
+
 export const getFriendRequestService = () => {
     return axios.get('/User/request');
 };

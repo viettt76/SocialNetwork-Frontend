@@ -5,6 +5,7 @@ import { faSearch, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect } from 'react';
 import { getSearchUserService } from '~/services/userServices';
 import useDebounced from '~/hook/useDebounced';
+import { sendFriendRequestService } from '~/services/relationshipServices';
 
 const SearchInput = () => {
     const [keyword, setKeyword] = useState('');
@@ -47,34 +48,16 @@ const SearchInput = () => {
         setKeyword(e.target.value);
         setPageIndex(1);
     };
+
+    const handleSendFriendRequest = async (friendId) => {
+        try {
+            await sendFriendRequestService(friendId);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     return (
-        // <div className="search-container">
-        //     <h2>Tìm kiếm</h2>
-        //     <div className="search-box">
-        //         <input type="text" placeholder="Tìm kiếm" value={keyword} onChange={handleSearch} />
-        //     </div>
-
-        //     {loading && <p>Đang tải...</p>}
-
-        //     {users.length > 0 && (
-        //         <div className="search-results">
-        //             {users.map((user) => (
-        //                 <div key={user.id} className="user-item">
-        //                     <img src={user.avatar} alt={user.username} className="user-avatar" />
-        //                     <div className="user-info">
-        //                         <span className="user-username">{user.firstName}</span>
-        //                         <span className="user-displayName">{user.lastName}</span>
-        //                         <span className="user-followers">{user.followers} người theo dõi</span>
-        //                     </div>
-        //                     <button className="follow-button">Theo dõi</button>
-        //                 </div>
-        //             ))}
-        //         </div>
-        //     )}
-
-        //     {/* Hiển thị thông báo khi không có kết quả */}
-        //     {!loading && users.length === 0 && keyword && <p>Không tìm thấy kết quả nào.</p>}
-        // </div>
         <div className={clsx(styles['search-container'])}>
             <div className={clsx(styles['search-wrapper'])}>
                 <div className={clsx(styles['search-bar'])}>
@@ -98,7 +81,12 @@ const SearchInput = () => {
                                     </div>
                                 </div>
                             </div>
-                            <button className={clsx(styles['follow-btn'])}>Thêm bạn</button>
+                            <button
+                                className={clsx(styles['follow-btn'])}
+                                onClick={() => handleSendFriendRequest(user?.id)}
+                            >
+                                Thêm bạn
+                            </button>
                         </div>
                     );
                 })}

@@ -9,7 +9,7 @@ import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import { useSelector } from 'react-redux';
 import { userInfoSelector } from '~/redux/selectors';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear, faRightFromBracket, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faRightFromBracket, faUser, faUserCog } from '@fortawesome/free-solid-svg-icons';
 import Menu from '~/components/Menu';
 import { useEffect, useRef, useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
@@ -113,6 +113,21 @@ const UserDashboard = ({ userDashboardRef, showUserDashboard, setShowUserDashboa
             depthLevel: 1,
             menu: [
                 [
+                    ...(userInfo?.role === 'admin'
+                        ? [
+                              {
+                                  label: (
+                                      <Link to="/admin/manage-post" className={clsx(styles['dashboard-link'])}>
+                                          <FontAwesomeIcon
+                                              icon={faUserCog}
+                                              className={clsx(styles['dashboard-link-icon'])}
+                                          />
+                                          Trang quản trị
+                                      </Link>
+                                  ),
+                              },
+                          ]
+                        : []),
                     {
                         label: (
                             <Link className={clsx(styles['dashboard-link'])}>

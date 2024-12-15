@@ -19,50 +19,24 @@ import signalRClient from '../Post/signalRClient';
 import { getAllUserPostsService } from '~/services/postServices';
 
 const UserProfile = () => {
+    const { userId } = useParams();
     const userInfo = useSelector(userInfoSelector);
     const dispatch = useDispatch();
-
-    const [userPosts, setUserPosts] = useState([1, 2]);
+    const [loading, setLoading] = useState(true);
 
     const [showModal, setShowModal] = useState(false);
 
     const handleShowModal = () => setShowModal(true);
     const handleCloseModal = () => setShowModal(false);
 
-    // useEffect(() => {
-    //     const fetchProfile = async () => {
-    //         try {
-    //             const res = await getProfileService(userId);
-    //             setUserInfo(res);
-    //         } catch (error) {
-    //             console.log(error);
-    //         }
-    //     };
-
-    //     const fetchUserPosts = async () => {
-    //         try {
-    //             const posts = await getUserPostsService(userId);
-    //             // console.log(posts)
-    //             setUserPosts(posts);
-    //         } catch (error) {
-    //             console.log(error);
-    //         }
-    //     };
-
-    //     fetchProfile();
-    //     fetchUserPosts();
-    // }, [userId]);
-
-    // if (!userInfo) return <div>Loading...</div>;
-
     const [posts, setPosts] = useState([]);
     useEffect(() => {
         const fetchAllPosts = async () => {
             try {
-                if (userInfo.id === null) {
+                if (userId === null) {
                     return;
                 }
-                const res = await getAllUserPostsService({ userId: userInfo.id });
+                const res = await getAllUserPostsService({ userId: userId });
                 setPosts(
                     res.map((post) => {
                         return {
@@ -100,6 +74,7 @@ const UserProfile = () => {
                     }),
                     // console.log(post),
                 );
+                setLoading(false);
             } catch (error) {
                 console.error(error);
             }
@@ -136,7 +111,7 @@ const UserProfile = () => {
                     },
                     ...prevPosts,
                 ]);
-
+                setLoading(true);
                 // console.log('vinhbr', newPost);
             });
         };
@@ -216,76 +191,76 @@ const UserProfile = () => {
                 </div>
             </div>
             <br></br>
-            <div className="d-flex">
-                <label htmlFor="change-avatar-input" className={clsx(styles['edit-profile-btn'])}>
-                    <FontAwesomeIcon icon={faPencil} />
-                    <span>Đổi ảnh đại diện</span>
-                </label>
-                <input type="file" id="change-avatar-input" hidden onChange={handleChooseFile} />
-                <Modal
-                    className={clsx(styles['modal'])}
-                    show={showModalUpdateAvatar}
-                    onHide={handleHideModalUpdateAvatar}
-                >
-                    <Modal.Header>
-                        <Modal.Title>Chọn ảnh đại diện</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body className={clsx(styles['modal-body'])}>
-                        <div className={clsx(styles['crop-container'])}>
-                            <Cropper
-                                image={updateAvatar}
-                                crop={crop}
-                                zoom={zoom}
-                                aspect={1}
-                                onCropChange={setCrop}
-                                onCropComplete={onCropComplete}
-                                onZoomChange={setZoom}
-                                cropShape="round"
-                                showGrid={false}
-                            />
-                        </div>
-                        <div className={clsx(styles['controls'])}>
-                            <input
-                                type="range"
-                                value={zoom}
-                                min={1}
-                                max={3}
-                                step={0.1}
-                                aria-labelledby="Zoom"
-                                onChange={(e) => {
-                                    setZoom(e.target.value);
-                                }}
-                                className={clsx(styles['zoom-range'])}
-                            />
-                        </div>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <div className="d-flex align-items-revert">
-                            <div className={clsx(styles['btn-cancel'])} onClick={handleHideModalUpdateAvatar}>
-                                Huỷ
+            {userInfo?.id === userId && (
+                <div className="d-flex">
+                    <label htmlFor="change-avatar-input" className={clsx(styles['edit-profile-btn'])}>
+                        <FontAwesomeIcon icon={faPencil} />
+                        <span>Đổi ảnh đại diện</span>
+                    </label>
+                    <input type="file" id="change-avatar-input" hidden onChange={handleChooseFile} />
+                    <Modal
+                        className={clsx(styles['modal'])}
+                        show={showModalUpdateAvatar}
+                        onHide={handleHideModalUpdateAvatar}
+                    >
+                        <Modal.Header>
+                            <Modal.Title>Chọn ảnh đại diện</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body className={clsx(styles['modal-body'])}>
+                            <div className={clsx(styles['crop-container'])}>
+                                <Cropper
+                                    image={updateAvatar}
+                                    crop={crop}
+                                    zoom={zoom}
+                                    aspect={1}
+                                    onCropChange={setCrop}
+                                    onCropComplete={onCropComplete}
+                                    onZoomChange={setZoom}
+                                    cropShape="round"
+                                    showGrid={false}
+                                />
                             </div>
-                            <Button variant="primary" className="fz-16" onClick={handleSave}>
-                                Xác nhận
-                            </Button>
-                        </div>
-                    </Modal.Footer>
-                </Modal>
-                {/* Phần bài viết của người dùng */}
-                <button className={styles.xemtt} onClick={handleShowModal}>
-                    Xem thêm thông tin
-                </button>
-            </div>
+                            <div className={clsx(styles['controls'])}>
+                                <input
+                                    type="range"
+                                    value={zoom}
+                                    min={1}
+                                    max={3}
+                                    step={0.1}
+                                    aria-labelledby="Zoom"
+                                    onChange={(e) => {
+                                        setZoom(e.target.value);
+                                    }}
+                                    className={clsx(styles['zoom-range'])}
+                                />
+                            </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <div className="d-flex align-items-revert">
+                                <div className={clsx(styles['btn-cancel'])} onClick={handleHideModalUpdateAvatar}>
+                                    Huỷ
+                                </div>
+                                <Button variant="primary" className="fz-16" onClick={handleSave}>
+                                    Xác nhận
+                                </Button>
+                            </div>
+                        </Modal.Footer>
+                    </Modal>
+                    {/* Phần bài viết của người dùng */}
+                    <button className={styles.xemtt} onClick={handleShowModal}>
+                        Xem thêm thông tin
+                    </button>
+                </div>
+            )}
             <br></br>
             <br></br>
             <div>
                 <h2>Dòng Thời Gian</h2>
             </div>
             <div className={styles.postsContainer}>
-                {posts.length > 0 ? (
-                    posts.map((post) => <Post className={clsx(styles['post-item'])} key={post.id} postInfo={post} />)
-                ) : (
-                    <p>Người dùng này chưa có bài viết nào.</p>
-                )}
+                {posts.length > 0
+                    ? posts.map((post) => <Post className={clsx(styles['post-item'])} key={post.id} postInfo={post} />)
+                    : loading === false && <p className="fz-16">Người dùng này chưa có bài viết nào.</p>}
             </div>
             {showModal && <ModalUserProfile userInfo={userInfo} show={showModal} handleClose={handleCloseModal} />}
         </div>

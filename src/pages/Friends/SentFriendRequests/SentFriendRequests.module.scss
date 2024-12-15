@@ -1,29 +1,30 @@
 @import '~/styles/variables';
 
+.nav-link {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+
+    .nav-link-item {
+        font-size: 1.6rem;
+        padding: 0.4rem 1.2rem;
+        margin: 0 0.6rem;
+        font-weight: 500;
+        cursor: pointer;
+        color: $text;
+
+        &.active {
+            color: $main-color;
+            text-decoration: underline;
+        }
+    }
+}
+
 .wrapper {
     margin-top: 2.6rem;
     padding-top: 1.2rem;
     background-color: $background-color-medium-gray;
     min-height: calc(100vh - 5.6rem);
-
-    .nav-link {
-        display: flex;
-        justify-content: center;
-
-        .nav-link-item {
-            font-size: 1.6rem;
-            padding: 0.4rem 1.2rem;
-            margin: 0 0.6rem;
-            font-weight: 500;
-            cursor: pointer;
-            color: $text;
-
-            &.active {
-                color: $main-color;
-                text-decoration: underline;
-            }
-        }
-    }
 }
 
 .friends-wrapper {

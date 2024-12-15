@@ -45,7 +45,7 @@ const Header = ({ notificationConnection }) => {
                     actions.addNotificationMessenger({
                         id: noti.id,
                         senderId: noti.senderId,
-                        type: 'messenger',
+                        type: noti.type,
                         isRead: noti.isRead,
                     }),
                 );
@@ -65,7 +65,7 @@ const Header = ({ notificationConnection }) => {
                 actions.addNotificationMessenger({
                     id: notification.id,
                     senderId: notification.senderId,
-                    type: 'messenger',
+                    type: notification.type,
                     isRead: false,
                 }),
             );

@@ -195,6 +195,20 @@ const UserProfile = () => {
         }
     };
 
+    const handleUpdateUserInfor = async (data) => {
+        console.log(data);
+        var param = {
+            id: userInfo.id,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            gender: data.gender === 'true' ? true : false,
+            dateOfBirth: new Date(data.dateOfBirthFormatted),
+            address: data.address,
+            isPrivate: data.isPrivate,
+        };
+        await updateMyInfoService(param);
+    };
+
     return (
         <div className={styles.profileContainer}>
             {/* Phần header hồ sơ */}
@@ -287,7 +301,14 @@ const UserProfile = () => {
                     <p>Người dùng này chưa có bài viết nào.</p>
                 )}
             </div>
-            {showModal && <ModalUserProfile userInfo={userInfo} show={showModal} handleClose={handleCloseModal} />}
+            {showModal && (
+                <ModalUserProfile
+                    userInfo={userInfo}
+                    show={showModal}
+                    handleClose={handleCloseModal}
+                    onSave={handleUpdateUserInfor}
+                />
+            )}
         </div>
     );
 };

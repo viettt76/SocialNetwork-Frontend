@@ -1,7 +1,11 @@
 import clsx from 'clsx';
 import styles from './Notification.module.scss';
 import { useEffect, useState } from 'react';
-import { getNotificationsService, getNotificationsTypeService } from '~/services/userServices';
+import {
+    getNotificationsPostService,
+    getNotificationsService,
+    getNotificationsTypeService,
+} from '~/services/userServices';
 import { useDispatch, useSelector } from 'react-redux';
 import { notificationsOtherSelector } from '~/redux/selectors';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
@@ -16,17 +20,15 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
     const dispatch = useDispatch();
     const notificationsOther = useSelector(notificationsOtherSelector);
     const [notificationsType, setNotificationsType] = useState([]);
-    console.log('notificationsOther ', notificationsOther);
 
     useEffect(() => {
         const fetchNotification = async () => {
             try {
-                const res = await getNotificationsService();
+                const res = await getNotificationsPostService();
 
                 if (res.data && Array.isArray(res.data)) {
                     dispatch(actions.setNotificationsOther(res.data));
                 }
-                // console.log('Notifications loaded:', res.data);
             } catch (error) {
                 console.error('Error fetching notifications:', error);
             }

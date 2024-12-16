@@ -9,7 +9,9 @@ export const updateMyInfoService = (data) => {
 };
 
 export const getUserInfoService = (userId) => {
-    return axios.get(`/user/user-info/${userId}`);
+    return axios.get('/user/getInfor', {
+        params: { userId },
+    });
 };
 
 export const getPicturesOfUserService = (userId) => {

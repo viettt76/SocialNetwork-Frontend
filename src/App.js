@@ -137,6 +137,7 @@ function FetchUserInfo() {
                         workplace: res?.workplace,
                         gender: res?.gender,
                         isPrivate: res?.isPrivate,
+                        totalOfFirend: res?.totalOfFirend,
                     }),
                 );
             } catch (error) {

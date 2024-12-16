@@ -12,6 +12,7 @@ const initialState = {
     school: null,
     workplace: null,
     isPrivate: false,
+    totalOfFirend: null,
 };
 
 const userReducer = (state = initialState, action) => {
@@ -39,6 +40,7 @@ const userReducer = (state = initialState, action) => {
                 school: null,
                 workplace: null,
                 isPrivate: false,
+                totalOfFirend: null,
             };
         default:
             return state;

@@ -130,11 +130,14 @@ function FetchUserInfo() {
                         id: res?.id,
                         firstName: res?.firstName,
                         lastName: res?.lastName,
-                        birthday: res?.dateOfBirth,
+                        dateOfBirthFormatted: res?.dateOfBirthFormatted,
                         avatar: res?.avatarUrl,
-                        homeTown: res?.homeTown,
+                        address: res?.address,
                         school: res?.school,
                         workplace: res?.workplace,
+                        gender: res?.gender,
+                        isPrivate: res?.isPrivate,
+                        totalOfFirend: res?.totalOfFirend,
                     }),
                 );
             } catch (error) {

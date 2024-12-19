@@ -14,13 +14,13 @@ import { Button, Modal } from 'react-bootstrap';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg, uploadToCloudinary } from '~/utils/commonUtils';
 import * as actions from '~/redux/actions';
-import { updateMyInfoService } from '~/services/userServices';
+import { getUserInfoService, updateMyInfoService } from '~/services/userServices';
 import signalRClient from '../Post/signalRClient';
 import { getAllUserPostsService } from '~/services/postServices';
 
 const UserProfile = () => {
     const { userId } = useParams();
-    const userInfo = useSelector(userInfoSelector);
+    const userInfoRedux = useSelector(userInfoSelector);
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(true);
 
@@ -30,7 +30,48 @@ const UserProfile = () => {
     const handleCloseModal = () => setShowModal(false);
 
     const [posts, setPosts] = useState([]);
+
+    const [totalOfFriend, setTotalOfFriend] = useState(0);
+
+    const [userInfo, setUserInfo] = useState({
+        id: null,
+        firstName: null,
+        lastName: null,
+        gender: null,
+        dateOfBirthFormatted: null,
+        role: null,
+        avatar: null,
+        address: null,
+        school: null,
+        workplace: null,
+        isPrivate: false,
+        totalOfFirend: null,
+    });
+
     useEffect(() => {
+        const fetchUserInfo = async () => {
+            try {
+                var res = (await getUserInfoService(userId)).data;
+                var value = {
+                    id: res?.id,
+                    firstName: res?.firstName,
+                    lastName: res?.lastName,
+                    dateOfBirthFormatted: res?.dateOfBirthFormatted,
+                    avatar: res?.avatarUrl,
+                    address: res?.address,
+                    school: res?.school,
+                    workplace: res?.workplace,
+                    gender: res?.gender,
+                    isPrivate: res?.isPrivate,
+                    totalOfFirend: res?.totalOfFirend,
+                };
+
+                setUserInfo(value);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
         const fetchAllPosts = async () => {
             try {
                 if (userId === null) {
@@ -81,6 +122,7 @@ const UserProfile = () => {
         };
 
         // signalRClient.on('ReceivePost', fetchAllPosts());
+        fetchUserInfo();
         fetchAllPosts();
         const startSignalR = () => {
             signalRClient.on('ReceivePost', (newPost) => {
@@ -117,11 +159,10 @@ const UserProfile = () => {
         };
 
         startSignalR();
-
         return () => {
             signalRClient.stop();
         };
-    }, [userInfo]);
+    }, [userId]);
 
     const [updateAvatar, setUpdateAvatar] = useState(null);
     const [showModalUpdateAvatar, setShowModalUpdateAvatar] = useState(false);
@@ -159,7 +200,11 @@ const UserProfile = () => {
                 .then((res) => res.blob())
                 .then((blob) => new File([blob], 'cropped-image.jpg', { type: 'image/jpeg' }));
             const imageUrl = await uploadToCloudinary(file);
-            await updateMyInfoService({ avatar: imageUrl });
+            var param = {
+                id: userInfo.id,
+                avatarUrl: imageUrl,
+            };
+            await updateMyInfoService(param);
 
             dispatch(actions.saveUserInfo({ avatar: imageUrl }));
             handleHideModalUpdateAvatar();
@@ -167,7 +212,24 @@ const UserProfile = () => {
             console.error('Failed to crop image', error);
         } finally {
             dispatch(actions.stopLoading('updateAvatar'));
+            location.reload();
         }
+    };
+
+    const handleUpdateUserInfor = async (data) => {
+        console.log(data);
+        var param = {
+            id: userInfo.id,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            gender: data.gender === 'true' ? true : false,
+            dateOfBirth: new Date(data.dateOfBirthFormatted),
+            address: data.address,
+            isPrivate: data.isPrivate,
+        };
+
+        await updateMyInfoService(param);
+        location.reload();
     };
 
     return (
@@ -186,12 +248,12 @@ const UserProfile = () => {
                 <div className={styles.userInfo}>
                     <h2>{`${userInfo.firstName} ${userInfo.lastName}`}</h2>
                     <div className={styles.userStats}>
-                        <span className="fz-13">{userInfo.friendsCount || 0} Bạn bè</span>
+                        <span className="fz-13">{userInfo.totalOfFirend || 0} Bạn bè</span>
                     </div>
                 </div>
             </div>
             <br></br>
-            {userInfo?.id === userId && (
+            {userInfoRedux?.id === userId && (
                 <div className="d-flex">
                     <label htmlFor="change-avatar-input" className={clsx(styles['edit-profile-btn'])}>
                         <FontAwesomeIcon icon={faPencil} />
@@ -262,7 +324,14 @@ const UserProfile = () => {
                     ? posts.map((post) => <Post className={clsx(styles['post-item'])} key={post.id} postInfo={post} />)
                     : loading === false && <p className="fz-16">Người dùng này chưa có bài viết nào.</p>}
             </div>
-            {showModal && <ModalUserProfile userInfo={userInfo} show={showModal} handleClose={handleCloseModal} />}
+            {showModal && (
+                <ModalUserProfile
+                    userInfo={userInfo}
+                    show={showModal}
+                    handleClose={handleCloseModal}
+                    onSave={handleUpdateUserInfor}
+                />
+            )}
         </div>
     );
 };

@@ -1,10 +1,11 @@
 import axios from '~/utils/axios';
 
-export const signUpService = ({ firstName, lastName, username, password }) => {
+export const signUpService = ({ firstName, lastName, email, password }) => {
     return axios.post('/Login/signup', {
         firstName,
         lastName,
-        username,
+        userName: email,
+        email,
         password,
     });
 };

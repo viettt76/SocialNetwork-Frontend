@@ -89,7 +89,7 @@ function Login() {
                             lastName: res?.lastName,
                             age: '18',
                             avatar: res?.avatarUrl,
-                            homeTown: res?.homeTown,
+                            address: res?.address,
                             school: 'Haui',
                             workplace: 'NewwaveJSC',
                         }),

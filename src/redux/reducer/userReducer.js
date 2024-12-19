@@ -5,13 +5,14 @@ const initialState = {
     firstName: null,
     lastName: null,
     gender: null,
-    birthday: null,
+    dateOfBirthFormatted: null,
     role: null,
     avatar: null,
-    homeTown: null,
+    address: null,
     school: null,
     workplace: null,
     isPrivate: false,
+    totalOfFirend: null,
 };
 
 const userReducer = (state = initialState, action) => {
@@ -32,13 +33,14 @@ const userReducer = (state = initialState, action) => {
                 firstName: null,
                 lastName: null,
                 gender: null,
-                birthday: null,
+                dateOfBirthFormatted: null,
                 role: null,
                 avatar: null,
-                homeTown: null,
+                address: null,
                 school: null,
                 workplace: null,
                 isPrivate: false,
+                totalOfFirend: null,
             };
         default:
             return state;

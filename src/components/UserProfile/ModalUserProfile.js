@@ -11,23 +11,25 @@ const ModalUserProfile = ({ show, handleClose, onSave }) => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
-        gender: '',
-        birthday: '',
-        avatar: null,
-        homeTown: '',
+        gender: false,
+        dateOfBirthFormatted: '',
+        // avatar: null,
+        address: '',
         school: '',
         workplace: '',
         isPrivate: false,
     });
 
     useEffect(() => {
+        console.log(userInfo);
+        console.log(formData);
         setFormData({
             firstName: userInfo?.firstName,
             lastName: userInfo?.lastName,
-            gender: userInfo?.gender,
-            birthday: userInfo?.birthday,
-            avatar: userInfo?.avatar,
-            homeTown: userInfo?.homeTown,
+            gender: userInfo?.gender === true ? 'true' : 'false',
+            dateOfBirthFormatted: userInfo?.dateOfBirthFormatted,
+            // avatar: userInfo?.avatar,
+            address: userInfo?.address,
             school: userInfo?.school,
             workplace: userInfo?.workplace,
             isPrivate: userInfo?.isPrivate,
@@ -79,8 +81,8 @@ const ModalUserProfile = ({ show, handleClose, onSave }) => {
                             type="radio"
                             name="gender"
                             label="Nam"
-                            value={formData.gender}
-                            checked={formData?.gender === 'male'}
+                            value={true}
+                            checked={formData?.gender === 'true'}
                             onChange={handleChange}
                         />
                         <Form.Check
@@ -88,14 +90,19 @@ const ModalUserProfile = ({ show, handleClose, onSave }) => {
                             type="radio"
                             name="gender"
                             label="Nữ"
-                            value={formData.gender}
-                            checked={formData?.gender === 'female'}
+                            value={false}
+                            checked={formData?.gender === 'false'}
                             onChange={handleChange}
                         />
                     </Form.Group>
                     <Form.Group className="mb-3" controlId="formCreatedAt">
                         <Form.Label>Ngày sinh</Form.Label>
-                        <Form.Control type="date" name="birthday" value={formData.birthday} onChange={handleChange} />
+                        <Form.Control
+                            type="date"
+                            name="dateOfBirthFormatted"
+                            value={formData.dateOfBirthFormatted}
+                            onChange={handleChange}
+                        />
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Địa chỉ</Form.Label>

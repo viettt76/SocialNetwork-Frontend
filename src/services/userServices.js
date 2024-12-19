@@ -4,12 +4,14 @@ export const getMyInfoService = () => {
     return axios.get('/User/getInfor');
 };
 
-export const updateMyInfoService = ({ homeTown, school, workplace, avatar, birthday }) => {
-    return axios.put('/user/my-info', { homeTown, school, workplace, avatar, birthday });
+export const updateMyInfoService = (data) => {
+    return axios.put('/user/updateInfor', data);
 };
 
 export const getUserInfoService = (userId) => {
-    return axios.get(`/user/user-info/${userId}`);
+    return axios.get('/user/getInfor', {
+        params: { userId },
+    });
 };
 
 export const getPicturesOfUserService = (userId) => {

@@ -13,6 +13,7 @@ const ManagePost = () => {
             try {
                 const res = await postsNotApprovedService();
                 setPosts(res);
+                console.log(res);
             } catch (error) {
                 console.log(error);
             }

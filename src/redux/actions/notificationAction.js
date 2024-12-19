@@ -51,3 +51,7 @@ export const setNotificationsOther = (payload) => {
 //         type: READ_NOTIFICATION_OTHER,
 //     };
 // };
+
+// export const clearNotificationsOther = () => ({
+//     type: 'CLEAR_NOTIFICATIONS_OTHER',
+// });

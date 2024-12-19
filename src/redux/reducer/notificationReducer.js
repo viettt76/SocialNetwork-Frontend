@@ -67,6 +67,7 @@ const notificationReducer = (state = initialState, action) => {
                     isOpenMenu: true,
                 })),
             };
+
         default:
             return state;
     }

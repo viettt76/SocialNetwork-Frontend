@@ -15,7 +15,7 @@ const routes = [
     { path: '/', component: Home },
     { path: '/search', component: Search, layout: OnlySidebarDefault },
     { path: '/login', component: Login, layout: null },
-    { path: '/profile', component: Profile, layout: OnlySidebarDefault },
+    { path: '/profile/:userId', component: Profile, layout: OnlySidebarDefault },
     { path: '/friends', component: MyFriends, layout: HeaderSidebarLayout },
     { path: '/friends/requests', component: FriendRequests, layout: HeaderSidebarLayout },
     { path: '/friends/sent-requests', component: SentFriendRequests, layout: HeaderSidebarLayout },

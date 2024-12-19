@@ -88,7 +88,7 @@ const ChatPopup = ({ friend, index }) => {
     }, [friend]);
 
     useEffect(() => {
-        const connection = new HubConnectionBuilder().withUrl('https://localhost:7072/chatPerson').build();
+        const connection = new HubConnectionBuilder().withUrl('https://localhost:7072/chat').build();
 
         const reactionHub = new HubConnectionBuilder().withUrl('https://localhost:7072/reactionMessage').build();
 
@@ -104,42 +104,44 @@ const ChatPopup = ({ friend, index }) => {
                 });
 
                 connection.on('ReceiveSpecitificMessage', (messageResponse) => {
-                    if (messageResponse.isDelete) {
-                        setMessages((prev) => {
-                            return prev.filter((message) => message.id !== messageResponse.messageID);
-                        });
-                    } else {
-                        setMessages((prev) => {
-                            var x = prev.find((message) => message.id === messageResponse.messageID);
-                            return [
-                                ...(prev.find((message) => message.id === messageResponse.messageID)
-                                    ? prev.filter((message) => message.id !== messageResponse.messageID)
-                                    : prev),
-                                {
-                                    id: messageResponse.messageID,
-                                    sender: friend?.id,
-                                    receiver: userInfo?.id,
-                                    message: messageResponse.content,
-                                    pictures: messageResponse.images,
-                                    symbol: messageResponse.symbol,
-                                    reactionByUser: messageResponse.reactionByUser
-                                        ? messageResponse.reactionByUser.map((reaction) => {
-                                              return {
-                                                  userId: reaction.userId,
-                                                  reactionId: reaction.reactionId,
-                                                  emotionType: Number(reaction.emotionType.toString()),
-                                              };
-                                          })
-                                        : [],
-                                    createdAt: messageResponse.createdAt,
-                                },
-                            ];
+                    if (messageResponse.senderID === friend?.id) {
+                        if (messageResponse.isDelete) {
+                            setMessages((prev) => {
+                                return prev.filter((message) => message.id !== messageResponse.messageID);
+                            });
+                        } else {
+                            setMessages((prev) => {
+                                var x = prev.find((message) => message.id === messageResponse.messageID);
+                                return [
+                                    ...(prev.find((message) => message.id === messageResponse.messageID)
+                                        ? prev.filter((message) => message.id !== messageResponse.messageID)
+                                        : prev),
+                                    {
+                                        id: messageResponse.messageID,
+                                        sender: friend?.id,
+                                        receiver: userInfo?.id,
+                                        message: messageResponse.content,
+                                        pictures: messageResponse.images,
+                                        symbol: messageResponse.symbol,
+                                        reactionByUser: messageResponse.reactionByUser
+                                            ? messageResponse.reactionByUser.map((reaction) => {
+                                                  return {
+                                                      userId: reaction.userId,
+                                                      reactionId: reaction.reactionId,
+                                                      emotionType: Number(reaction.emotionType.toString()),
+                                                  };
+                                              })
+                                            : [],
+                                        createdAt: messageResponse.createdAt,
+                                    },
+                                ];
+                            });
+                        }
+
+                        connection.on('ReciverTypingNotification', (isTyping) => {
+                            setIsDisPlayTyping(isTyping);
                         });
                     }
-
-                    connection.on('ReciverTypingNotification', (isTyping) => {
-                        setIsDisPlayTyping(isTyping);
-                    });
                 });
             } catch (error) {
                 console.error('Error establishing connection:', error);

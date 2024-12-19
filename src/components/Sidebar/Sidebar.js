@@ -7,9 +7,13 @@ import clsx from 'clsx';
 import useClickOutside from '~/hook/useClickOutside';
 import { useRef } from 'react';
 import UserDashboard from '~/components/UserDashboard';
+import { useSelector } from 'react-redux';
+import { userInfoSelector } from '~/redux/selectors';
 
 const Sidebar = () => {
     const location = useLocation();
+
+    const userInfo = useSelector(userInfoSelector);
 
     const userDashboardIconRef = useRef(null);
 
@@ -42,9 +46,9 @@ const Sidebar = () => {
                     <FontAwesomeIcon icon={faMagnifyingGlass} />
                 </Link>
                 <Link
-                    to="/profile"
+                    to={`/profile/${userInfo?.id}`}
                     className={clsx(styles['sidebar-item'], styles['sidebar-item-link'], {
-                        [[styles['active']]]: location.pathname.toLowerCase() === '/profile',
+                        [[styles['active']]]: location.pathname.toLowerCase() === `/profile/${userInfo?.id}`,
                     })}
                 >
                     <FontAwesomeIcon icon={faUser} />

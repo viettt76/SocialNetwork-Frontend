@@ -20,8 +20,11 @@ export const getNotificationsService = () => {
     return axios.get('/chat/getAllNotificationMessage');
 };
 
-export const getNotificationsPostService = () => {
-    return axios.get('/user/notifications');
+// export const getNotificationsPostService = () => {
+//     return axios.get('/user/notifications');
+// };
+export const getNotificationsUserService = () => {
+    return axios.get('/user/notificationFriend');
 };
 
 export const readNotificationService = (notificationId) => {

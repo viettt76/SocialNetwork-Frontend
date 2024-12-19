@@ -13,14 +13,6 @@ import { Link } from 'react-router-dom';
 
 const FriendRequests = () => {
     const [friendRequests, setFriendRequests] = useState([]);
-    // const [friendRequests, setFriendRequests] = useState([
-    //     {
-    //         id: '123652746',
-    //         firstName: 'Việt',
-    //         lastName: 'Hoàng',
-    //         avatar: null,
-    //     },
-    // ]);
 
     useEffect(() => {
         const fetchFriendRequest = async () => {
@@ -77,24 +69,24 @@ const FriendRequests = () => {
     };
 
     return (
-        <>
+        <div className="mt-5 text-center fz-16">
+            <div className={clsx(styles['nav-link'])}>
+                <Link className={clsx(styles['nav-link-item'])} to="/friends">
+                    Bạn bè
+                </Link>
+                <Link className={clsx(styles['nav-link-item'], styles['active'])} to="/friends/requests">
+                    Lời mời kết bạn
+                </Link>
+                <Link className={clsx(styles['nav-link-item'])} to="/friends/sent-requests">
+                    Lời mời đã gửi
+                </Link>
+            </div>
             {friendRequests?.length === 0 ? (
-                <div className="mt-3 w-100 text-center fz-16">
+                <div className="w-100">
                     <div>Bạn không có lời mời kết bạn</div>
                 </div>
             ) : (
                 <div className={clsx(styles['wrapper'])}>
-                    <div className={clsx(styles['nav-link'])}>
-                        <Link className={clsx(styles['nav-link-item'])} to="/friends">
-                            Bạn bè
-                        </Link>
-                        <Link className={clsx(styles['nav-link-item'], styles['active'])} to="/friends/requests">
-                            Lời mời kết bạn
-                        </Link>
-                        <Link className={clsx(styles['nav-link-item'])} to="/friends/sent-requests">
-                            Lời mời đã gửi
-                        </Link>
-                    </div>
                     <div className={clsx(styles['friends-wrapper'])}>
                         {friendRequests?.map((request) => (
                             <Friend
@@ -113,7 +105,7 @@ const FriendRequests = () => {
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 };
 

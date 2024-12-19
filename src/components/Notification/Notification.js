@@ -2,12 +2,12 @@ import clsx from 'clsx';
 import styles from './Notification.module.scss';
 import { useEffect, useState } from 'react';
 import {
-    getNotificationsPostService,
     getNotificationsService,
     getNotificationsTypeService,
+    getNotificationsUserService,
 } from '~/services/userServices';
 import { useDispatch, useSelector } from 'react-redux';
-import { notificationsOtherSelector } from '~/redux/selectors';
+import { notificationsOtherSelector, userInfoSelector } from '~/redux/selectors';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import { Button } from 'react-bootstrap';
 import { timeDifferenceFromNow } from '~/utils/commonUtils';
@@ -20,52 +20,56 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
     const dispatch = useDispatch();
     const notificationsOther = useSelector(notificationsOtherSelector);
     const [notificationsType, setNotificationsType] = useState([]);
+    const userInfo = useSelector(userInfoSelector);
+    console.log('notificationsOther ', notificationsOther);
 
     useEffect(() => {
-        const fetchNotification = async () => {
+        const fetchNotifications = async () => {
             try {
-                const res = await getNotificationsPostService();
-
-                if (res.data && Array.isArray(res.data)) {
-                    dispatch(actions.setNotificationsOther(res.data));
-                }
+                var res = await getNotificationsUserService();
+                const notifications = res.data;
+                console.log('vinhbr', notifications);
+                setNotificationsType(notifications);
+                dispatch(actions.setNotificationsOther(notifications));
             } catch (error) {
                 console.error('Error fetching notifications:', error);
             }
         };
 
-        fetchNotification();
+        fetchNotifications();
 
-        // const handleRealtimeNotification = (notification) => {
-        //     console.log('Realtime Notification Received:', notification);
+        try {
+            signalRClient.on('FriendRequestNotification', (notification) => {
+                console.log('Received notification:', notification);
 
-        //     dispatch(actions.addNotificationOther(notification));
-        // };
-
-        signalRClient.on('ReceiveNotification', fetchNotification());
+                dispatch(actions.addNotificationOther(notification));
+            });
+        } catch (error) {
+            console.error('Error connecting to SignalR:', error);
+        }
 
         return () => {
-            signalRClient.off('ReceiveNotification', fetchNotification());
+            signalRClient.off('FriendRequestNotification');
         };
     }, [dispatch]);
 
-    // const handleAcceptFriendship = async ({ notificationId, senderId }) => {
-    //     try {
-    //         await acceptFriendshipService(senderId);
-    //         dispatch(actions.removeNotificationOther(notificationId));
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // };
+    const handleAcceptFriendship = async ({ notificationId, senderId }) => {
+        try {
+            await acceptFriendshipService(senderId);
+            dispatch(actions.removeNotificationOther(notificationId));
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
-    // const handleRefuseFriendRequest = async ({ notificationId, senderId }) => {
-    //     try {
-    //         await refuseFriendRequestService(senderId);
-    //         dispatch(actions.removeNotificationOther(notificationId));
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // };
+    const handleRefuseFriendRequest = async ({ notificationId, senderId }) => {
+        try {
+            await refuseFriendRequestService(senderId);
+            dispatch(actions.removeNotificationOther(notificationId));
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     return (
         <div
@@ -81,19 +85,20 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
                             <Link to={`/profile/${notification?.senderId}`}>
                                 <img
                                     className={clsx(styles['notification-avatar'])}
-                                    src={notification?.senderAvatar || defaultAvatar}
+                                    src={notification?.avatarUrl || defaultAvatar}
                                 />
                             </Link>
                             <div className={clsx(styles['notification-content-time'])}>
                                 <div
                                     className={clsx(styles['notification-content'])}
-                                    dangerouslySetInnerHTML={{ __html: notification?.content }}
+                                    dangerouslySetInnerHTML={{ __html: notification?.message }}
                                 ></div>
                                 <div className={clsx(styles['notification-time'])}>
                                     {timeDifferenceFromNow(notification?.createdAt)}
                                 </div>
-                                {notification?.type ===
-                                    notificationsType?.find((type) => type?.name === 'friend request')?.id && (
+                                {/* {notification?.type ===
+                                    notificationsType?.find((type) => type?.name === 'friend request')?.id && ( */}
+                                {notification?.type === 1 && (
                                     <div className="mt-2">
                                         <Button
                                             className="fz-16 me-3"

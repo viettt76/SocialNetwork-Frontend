@@ -12,8 +12,9 @@ import { debounce } from 'lodash';
 import styles from './Messenger.module.scss';
 import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import { createGroupChatService, getLatestConversationsService, getFriendService } from '~/services/chatServices';
+import { readMenuNotificationMessengerService } from '~/services/userServices';
 
-const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
+const Messenger = ({ messengerRef, showMessenger, setShowMessenger, notificationConnection }) => {
     const userInfo = useSelector(userInfoSelector);
     const notificationsMessenger = useSelector(notificationsMessengerSelector);
     const dispatch = useDispatch();
@@ -76,7 +77,13 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger }) => {
         }
     };
 
-    const addToOpenChatList = (chat) => {
+    const addToOpenChatList = async (chat) => {
+        var param = {
+            recieverId: chat.isGroupChat ? null : chat?.id,
+            groupId: chat.isGroupChat ? chat?.id : null,
+        };
+        await notificationConnection.invoke('ReadMessageNotification', param);
+
         dispatch(actions.openChat(chat));
         setShowMessenger(false);
     };

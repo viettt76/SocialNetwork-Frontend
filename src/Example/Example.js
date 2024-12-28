@@ -12,7 +12,6 @@ const Example = () => {
     const handleLogin = async () => {
         try {
             const response = await loginService({ password: '123456', username: 'viet' });
-            console.log(response);
         } catch (error) {
             console.log(error);
         }
@@ -21,7 +20,6 @@ const Example = () => {
     const handleSignup = async () => {
         try {
             const response = await signupService({ password: '123456', username: 'viet' });
-            console.log(response);
         } catch (error) {
             console.log(error);
         }

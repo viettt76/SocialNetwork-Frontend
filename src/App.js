@@ -36,14 +36,8 @@ function App() {
                 .withAutomaticReconnect()
                 .build();
 
-            // connection.on('ReceiveNotification', (notification) => {
-            //     console.log('New Notification:', notification);
-            //     // Xử lý thông báo tại đây (ví dụ: lưu vào state)
-            // });
-
             try {
                 await connection.start();
-                console.log('Notification Hub Connected!');
                 setNotificationConnection(connection);
             } catch (error) {
                 console.error('Notification Hub Connection Failed:', error);

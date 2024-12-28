@@ -55,12 +55,9 @@ const Header = ({ notificationConnection }) => {
         initialNotificationMessage();
     }, []);
 
-    console.log('notificationsMessenger:', notificationsMessenger);
     useEffect(() => {
         if (!notificationConnection) return;
         notificationConnection.on('ReceiveNotification', (notification) => {
-            console.log('New Notification:', notification);
-            //setNotifications((prev) => prev + 1); // Thêm thông báo mới vào danh sách
             dispatch(
                 actions.addNotificationMessenger({
                     id: notification.id,
@@ -69,6 +66,10 @@ const Header = ({ notificationConnection }) => {
                     isRead: false,
                 }),
             );
+        });
+
+        notificationConnection.on('ReadMessageNotificationEvent', (notification) => {
+            dispatch(actions.readMessage(notification.id));
         });
 
         return () => {
@@ -157,6 +158,7 @@ const Header = ({ notificationConnection }) => {
                         messengerRef={messengerRef}
                         showMessenger={showMessenger}
                         setShowMessenger={setShowMessenger}
+                        notificationConnection={notificationConnection}
                     />
                 </div>
 

@@ -217,7 +217,6 @@ const PostContent = ({
                     return clone;
                 });
             }
-            // console.log('vinh', postId, userCancelReleaseEmotionId);
         };
 
         signalRClient.on('cancelReleasedEmotion', handleCancelReleasedEmotion);

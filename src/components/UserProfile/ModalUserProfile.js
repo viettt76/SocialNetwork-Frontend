@@ -21,8 +21,6 @@ const ModalUserProfile = ({ show, handleClose, onSave }) => {
     });
 
     useEffect(() => {
-        console.log(userInfo);
-        console.log(formData);
         setFormData({
             firstName: userInfo?.firstName,
             lastName: userInfo?.lastName,

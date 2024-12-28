@@ -12,7 +12,6 @@ const Home = () => {
         const fetchAllPosts = async () => {
             try {
                 const res = await getAllPostsService();
-                console.log('vinhbr1', res);
                 setPosts(
                     res.map((post) => {
                         return {
@@ -86,8 +85,6 @@ const Home = () => {
                     },
                     ...prevPosts,
                 ]);
-
-                console.log('vinhbr', newPost);
             });
         };
 

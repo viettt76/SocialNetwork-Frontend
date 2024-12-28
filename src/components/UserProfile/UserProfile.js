@@ -113,7 +113,6 @@ const UserProfile = () => {
                             }),
                         };
                     }),
-                    // console.log(post),
                 );
                 setLoading(false);
             } catch (error) {
@@ -154,7 +153,6 @@ const UserProfile = () => {
                     ...prevPosts,
                 ]);
                 setLoading(true);
-                // console.log('vinhbr', newPost);
             });
         };
 
@@ -217,7 +215,6 @@ const UserProfile = () => {
     };
 
     const handleUpdateUserInfor = async (data) => {
-        console.log(data);
         var param = {
             id: userInfo.id,
             firstName: data.firstName,

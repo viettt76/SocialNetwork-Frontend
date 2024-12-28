@@ -21,14 +21,12 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
     const notificationsOther = useSelector(notificationsOtherSelector);
     const [notificationsType, setNotificationsType] = useState([]);
     const userInfo = useSelector(userInfoSelector);
-    console.log('notificationsOther ', notificationsOther);
 
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
                 var res = await getNotificationsUserService();
                 const notifications = res.data;
-                console.log('vinhbr', notifications);
                 setNotificationsType(notifications);
                 dispatch(actions.setNotificationsOther(notifications));
             } catch (error) {
@@ -40,8 +38,6 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
 
         try {
             signalRClient.on('FriendRequestNotification', (notification) => {
-                console.log('Received notification:', notification);
-
                 dispatch(actions.addNotificationOther(notification));
             });
         } catch (error) {

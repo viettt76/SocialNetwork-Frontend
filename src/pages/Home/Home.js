@@ -55,6 +55,50 @@ const Home = () => {
     };
 
     useEffect(() => {
+        const fetchAllPosts = async () => {
+            try {
+                const res = await getAllPostsService();
+                setPosts(
+                    res.map((post) => {
+                        return {
+                            id: post.postID,
+                            posterId: post.userID,
+                            firstName: post.firstName,
+                            lastName: post.lastName,
+                            avatar: post.avatarUrl,
+                            content: post.content,
+                            createdAt: post.createdAt,
+                            pictures:
+                                post.images?.length > 0 &&
+                                post.images.map((image) => {
+                                    return {
+                                        pictureUrl: image?.imgUrl,
+                                    };
+                                }),
+                            currentEmotionId: post.userReaction?.emotionTypeID || null, // Emotion của user hiện tại
+                            currentEmotionName: post.userReaction?.emotionName || null,
+                            // currentEmotionId: post.reactions?.emotionTypeID || null, // Emotion của user hiện tại
+                            // currentEmotionName: post.reactions?.emotionName || null,
+                            emotions: post?.reactions?.map((emo) => {
+                                return {
+                                    id: emo?.reactionID,
+                                    emotion: {
+                                        id: emo?.emotionTypeID,
+                                        name: emo?.emotionName,
+                                    },
+                                    userInfo: {
+                                        id: emo?.userID,
+                                    },
+                                };
+                            }),
+                        };
+                    }),
+                );
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
         fetchAllPosts();
     }, [page]);
 

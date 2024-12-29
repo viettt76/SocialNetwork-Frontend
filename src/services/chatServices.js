@@ -93,6 +93,10 @@ export const getAllMessageService = (receiverId) => {
     return axios.get(`/Chat/getAllPersonalMessage`, { params: { receiverId } });
 };
 
+export const getAllMessageChatGroupService = (groupId) => {
+    return axios.get(`/Chat/getAllGroupChatMessage`, { params: { groupId } });
+};
+
 export const sendReactionMessage = ({ messageId, emotionType }) => {
     return axios.post(``);
 };

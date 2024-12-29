@@ -25,7 +25,6 @@ const FriendRequests = () => {
             try {
                 const res = await getFriendRequestService();
                 setFriendRequests(res.data);
-                console.log('Friend vinh', res.data);
             } catch (error) {
                 console.log(error);
             }

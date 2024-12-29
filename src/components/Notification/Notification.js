@@ -21,14 +21,12 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
     const notificationsOther = useSelector(notificationsOtherSelector);
     const [notificationsType, setNotificationsType] = useState([]);
     const userInfo = useSelector(userInfoSelector);
-    // console.log('notificationsOther ', notificationsOther);
 
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
                 var res = await getNotificationsUserService();
                 const notifications = res.data;
-                // console.log('vinhbr', notifications);
                 setNotificationsType(notifications);
                 dispatch(actions.setNotificationsOther(notifications));
             } catch (error) {
@@ -38,13 +36,13 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
 
         fetchNotifications();
 
-        signalRClient.on('CancelUser', (notification) => {
-            dispatch(actions.removeNotificationOther(notification));
-        });
-
-        signalRClient.on('FriendRequestNotification', (notification) => {
-            dispatch(actions.addNotificationOther(notification));
-        });
+        try {
+            signalRClient.on('FriendRequestNotification', (notification) => {
+                dispatch(actions.addNotificationOther(notification));
+            });
+        } catch (error) {
+            console.error('Error connecting to SignalR:', error);
+        }
 
         return () => {
             signalRClient.off('CancelUser');

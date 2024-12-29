@@ -13,7 +13,6 @@ const ManagePost = () => {
             try {
                 const res = await postsNotApprovedService();
                 setPosts(res);
-                console.log(res);
             } catch (error) {
                 console.log(error);
             }
@@ -43,7 +42,6 @@ const ManagePost = () => {
                               }))
                             : [];
 
-                    console.log('Processed pictures:', pictures);
                     return (
                         <Post
                             key={`post-${post?.id}`}

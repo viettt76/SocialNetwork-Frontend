@@ -217,7 +217,6 @@ const ChatPopup = ({ friend, index }) => {
     const sendMessageToPerson = async (imagesUrls = []) => {
         try {
             if (Object.keys(currentMessageSelect).length > 0) {
-                console.log('currentMessageSelect', currentMessageSelect);
                 var messageUpdateParameter = {
                     messageId: currentMessageSelect.messageId,
                     reactionByUser: currentMessageSelect.reactionByUser.map((reaction) => {
@@ -366,13 +365,6 @@ const ChatPopup = ({ friend, index }) => {
             }
         };
     }, [handleCloseChatPopup, isFocus]);
-
-    // useEffect(() => {
-    //     () => {return conn.on("ReciverTypingNotification", (isTyping) => {
-    //         setIsDisPlayTyping(isTyping);
-    //         console.log("User is typing? >>>", isTyping);
-    //     })};
-    // }, [isTyping]);
 
     const [showSetting, setShowSetting] = useState(false);
     const handleShowSetting = () => setShowSetting(true);

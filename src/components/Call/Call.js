@@ -29,9 +29,7 @@ const Call = ({ isCalling, endCall, isVideoCall, friendId }) => {
         const newPeer = new Peer();
         setPeer(newPeer);
 
-        newPeer.on('open', (id) => {
-            console.log('Peer ID:', id);
-        });
+        newPeer.on('open', (id) => {});
 
         newPeer.on('call', (incomingCall) => {
             navigator.mediaDevices
@@ -78,15 +76,12 @@ const Call = ({ isCalling, endCall, isVideoCall, friendId }) => {
     const toggleCamera = () => {
         setIsCameraOn((prev) => {
             const newCameraState = !prev;
-            console.log('after', newCameraState);
             localVideoRef.current.srcObject.getVideoTracks().forEach((track) => {
                 track.enabled = newCameraState;
                 if (!newCameraState) {
                     track.stop();
                 }
             });
-
-            console.log('before', newCameraState);
 
             return newCameraState;
         });
@@ -161,7 +156,6 @@ const Call = ({ isCalling, endCall, isVideoCall, friendId }) => {
         endCall();
     };
 
-    console.log('isCamera', isCameraOn);
     return (
         <div>
             {isCalling && (

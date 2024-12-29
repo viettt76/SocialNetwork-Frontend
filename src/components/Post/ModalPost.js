@@ -223,7 +223,6 @@ const ModalPost = ({ postInfo, show, numberOfComments, setNumberOfComments, hand
                 ]);
             }
         };
-        // console.log('State comments: ', newComment);
 
         const handleNewChildComment = (newChildComment) => {
             if (postId === newChildComment?.postID) {

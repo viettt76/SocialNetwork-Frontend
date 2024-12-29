@@ -94,7 +94,6 @@ function Login() {
                             workplace: 'NewwaveJSC',
                         }),
                     );
-                    console.log(res);
                 };
                 fetchPersonalInfo();
             }

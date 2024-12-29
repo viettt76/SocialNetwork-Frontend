@@ -71,13 +71,13 @@ const WritePost = () => {
             }
 
             const newPost = await submitPostService({ content, images: imagesUrl.map((imgUrl) => ({ imgUrl })) });
-            if (!newPost) {
-                throw new Error('Post submission failed or invalid response');
-            }
+            // if (!newPost) {
+            //     throw new Error('Post submission failed or invalid response');
+            // }
             dispatch(actions.stopLoading('writePost'));
-            handleCloseModalWritePost();
             setContent('');
             deleteAllImages();
+            handleCloseModalWritePost();
         } catch (error) {
             console.log(error);
             dispatch(actions.stopLoading('writePost'));

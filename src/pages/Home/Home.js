@@ -59,7 +59,7 @@ const Home = () => {
             try {
                 const res = await getAllPostsService();
                 setPosts(
-                    res.map((post) => {
+                    res.data.map((post) => {
                         return {
                             id: post.postID,
                             posterId: post.userID,

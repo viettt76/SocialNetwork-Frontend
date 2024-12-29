@@ -401,7 +401,7 @@ const ChatGroupPopup = ({ index, group }) => {
                               {
                                   leftIcon: <FontAwesomeIcon icon={faUserPlus} />,
                                   label: 'Thêm thành viên',
-                                  //   goToMenu: 'addGroupMembers',
+                                  goToMenu: 'addGroupMembers',
                               },
                           ]
                         : []),
@@ -702,7 +702,7 @@ const ChatGroupPopup = ({ index, group }) => {
                     return prev.filter((message) => message.id !== messageId);
                 });
 
-                await conn.invoke('RemoveMessage', messageId, friend?.id);
+                await conn.invoke('RemoveMessage', messageId, group?.id);
             }
         } catch (error) {
             console.log(error);

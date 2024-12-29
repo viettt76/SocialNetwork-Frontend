@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Post from '~/components/Post';
 import WritePost from '~/components/WritePost';
 import { getAllPostsService } from '~/services/postServices';
@@ -8,56 +8,57 @@ import styles from './Home.module.scss';
 
 const Home = () => {
     const [posts, setPosts] = useState([]);
+    const [hasMore, setHasMore] = useState(true);
+    const [page, setPage] = useState(1);
+
+    const observer = useRef();
+
+    const fetchAllPosts = async () => {
+        try {
+            const res = await getAllPostsService(page, 10);
+
+            setPosts((prevPosts) => [
+                ...prevPosts,
+                ...res.data.map((post) => ({
+                    id: post.postID,
+                    posterId: post.userID,
+                    firstName: post.firstName,
+                    lastName: post.lastName,
+                    avatar: post.avatarUrl,
+                    content: post.content,
+                    createdAt: post.createdAt,
+                    pictures:
+                        post.images?.length > 0
+                            ? post.images.map((image) => ({
+                                  pictureUrl: image?.imgUrl,
+                              }))
+                            : [],
+                    currentEmotionId: post.userReaction?.emotionTypeID || null,
+                    currentEmotionName: post.userReaction?.emotionName || null,
+                    emotions: post?.reactions?.map((emo) => ({
+                        id: emo?.reactionID,
+                        emotion: {
+                            id: emo?.emotionTypeID,
+                            name: emo?.emotionName,
+                        },
+                        userInfo: {
+                            id: emo?.userID,
+                        },
+                    })),
+                })),
+            ]);
+
+            setHasMore(res.data.length > 0);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     useEffect(() => {
-        const fetchAllPosts = async () => {
-            try {
-                const res = await getAllPostsService();
-                console.log('vinhbr1', res);
-                setPosts(
-                    res.map((post) => {
-                        return {
-                            id: post.postID,
-                            posterId: post.userID,
-                            firstName: post.firstName,
-                            lastName: post.lastName,
-                            avatar: post.avatarUrl,
-                            content: post.content,
-                            createdAt: post.createdAt,
-                            pictures:
-                                post.images?.length > 0 &&
-                                post.images.map((image) => {
-                                    return {
-                                        pictureUrl: image?.imgUrl,
-                                    };
-                                }),
-                            currentEmotionId: post.userReaction?.emotionTypeID || null, // Emotion của user hiện tại
-                            currentEmotionName: post.userReaction?.emotionName || null,
-                            // currentEmotionId: post.reactions?.emotionTypeID || null, // Emotion của user hiện tại
-                            // currentEmotionName: post.reactions?.emotionName || null,
-                            emotions: post?.reactions?.map((emo) => {
-                                return {
-                                    id: emo?.reactionID,
-                                    emotion: {
-                                        id: emo?.emotionTypeID,
-                                        name: emo?.emotionName,
-                                    },
-                                    userInfo: {
-                                        id: emo?.userID,
-                                    },
-                                };
-                            }),
-                        };
-                    }),
-                );
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
         fetchAllPosts();
+    }, [page]);
 
-        signalRClient.on('ReceiveRefusePost', fetchAllPosts);
-
+    useEffect(() => {
         const startSignalR = () => {
             signalRClient.on('ReceivePost', (newPost) => {
                 setPosts((prevPosts) => [
@@ -86,17 +87,27 @@ const Home = () => {
                     },
                     ...prevPosts,
                 ]);
-
-                console.log('vinhbr', newPost);
             });
         };
 
         startSignalR();
 
         return () => {
-            signalRClient.stop();
+            signalRClient.off('ReceivePost');
         };
     }, []);
+
+    const lastPostRef = (node) => {
+        if (observer.current) observer.current.disconnect();
+
+        observer.current = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage((prevPage) => prevPage + 1);
+            }
+        });
+
+        if (node) observer.current.observe(node);
+    };
 
     return (
         <div className={clsx('d-flex mt-5', styles['home-wrapper'])}>
@@ -107,7 +118,11 @@ const Home = () => {
                         <div>Hãy kết bạn để xem những bài viết thú vị hơn</div>
                     </div>
                 ) : (
-                    posts.map((post) => <Post key={`post-${post.id}`} postInfo={post} />)
+                    posts.map((post, index) => (
+                        <div key={`post-${post.id}`} ref={index === posts.length - 1 ? lastPostRef : null}>
+                            <Post postInfo={post} />
+                        </div>
+                    ))
                 )}
             </div>
         </div>

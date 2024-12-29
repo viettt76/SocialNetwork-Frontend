@@ -10,8 +10,14 @@ import {
 import { filter } from 'lodash';
 import socket from '~/socket';
 import { Link } from 'react-router-dom';
+import { Actions } from '@cloudinary/url-gen';
+import signalRClient from '~/components/Post/signalRClient';
+import { useDispatch, useSelector } from 'react-redux';
+import * as actions from '~/redux/actions';
 
 const FriendRequests = () => {
+    const dispatch = useDispatch();
+
     const [friendRequests, setFriendRequests] = useState([]);
 
     useEffect(() => {
@@ -28,19 +34,13 @@ const FriendRequests = () => {
     }, []);
 
     useEffect(() => {
-        const handleNewFriendRequest = (friendInfo) => {
-            setFriendRequests((prev) => [friendInfo, ...prev]);
-        };
-        const handleCancelFriendRequest = (senderId) => {
-            setFriendRequests((prev) => prev.filter((fq) => fq.id !== senderId));
-        };
-
-        socket.on('newFriendRequest', handleNewFriendRequest);
-        socket.on('cancelFriendRequest', handleCancelFriendRequest);
+        handleRefuseFriendRequest();
+        signalRClient.on('CancelUser', handleAcceptFriendship);
+        // signalRClient.on('cancelFriendRequest', handleCancelFriendRequest);
 
         return () => {
-            socket.off('newFriendRequest', handleNewFriendRequest);
-            socket.off('cancelFriendRequest', handleCancelFriendRequest);
+            signalRClient.off('CancelUser', handleAcceptFriendship);
+            // signalRClient.off('cancelFriendRequest', handleCancelFriendRequest);
         };
     }, []);
 
@@ -51,6 +51,7 @@ const FriendRequests = () => {
                 const frs = filter(prev, (f) => f.id !== id);
                 return frs;
             });
+            dispatch(actions.removeNotificationOther(notification));
         } catch (error) {
             console.log(error);
         }
@@ -67,7 +68,6 @@ const FriendRequests = () => {
             console.log(error);
         }
     };
-
     return (
         <div className="mt-5 text-center fz-16">
             <div className={clsx(styles['nav-link'])}>
@@ -96,7 +96,7 @@ const FriendRequests = () => {
                                 id={request?.id}
                                 firstName={request?.firstName}
                                 lastName={request?.lastName}
-                                avatar={request?.avatar}
+                                avatar={request?.avatarUrl}
                                 numberOfCommonFriends={request?.numberOfCommonFriends}
                                 handleAcceptFriendship={handleAcceptFriendship}
                                 handleRefuseFriendRequest={handleRefuseFriendRequest}

@@ -9,14 +9,6 @@ import { Link } from 'react-router-dom';
 
 const SentFriendRequests = () => {
     const [sentFriendRequests, setSentFriendRequests] = useState([]);
-    // const [sentFriendRequests, setSentFriendRequests] = useState([
-    //     {
-    //         id: '123652746',
-    //         firstName: 'Việt',
-    //         lastName: 'Hoàng',
-    //         avatar: null,
-    //     },
-    // ]);
 
     useEffect(() => {
         const fetchSentFriendRequests = async () => {
@@ -31,17 +23,10 @@ const SentFriendRequests = () => {
     }, []);
 
     useEffect(() => {
-        const handleFriendRequestDenied = (denierId) => {
-            setSentFriendRequests((prev) => prev.filter((fq) => fq?.id !== denierId));
-        };
-        const handleFriendRequestAccept = ({ id }) => {
-            setSentFriendRequests((prev) => prev.filter((fq) => fq?.id !== id));
-        };
-        socket.on('friendRequestDenied', handleFriendRequestDenied);
-        socket.on('acceptFriendRequest', handleFriendRequestAccept);
+        socket.on('CancelUser', handleCancelFriendRequest);
 
         return () => {
-            socket.off('friendRequestDenied', handleFriendRequestDenied);
+            socket.off('CancelUser', handleCancelFriendRequest);
         };
     }, []);
 
@@ -85,7 +70,7 @@ const SentFriendRequests = () => {
                                 id={request?.id}
                                 firstName={request?.firstName}
                                 lastName={request?.lastName}
-                                avatar={request?.avatar}
+                                avatar={request?.avatarUrl}
                                 numberOfCommonFriends={request?.numberOfCommonFriends}
                                 handleCancelFriendRequest={handleCancelFriendRequest}
                             />

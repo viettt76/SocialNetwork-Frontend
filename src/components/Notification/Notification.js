@@ -21,14 +21,14 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
     const notificationsOther = useSelector(notificationsOtherSelector);
     const [notificationsType, setNotificationsType] = useState([]);
     const userInfo = useSelector(userInfoSelector);
-    console.log('notificationsOther ', notificationsOther);
+    // console.log('notificationsOther ', notificationsOther);
 
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
                 var res = await getNotificationsUserService();
                 const notifications = res.data;
-                console.log('vinhbr', notifications);
+                // console.log('vinhbr', notifications);
                 setNotificationsType(notifications);
                 dispatch(actions.setNotificationsOther(notifications));
             } catch (error) {
@@ -38,17 +38,16 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
 
         fetchNotifications();
 
-        try {
-            signalRClient.on('FriendRequestNotification', (notification) => {
-                console.log('Received notification:', notification);
+        signalRClient.on('CancelUser', (notification) => {
+            dispatch(actions.removeNotificationOther(notification));
+        });
 
-                dispatch(actions.addNotificationOther(notification));
-            });
-        } catch (error) {
-            console.error('Error connecting to SignalR:', error);
-        }
+        signalRClient.on('FriendRequestNotification', (notification) => {
+            dispatch(actions.addNotificationOther(notification));
+        });
 
         return () => {
+            signalRClient.off('CancelUser');
             signalRClient.off('FriendRequestNotification');
         };
     }, [dispatch]);
@@ -96,8 +95,7 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
                                 <div className={clsx(styles['notification-time'])}>
                                     {timeDifferenceFromNow(notification?.createdAt)}
                                 </div>
-                                {/* {notification?.type ===
-                                    notificationsType?.find((type) => type?.name === 'friend request')?.id && ( */}
+
                                 {notification?.type === 1 && (
                                     <div className="mt-2">
                                         <Button

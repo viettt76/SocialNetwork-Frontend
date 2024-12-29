@@ -5,7 +5,13 @@ import { faSearch, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect } from 'react';
 import { getSearchUserService } from '~/services/userServices';
 import useDebounced from '~/hook/useDebounced';
-import { sendFriendRequestService } from '~/services/relationshipServices';
+import {
+    cancelFriendRequestService,
+    refuseFriendRequestService,
+    sendFriendRequestService,
+    unfriendService,
+} from '~/services/relationshipServices';
+import signalRClient from '../Post/signalRClient';
 
 const SearchInput = () => {
     const [keyword, setKeyword] = useState('');
@@ -39,7 +45,11 @@ const SearchInput = () => {
             };
 
             fetchUsers();
+            signalRClient.on('CancelUser', fetchUsers);
         } else {
+            // signalRClient.on('seedSearUser', (users) => {
+            //     setUsers(users);
+            // });
             setUsers([]);
         }
     }, [keywordDebounced, pageIndex]);
@@ -52,6 +62,14 @@ const SearchInput = () => {
     const handleSendFriendRequest = async (friendId) => {
         try {
             await sendFriendRequestService(friendId);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleUnfriend = async (friendId) => {
+        try {
+            await unfriendService(friendId);
         } catch (error) {
             console.log(error);
         }
@@ -81,12 +99,18 @@ const SearchInput = () => {
                                     </div>
                                 </div>
                             </div>
-                            <button
-                                className={clsx(styles['follow-btn'])}
-                                onClick={() => handleSendFriendRequest(user?.id)}
-                            >
-                                Thêm bạn
-                            </button>
+                            {!user.isRelationShip ? (
+                                <button
+                                    className={clsx(styles['follow-btn'])}
+                                    onClick={() => handleSendFriendRequest(user?.id)}
+                                >
+                                    Thêm bạn
+                                </button>
+                            ) : (
+                                <button className={clsx(styles['follow-btn'])} onClick={() => handleUnfriend(user?.id)}>
+                                    Hủy kết bạn
+                                </button>
+                            )}
                         </div>
                     );
                 })}
@@ -96,131 +120,3 @@ const SearchInput = () => {
 };
 
 export default SearchInput;
-
-// export default SearchInput;
-
-// {
-/* <div className={clsx(styles['suggestions'])}>Gợi ý theo dõi</div>
-                <div className={clsx(styles['user'])}>
-                    <div className={clsx(styles['user-info'])}>
-                        <img alt="Profile picture of liverpool_fc_fanatics_" height="40" src={img1} width="40" />
-                        <div>
-                            <div className={clsx(styles['name'])}>liverpool_fc_fanatics_</div>
-                            <div className={clsx(styles['description'])}>
-                                Liverpool FC Fanatics
-                                <br />
-                                15,3K người theo dõi
-                            </div>
-                        </div>
-                    </div>
-                    <button className={clsx(styles['follow-btn'])}>Theo dõi</button>
-                </div>
-
-                <div className={clsx(styles['user'])}>
-                    <div className={clsx(styles['user-info'])}>
-                        <img alt="Profile picture of moingay1trangsach.vn" height="40" src={img3} width="40" />
-                        <div>
-                            <div className={clsx(styles['name'])}>moingay1trangsach.vn</div>
-                            <div className={clsx(styles['description'])}>
-                                Mỗi Ngày 1 Trang Sách
-                                <br />
-                                262K người theo dõi
-                            </div>
-                        </div>
-                    </div>
-                    <button className={clsx(styles['follow-btn'])}>Theo dõi</button>
-                </div>
-
-                <div className={clsx(styles['user'])}>
-                    <div className={clsx(styles['user-info'])}>
-                        <img
-                            alt="Profile picture of lfcretail"
-                            height="40"
-                            src="https://storage.googleapis.com/a1aa/image/2BV1cR8zjGo1KZfPdIZzHcFRHhmDruMEhlhmEUw2zlHgzJzJA.jpg"
-                            width="40"
-                        />
-                        <div>
-                            <div className={clsx(styles['name'])}>
-                                <div>
-                                    <span>
-                                        lfcretail
-                                        <FontAwesomeIcon
-                                            icon={faCheckCircle}
-                                            color="#3897F0"
-                                            style={{ marginLeft: '5px' }}
-                                        />
-                                    </span>
-                                </div>
-                            </div>
-                            <div className={clsx(styles['description'])}>
-                                Offical LFC Retail
-                                <br />
-                                321K người theo dõi
-                            </div>
-                        </div>
-                    </div>
-                    <button className={clsx(styles['follow-btn'])}>Theo dõi</button>
-                </div>
-
-                <div className={clsx(styles['user'])}>
-                    <div className={clsx(styles['user-info'])}>
-                        <img
-                            alt="Profile picture of liverpoolfcw"
-                            height="40"
-                            src="https://storage.googleapis.com/a1aa/image/FRi4qu4b7FqjFVemfZ7kp3g9TCTAEl1rCra1vJj85kbHnTmTA.jpg"
-                            width="40"
-                        />
-                        <div>
-                            <div className={clsx(styles['name'])}>
-                                <div>
-                                    <span>
-                                        liverpoolfcw
-                                        <FontAwesomeIcon
-                                            icon={faCheckCircle}
-                                            color="#3897F0"
-                                            style={{ marginLeft: '5px' }}
-                                        />
-                                    </span>
-                                </div>
-                            </div>
-                            <div className={clsx(styles['description'])}>
-                                Liverpool FC Women
-                                <br />
-                                268K người theo dõi
-                            </div>
-                        </div>
-                    </div>
-                    <button className={clsx(styles['follow-btn'])}>Theo dõi</button>
-                </div>
-
-                <div className={clsx(styles['user'])}>
-                    <div className={clsx(styles['user-info'])}>
-                        <img
-                            alt="Profile picture of liverpoolfcw"
-                            height="40"
-                            src="https://storage.googleapis.com/a1aa/image/cYbw0KfyHv2eBUZfCA5FmBAby0d8vOJr1bRBb5DDrsIGOnMnA.jpg"
-                            width="40"
-                        />
-                        <div>
-                            <div className={clsx(styles['name'])}>
-                                <div>
-                                    <span>
-                                        Dior
-                                        <FontAwesomeIcon
-                                            icon={faCheckCircle}
-                                            color="#3897F0"
-                                            style={{ marginLeft: '5px' }}
-                                        />
-                                    </span>
-                                </div>
-                            </div>
-                            <div className={clsx(styles['description'])}>
-                                Dior Offical
-                                <br />
-                                6,1 triệu người theo dõi
-                            </div>
-                        </div>
-                    </div>
-                    <button className={clsx(styles['follow-btn'])}>Theo dõi</button>
-                </div>*/
-// }

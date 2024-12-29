@@ -45,6 +45,7 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
         }
 
         return () => {
+            signalRClient.off('CancelUser');
             signalRClient.off('FriendRequestNotification');
         };
     }, [dispatch]);
@@ -92,8 +93,7 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
                                 <div className={clsx(styles['notification-time'])}>
                                     {timeDifferenceFromNow(notification?.createdAt)}
                                 </div>
-                                {/* {notification?.type ===
-                                    notificationsType?.find((type) => type?.name === 'friend request')?.id && ( */}
+
                                 {notification?.type === 1 && (
                                     <div className="mt-2">
                                         <Button

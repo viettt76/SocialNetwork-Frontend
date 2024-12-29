@@ -173,9 +173,9 @@ const Header = ({ notificationConnection }) => {
                         data-tooltip-id="tool-tip-notification"
                     >
                         <BellIcon className={clsx(styles['action-user-icon'])} />
-                        {notificationsOther?.reduce((acc, noti) => (acc + noti?.isOpenMenu ? 0 : 1), 0) > 0 && (
+                        {notificationsOther?.reduce((acc, noti) => acc + (noti?.isRead ? 0 : 1), 0) > 0 && (
                             <div className={clsx(styles['number-of-notifications'])}>
-                                {notificationsOther?.reduce((acc, noti) => (acc + noti?.isOpenMenu ? 0 : 1), 0)}
+                                {notificationsOther?.reduce((acc, noti) => acc + (noti?.isRead ? 0 : 1), 0)}
                             </div>
                         )}
                         <ReactTooltip className="fz-16" id="tool-tip-notification" place="bottom" content="Thông báo" />

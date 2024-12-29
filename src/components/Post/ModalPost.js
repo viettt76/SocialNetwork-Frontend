@@ -196,11 +196,11 @@ const ModalPost = ({ postInfo, show, numberOfComments, setNumberOfComments, hand
         if (postId) {
             fetchComments();
 
-            // signalRClient.on('ReceiveComment', fetchComments);
+            signalRClient.on('ReceiveComment', fetchComments);
 
-            // return () => {
-            //     signalRClient.off('ReceiveComment', fetchComments);
-            // };
+            return () => {
+                signalRClient.off('ReceiveComment', fetchComments);
+            };
         } else {
             console.error('Post ID không hợp lệ');
         }

@@ -35,11 +35,16 @@ const FriendRequests = () => {
 
     useEffect(() => {
         handleRefuseFriendRequest();
+        handleAcceptFriendship();
         signalRClient.on('CancelUser', handleAcceptFriendship);
+        signalRClient.on('CancelUser', handleRefuseFriendRequest);
+
         // signalRClient.on('cancelFriendRequest', handleCancelFriendRequest);
 
         return () => {
             signalRClient.off('CancelUser', handleAcceptFriendship);
+            signalRClient.off('CancelUser', handleRefuseFriendRequest);
+
             // signalRClient.off('cancelFriendRequest', handleCancelFriendRequest);
         };
     }, []);

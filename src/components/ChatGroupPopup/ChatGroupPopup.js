@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -28,7 +28,7 @@ import _ from 'lodash';
 import useClickOutside from '~/hook/useClickOutside';
 import Menu from '~/components/Menu';
 import { Link } from 'react-router-dom';
-import { ArrowIcon } from '../Icons';
+import { ArrowIcon, AngryIcon, HaHaIcon, LikeIcon, LoveIcon, SadIcon, WowIcon } from '~/components/Icons';
 import { Button, Modal } from 'react-bootstrap';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
@@ -264,6 +264,10 @@ const ChatGroupPopup = ({ index, group }) => {
 
     const [messages, setMessages] = useState([]);
 
+    useEffect(() => {
+        endOfMessagesRef.current.scrollTop = endOfMessagesRef.current.scrollHeight;
+    }, [messages]);
+
     const [sendMessage, setSendMessage] = useState('');
     const [processingMessage, setProcessingMessage] = useState('');
     const [currentMessageSelect, setcurrentMessageSelect] = useState({});
@@ -401,7 +405,7 @@ const ChatGroupPopup = ({ index, group }) => {
                               {
                                   leftIcon: <FontAwesomeIcon icon={faUserPlus} />,
                                   label: 'Thêm thành viên',
-                                  //   goToMenu: 'addGroupMembers',
+                                  goToMenu: 'addGroupMembers',
                               },
                           ]
                         : []),
@@ -451,9 +455,13 @@ const ChatGroupPopup = ({ index, group }) => {
 
     const menuRef = useRef(null);
     useEffect(() => {
-        const connection = new HubConnectionBuilder().withUrl('https://localhost:7072/chat').build();
+        const connection = new HubConnectionBuilder()
+            .withUrl(`https://localhost:7072/groupChatHub?groupId=${group?.id}`)
+            .build();
 
-        const reactionHub = new HubConnectionBuilder().withUrl('https://localhost:7072/reactionMessage').build();
+        const reactionHub = new HubConnectionBuilder()
+            .withUrl(`https://localhost:7072/reactionGroupChatMessage?groupId=${group?.id}`)
+            .build();
 
         const startConnection = async () => {
             try {
@@ -461,13 +469,13 @@ const ChatGroupPopup = ({ index, group }) => {
 
                 setConn(connection);
 
-                connection.on('UserNotConnected', (errorMessage) => {
+                connection.on('UserDisconnectedFromGroup', (errorMessage) => {
                     setError(errorMessage);
                     console.error('Error received: ', errorMessage);
                 });
 
-                connection.on('ReceiveSpecitificMessage', (messageResponse) => {
-                    if (messageResponse.senderID === friend?.id) {
+                connection.on('ReceiveSpecitificGroupChatMessage', (messageResponse) => {
+                    if (messageResponse.senderID !== userInfo?.id) {
                         if (messageResponse.isDelete) {
                             setMessages((prev) => {
                                 return prev.filter((message) => message.id !== messageResponse.messageID);
@@ -480,11 +488,11 @@ const ChatGroupPopup = ({ index, group }) => {
                                         ? prev.filter((message) => message.id !== messageResponse.messageID)
                                         : prev),
                                     {
-                                        id: messageResponse.messageID,
-                                        sender: friend?.id,
-                                        receiver: userInfo?.id,
+                                        id: messageResponse.groupChatMessageID,
+                                        sender: messageResponse.userID,
+                                        group: messageResponse.groupChatID,
                                         message: messageResponse.content,
-                                        pictures: messageResponse.images,
+                                        pictures: messageResponse.images || [],
                                         symbol: messageResponse.symbol,
                                         senderAvatar: messageResponse?.senderAvatar,
                                         reactionByUser: messageResponse.reactionByUser
@@ -585,12 +593,125 @@ const ChatGroupPopup = ({ index, group }) => {
         }
     };
 
+    const handleEmotionMessage = async ({ messageId, emotionType }) => {
+        var param = {
+            messageId,
+            emotionType,
+            groupId: group?.id,
+            senderid: userInfo?.id,
+        };
+        var currentReactionId = await connectionChathub.invoke('AddOrUpdateReactionToMessage', param);
+        try {
+            if (!messageId || emotionType === undefined || !userInfo?.id) {
+                throw new Error('Missing required parameters');
+            }
+
+            const messageIndex = messages.findIndex((message) => message.id === messageId);
+            if (messageIndex === -1) {
+                throw new Error('Message not found');
+            }
+
+            const newReaction = {
+                userId: userInfo.id,
+                reactionId: currentReactionId,
+                emotionType: Number(emotionType),
+            };
+
+            setMessages((prevMessages) => {
+                const newMessages = [...prevMessages];
+                const message = { ...newMessages[messageIndex] };
+                const reactions = [...(message.reactionByUser || [])];
+
+                const existingReactionIndex = reactions.findIndex((reaction) => reaction.userId === userInfo.id);
+
+                if (existingReactionIndex !== -1) {
+                    reactions[existingReactionIndex] = {
+                        ...reactions[existingReactionIndex],
+                        emotionType: Number(emotionType),
+                    };
+                } else if (reactions.length < 2) {
+                    reactions.push(newReaction);
+                }
+
+                message.reactionByUser = reactions;
+                newMessages[messageIndex] = message;
+                return newMessages;
+            });
+        } catch (error) {
+            console.error('Error handling emotion message:', error);
+        }
+    };
+
+    const handleReamoveReactionMessage = async ({ messageId, senderReactionId, reactionId }) => {
+        if (!messageId || !senderReactionId || !reactionId) {
+            throw new Error('Missing required parameters');
+        }
+
+        if (senderReactionId === userInfo.id) {
+            try {
+                setMessages((prevMessages) => {
+                    return prevMessages.map((message) => {
+                        if (message.id === messageId) {
+                            const updatedReactions = message.reactionByUser.filter(
+                                (reaction) => reaction.reactionId !== reactionId,
+                            );
+                            return { ...message, reactionByUser: updatedReactions };
+                        }
+                        return message;
+                    });
+                });
+                await connectionChathub.invoke(
+                    'RemoveReactionToMessage',
+                    {
+                        reciverId: friend?.id,
+                        messageId,
+                    },
+                    reactionId,
+                );
+            } catch (error) {
+                console.error('Error removing reaction message:', error);
+            }
+        } else {
+            console.log('You can not remove reaction message');
+        }
+    };
     useEffect(() => {
         if (symbol === 1) {
             handleSendMessage([]);
         }
     }, [symbol]);
 
+    const handleUpdateMessage = async (messageId, senderId, reactionByUser) => {
+        try {
+            if (messageId.trim() && userInfo?.id == senderId) {
+                var currentMessage = messages.find((mesage) => mesage.id === messageId);
+
+                setSendMessage(currentMessage.message);
+
+                setMessages((prev) => {
+                    return prev.filter((message) => message.id !== messageId);
+                });
+
+                setcurrentMessageSelect({ messageId, reactionByUser });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleReamoveMessage = async (messageId, senderId) => {
+        try {
+            if (messageId.trim() && userInfo?.id == senderId) {
+                setMessages((prev) => {
+                    return prev.filter((message) => message.id !== messageId);
+                });
+
+                await conn.invoke('RemoveMessage', messageId, group?.id);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
     const handleSendMessage = async (imagesUrls = []) => {
         try {
             if (Object.keys(currentMessageSelect).length > 0) {
@@ -690,7 +811,7 @@ const ChatGroupPopup = ({ index, group }) => {
 
                     updatedMessages[index] = {
                         ...updatedMessages[index],
-                        id: messageResult.messageID,
+                        id: messageResult.groupChatMessageID,
                         createdAt: messageResult.createdAt,
                     };
 
@@ -885,7 +1006,248 @@ const ChatGroupPopup = ({ index, group }) => {
                                         _.isEqual(_.findLast(messages, { sender: userInfo?.id }), message) && (
                                             <div className={clsx(styles['process-message'])}>{processingMessage}</div>
                                         )}
+                                    <div
+                                        className={clsx(styles['expand'], {
+                                            [styles['display-my-expand']]: message?.sender === userInfo?.id,
+                                        })}
+                                    >
+                                        <div className={clsx(styles['message-expand'])}>
+                                            <svg
+                                                viewBox="0 0 20 20"
+                                                width="16"
+                                                height="16"
+                                                fill="currentColor"
+                                                className="xfx01vb x1lliihq x1tzjh5l x1k90msu x2h7rmj x1qfuztq"
+                                                style={{ color: '#65676b' }}
+                                            >
+                                                <path
+                                                    d="M6.062 11.548c.596 1.376 2.234 2.453 3.955 2.452 1.694 0 3.327-1.08 3.921-2.452a.75.75 0 1 0-1.376-.596c-.357.825-1.451 1.548-2.545 1.548-1.123 0-2.22-.72-2.579-1.548a.75.75 0 1 0-1.376.596z"
+                                                    fillRule="nonzero"
+                                                ></path>
+                                                <ellipse cx="13.6" cy="6.8" rx="1.2" ry="1.2"></ellipse>
+                                                <ellipse cx="6.4" cy="6.8" rx="1.2" ry="1.2"></ellipse>
+                                                <ellipse
+                                                    stroke="currentColor"
+                                                    strokeWidth="1.5"
+                                                    fill="none"
+                                                    cx="10"
+                                                    cy="10"
+                                                    rx="9"
+                                                    ry="9"
+                                                ></ellipse>
+                                            </svg>
+                                            <ul
+                                                className={clsx(styles['emotion-list'], {
+                                                    [[styles['left--9']]]: message?.message?.length < 4,
+                                                })}
+                                            >
+                                                <li
+                                                    className={clsx(styles['emotion'])}
+                                                    onClick={() =>
+                                                        handleEmotionMessage({
+                                                            messageId: message?.id,
+                                                            emotionType: '0',
+                                                        })
+                                                    }
+                                                >
+                                                    <LikeIcon width={20} height={20} />
+                                                </li>
+                                                <li
+                                                    className={clsx(styles['emotion'])}
+                                                    onClick={() =>
+                                                        handleEmotionMessage({
+                                                            messageId: message?.id,
+                                                            emotionType: '1',
+                                                        })
+                                                    }
+                                                >
+                                                    <LoveIcon width={20} height={20} />
+                                                </li>
+                                                <li
+                                                    className={clsx(styles['emotion'])}
+                                                    onClick={() =>
+                                                        handleEmotionMessage({
+                                                            messageId: message?.id,
+                                                            emotionType: '2',
+                                                        })
+                                                    }
+                                                >
+                                                    <HaHaIcon width={20} height={20} />
+                                                </li>
+                                                <li
+                                                    className={clsx(styles['emotion'])}
+                                                    onClick={() =>
+                                                        handleEmotionMessage({
+                                                            messageId: message?.id,
+                                                            emotionType: '3',
+                                                        })
+                                                    }
+                                                >
+                                                    <WowIcon width={20} height={20} />
+                                                </li>
+                                                <li
+                                                    className={clsx(styles['emotion'])}
+                                                    onClick={() =>
+                                                        handleEmotionMessage({
+                                                            messageId: message?.id,
+                                                            emotionType: '4',
+                                                        })
+                                                    }
+                                                >
+                                                    <SadIcon width={20} height={20} />
+                                                </li>
+                                                <li
+                                                    className={clsx(styles['emotion'])}
+                                                    onClick={() =>
+                                                        handleEmotionMessage({
+                                                            messageId: message?.id,
+                                                            emotionType: '5',
+                                                        })
+                                                    }
+                                                >
+                                                    <AngryIcon width={20} height={20} />
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div className={clsx(styles['more-popup'])}>
+                                            <svg
+                                                viewBox="6 6 24 24"
+                                                fill="currentColor"
+                                                width="16"
+                                                height="16"
+                                                className="xfx01vb x1lliihq x1tzjh5l x1k90msu x2h7rmj x1qfuztq"
+                                                overflow="visible"
+                                                style={{ color: '#65676b' }}
+                                            >
+                                                <path d="M18 12.5A2.25 2.25 0 1 1 18 8a2.25 2.25 0 0 1 0 4.5zM18 20.25a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5zM15.75 25.75a2.25 2.25 0 1 0 4.5 0 2.25 2.25 0 0 0-4.5 0z"></path>
+                                            </svg>
+
+                                            <ul
+                                                className={clsx(styles['more-popup-list'], {
+                                                    [styles['display-my-expand']]: message?.sender === userInfo?.id,
+                                                })}
+                                            >
+                                                <li className={clsx(styles['more-popup-item'])}>Phản hồi</li>
+                                                {message?.sender === userInfo?.id && (
+                                                    <li
+                                                        className={clsx(styles['more-popup-item'])}
+                                                        onClick={() => {
+                                                            handleUpdateMessage(
+                                                                message.id,
+                                                                message.sender,
+                                                                message.reactionByUser,
+                                                            );
+                                                        }}
+                                                    >
+                                                        Chỉnh sửa
+                                                    </li>
+                                                )}
+                                                {message?.sender === userInfo?.id && (
+                                                    <li
+                                                        className={clsx(styles['more-popup-item'])}
+                                                        onClick={() => handleReamoveMessage(message.id, message.sender)}
+                                                    >
+                                                        Gỡ
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    {message.reactionByUser.length > 0 && (
+                                        <div className={clsx(styles['reaction-wrapper'])}>
+                                            {message.reactionByUser !== null &&
+                                                message.reactionByUser.map((emotion, index) => (
+                                                    <Fragment key={index}>
+                                                        {emotion.emotionType === 0 && (
+                                                            <div
+                                                                className={clsx(styles['reaction-message'])}
+                                                                onClick={() => {
+                                                                    handleReamoveReactionMessage({
+                                                                        messageId: message.id,
+                                                                        senderReactionId: emotion.userId,
+                                                                        reactionId: emotion.reactionId,
+                                                                    });
+                                                                }}
+                                                            >
+                                                                <LikeIcon width={16} height={16} />
+                                                            </div>
+                                                        )}
+                                                        {emotion.emotionType === 1 && (
+                                                            <div
+                                                                className={clsx(styles['reaction-message'])}
+                                                                onClick={() => {
+                                                                    handleReamoveReactionMessage({
+                                                                        messageId: message.id,
+                                                                        senderReactionId: emotion.userId,
+                                                                        reactionId: emotion.reactionId,
+                                                                    });
+                                                                }}
+                                                            >
+                                                                <LoveIcon width={16} height={16} />
+                                                            </div>
+                                                        )}
+                                                        {emotion.emotionType === 2 && (
+                                                            <div
+                                                                className={clsx(styles['reaction-message'])}
+                                                                onClick={() => {
+                                                                    handleReamoveReactionMessage({
+                                                                        messageId: message.id,
+                                                                        senderReactionId: emotion.userId,
+                                                                        reactionId: emotion.reactionId,
+                                                                    });
+                                                                }}
+                                                            >
+                                                                <HaHaIcon width={16} height={16} />
+                                                            </div>
+                                                        )}
+                                                        {emotion.emotionType === 3 && (
+                                                            <div
+                                                                className={clsx(styles['reaction-message'])}
+                                                                onClick={() => {
+                                                                    handleReamoveReactionMessage({
+                                                                        messageId: message.id,
+                                                                        senderReactionId: emotion.userId,
+                                                                        reactionId: emotion.reactionId,
+                                                                    });
+                                                                }}
+                                                            >
+                                                                <WowIcon width={16} height={16} />
+                                                            </div>
+                                                        )}
+                                                        {emotion.emotionType === 4 && (
+                                                            <div
+                                                                className={clsx(styles['reaction-message'])}
+                                                                onClick={() => {
+                                                                    handleReamoveReactionMessage({
+                                                                        messageId: message.id,
+                                                                        senderReactionId: emotion.userId,
+                                                                        reactionId: emotion.reactionId,
+                                                                    });
+                                                                }}
+                                                            >
+                                                                <SadIcon width={16} height={16} />
+                                                            </div>
+                                                        )}
+                                                        {emotion.emotionType === 5 && (
+                                                            <div
+                                                                className={clsx(styles['reaction-message'])}
+                                                                onClick={() => {
+                                                                    handleReamoveReactionMessage({
+                                                                        messageId: message.id,
+                                                                        senderReactionId: emotion.userId,
+                                                                        reactionId: emotion.reactionId,
+                                                                    });
+                                                                }}
+                                                            >
+                                                                <AngryIcon width={16} height={16} />
+                                                            </div>
+                                                        )}
+                                                    </Fragment>
+                                                ))}
+                                        </div>
+                                    )}
                                 </div>
+
                                 {index === messages?.length - 1 && (
                                     <div
                                         className={clsx(styles['time-of-last-message'], {

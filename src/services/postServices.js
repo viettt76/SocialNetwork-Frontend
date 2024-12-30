@@ -7,15 +7,13 @@ export const submitPostService = ({ content = '', images = [] }) => {
     });
 };
 
-export const getAllPostsService = async (pageIndex, pageSize) => {
-    const response = await axios.get('/Post/All', {
+export const getAllPostsService = (pageIndex, pageSize) => {
+    return axios.get('/Post/All', {
         params: {
             pageIndex,
             pageSize,
         },
     });
-
-    return response.data;
 };
 export const getAllUserPostsService = async (userId, pageIndex, pageSize) => {
     var postUser = await axios.get(`/Post/User`, {

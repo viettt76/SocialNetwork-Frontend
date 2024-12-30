@@ -3,6 +3,8 @@
     position: fixed;
     right: 0;
     top: 7.6rem;
+    background-color: #fff;
+    border: 0.1rem solid #efefef;
 }
 
 .friends-list-wrapper,
@@ -58,7 +60,6 @@
         margin-left: 0.8rem;
         position: fixed;
         z-index: 1;
-        background-color: #fff;
         width: 100%;
     }
 

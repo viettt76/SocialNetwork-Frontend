@@ -113,7 +113,7 @@ const UserDashboard = ({ userDashboardRef, showUserDashboard, setShowUserDashboa
             depthLevel: 1,
             menu: [
                 [
-                    ...(userInfo?.role === 'admin'
+                    ...(userInfo?.role?.toLowerCase() === 'admin'
                         ? [
                               {
                                   label: (
@@ -128,15 +128,15 @@ const UserDashboard = ({ userDashboardRef, showUserDashboard, setShowUserDashboa
                               },
                           ]
                         : []),
-                    {
-                        label: (
-                            <Link className={clsx(styles['dashboard-link'])}>
-                                <FontAwesomeIcon icon={faUser} className={clsx(styles['dashboard-link-icon'])} />
-                                Tài khoản
-                            </Link>
-                        ),
-                        goToMenu: 'account',
-                    },
+                    // {
+                    //     label: (
+                    //         <Link className={clsx(styles['dashboard-link'])}>
+                    //             <FontAwesomeIcon icon={faUser} className={clsx(styles['dashboard-link-icon'])} />
+                    //             Tài khoản
+                    //         </Link>
+                    //     ),
+                    //     goToMenu: 'account',
+                    // },
                     {
                         label: (
                             <div className={clsx(styles['dashboard-link'])} onClick={handleLogout}>

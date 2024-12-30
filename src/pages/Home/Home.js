@@ -57,6 +57,7 @@ const Home = () => {
     useEffect(() => {
         const fetchAllPosts = async () => {
             try {
+<<<<<<< HEAD
                 const res = await getAllPostsService(page, 10);
 
                 setPosts((prevPosts) => [
@@ -91,6 +92,45 @@ const Home = () => {
                 ]);
 
                 setHasMore(res.data.length > 0);
+=======
+                const res = await getAllPostsService();
+                setPosts(
+                    res.map((post) => {
+                        return {
+                            id: post.postID,
+                            posterId: post.userID,
+                            firstName: post.firstName,
+                            lastName: post.lastName,
+                            avatar: post.avatarUrl,
+                            content: post.content,
+                            createdAt: post.createdAt,
+                            pictures:
+                                post.images?.length > 0 &&
+                                post.images.map((image) => {
+                                    return {
+                                        pictureUrl: image?.imgUrl,
+                                    };
+                                }),
+                            currentEmotionId: post.userReaction?.emotionTypeID || null, // Emotion của user hiện tại
+                            currentEmotionName: post.userReaction?.emotionName || null,
+                            // currentEmotionId: post.reactions?.emotionTypeID || null, // Emotion của user hiện tại
+                            // currentEmotionName: post.reactions?.emotionName || null,
+                            emotions: post?.reactions?.map((emo) => {
+                                return {
+                                    id: emo?.reactionID,
+                                    emotion: {
+                                        id: emo?.emotionTypeID,
+                                        name: emo?.emotionName,
+                                    },
+                                    userInfo: {
+                                        id: emo?.userID,
+                                    },
+                                };
+                            }),
+                        };
+                    }),
+                );
+>>>>>>> 2bc6835a1ffa989310518d41b04259e6b4f1ee0f
             } catch (error) {
                 console.error(error);
             }
@@ -167,6 +207,20 @@ const Home = () => {
                 )}
             </div>
         </div>
+        // <div style={{ position: 'relative', backgroundColor: 'blue' }}>
+        //     <div style={{ backgroundColor: 'red', width: '300px', height: '300px' }}>
+        //         <div
+        //             style={{
+        //                 position: 'absolute',
+        //                 backgroundColor: 'green',
+        //                 width: '30px',
+        //                 height: '30px',
+        //                 top: '-20px',
+        //                 left: '-20px',
+        //             }}
+        //         ></div>
+        //     </div>
+        // </div>
     );
 };
 

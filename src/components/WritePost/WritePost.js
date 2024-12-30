@@ -56,6 +56,7 @@ const WritePost = () => {
     };
 
     const deleteAllImages = () => {
+        setImages([]);
         setImagesUpload([]);
     };
 

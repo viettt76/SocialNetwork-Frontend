@@ -13,87 +13,84 @@ const Home = () => {
 
     const observer = useRef();
 
-    const fetchAllPosts = async () => {
-        try {
-            const res = await getAllPostsService(page, 10);
+    // const fetchAllPosts = async () => {
+    //     try {
+    //         const res = await getAllPostsService(page, 10);
 
-            setPosts((prevPosts) => [
-                ...prevPosts,
-                ...res.data.map((post) => ({
-                    id: post.postID,
-                    posterId: post.userID,
-                    firstName: post.firstName,
-                    lastName: post.lastName,
-                    avatar: post.avatarUrl,
-                    content: post.content,
-                    createdAt: post.createdAt,
-                    pictures:
-                        post.images?.length > 0
-                            ? post.images.map((image) => ({
-                                  pictureUrl: image?.imgUrl,
-                              }))
-                            : [],
-                    currentEmotionId: post.userReaction?.emotionTypeID || null,
-                    currentEmotionName: post.userReaction?.emotionName || null,
-                    emotions: post?.reactions?.map((emo) => ({
-                        id: emo?.reactionID,
-                        emotion: {
-                            id: emo?.emotionTypeID,
-                            name: emo?.emotionName,
-                        },
-                        userInfo: {
-                            id: emo?.userID,
-                        },
-                    })),
-                })),
-            ]);
+    //         setPosts((prevPosts) => [
+    //             ...prevPosts,
+    //             ...res.data.map((post) => ({
+    //                 id: post.postID,
+    //                 posterId: post.userID,
+    //                 firstName: post.firstName,
+    //                 lastName: post.lastName,
+    //                 avatar: post.avatarUrl,
+    //                 content: post.content,
+    //                 createdAt: post.createdAt,
+    //                 pictures:
+    //                     post.images?.length > 0
+    //                         ? post.images.map((image) => ({
+    //                               pictureUrl: image?.imgUrl,
+    //                           }))
+    //                         : [],
+    //                 currentEmotionId: post.userReaction?.emotionTypeID || null,
+    //                 currentEmotionName: post.userReaction?.emotionName || null,
+    //                 emotions: post?.reactions?.map((emo) => ({
+    //                     id: emo?.reactionID,
+    //                     emotion: {
+    //                         id: emo?.emotionTypeID,
+    //                         name: emo?.emotionName,
+    //                     },
+    //                     userInfo: {
+    //                         id: emo?.userID,
+    //                     },
+    //                 })),
+    //             })),
+    //         ]);
 
-            setHasMore(res.data.length > 0);
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    //         setHasMore(res.data.length > 0);
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // };
 
     useEffect(() => {
         const fetchAllPosts = async () => {
             try {
-                const res = await getAllPostsService();
-                setPosts(
-                    res.data.map((post) => {
-                        return {
-                            id: post.postID,
-                            posterId: post.userID,
-                            firstName: post.firstName,
-                            lastName: post.lastName,
-                            avatar: post.avatarUrl,
-                            content: post.content,
-                            createdAt: post.createdAt,
-                            pictures:
-                                post.images?.length > 0 &&
-                                post.images.map((image) => {
-                                    return {
-                                        pictureUrl: image?.imgUrl,
-                                    };
-                                }),
-                            currentEmotionId: post.userReaction?.emotionTypeID || null, // Emotion của user hiện tại
-                            currentEmotionName: post.userReaction?.emotionName || null,
-                            // currentEmotionId: post.reactions?.emotionTypeID || null, // Emotion của user hiện tại
-                            // currentEmotionName: post.reactions?.emotionName || null,
-                            emotions: post?.reactions?.map((emo) => {
-                                return {
-                                    id: emo?.reactionID,
-                                    emotion: {
-                                        id: emo?.emotionTypeID,
-                                        name: emo?.emotionName,
-                                    },
-                                    userInfo: {
-                                        id: emo?.userID,
-                                    },
-                                };
-                            }),
-                        };
-                    }),
-                );
+                const res = await getAllPostsService(page, 10);
+
+                setPosts((prevPosts) => [
+                    ...prevPosts,
+                    ...res.data.map((post) => ({
+                        id: post.postID,
+                        posterId: post.userID,
+                        firstName: post.firstName,
+                        lastName: post.lastName,
+                        avatar: post.avatarUrl,
+                        content: post.content,
+                        createdAt: post.createdAt,
+                        pictures:
+                            post.images?.length > 0
+                                ? post.images.map((image) => ({
+                                      pictureUrl: image?.imgUrl,
+                                  }))
+                                : [],
+                        currentEmotionId: post.userReaction?.emotionTypeID || null,
+                        currentEmotionName: post.userReaction?.emotionName || null,
+                        emotions: post?.reactions?.map((emo) => ({
+                            id: emo?.reactionID,
+                            emotion: {
+                                id: emo?.emotionTypeID,
+                                name: emo?.emotionName,
+                            },
+                            userInfo: {
+                                id: emo?.userID,
+                            },
+                        })),
+                    })),
+                ]);
+
+                setHasMore(res.data.length > 0);
             } catch (error) {
                 console.error(error);
             }

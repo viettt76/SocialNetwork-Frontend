@@ -84,7 +84,7 @@ function App() {
                             />
                         );
                     })}
-                    {userInfo?.role !== 'admin' &&
+                    {userInfo?.role?.toLowerCase() === 'admin' &&
                         protectedRoutes.map((route, index) => {
                             const Page = route.element;
                             let Layout = DefaultLayout;

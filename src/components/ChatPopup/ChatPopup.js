@@ -22,6 +22,8 @@ import { HubConnectionBuilder } from '@microsoft/signalr';
 import { calculateTime, uploadToCloudinary } from '~/utils/commonUtils';
 import { AngryIcon, HaHaIcon, LikeIcon, LoveIcon, SadIcon, WowIcon } from '~/components/Icons';
 import Call from '../Call';
+import 'tippy.js/dist/tippy.css';
+import Tippy from '@tippyjs/react/headless';
 
 const ChatPopup = ({ friend, index }) => {
     const { ref: chatPopupRef, isComponentVisible: isFocus, setIsComponentVisible: setIsFocus } = useClickOutside(true);
@@ -404,6 +406,7 @@ const ChatPopup = ({ friend, index }) => {
             reciverId: friend?.id,
             senderid: userInfo?.id,
         };
+        console.log(messageId);
         var currentReactionId = await connectionChathub.invoke('AddOrUpdateReactionToMessage', param);
         try {
             if (!messageId || emotionType === undefined || !userInfo?.id) {
@@ -522,6 +525,7 @@ const ChatPopup = ({ friend, index }) => {
         setIsCalling(false);
         setIsVideoCall(false);
     };
+
     return (
         <div
             style={{ right: index === 0 ? '3rem' : '38rem', zIndex: 2 - index }}
@@ -545,7 +549,7 @@ const ChatPopup = ({ friend, index }) => {
                     {friend?.lastName && friend?.firstName && (
                         <div className={clsx(styles['name'])}>{`${friend?.lastName} ${friend?.firstName}`}</div>
                     )}
-                    <FontAwesomeIcon
+                    {/* <FontAwesomeIcon
                         className={clsx(styles['chat-setting'])}
                         icon={faChevronDown}
                         onClick={handleShowSetting}
@@ -567,7 +571,7 @@ const ChatPopup = ({ friend, index }) => {
                                 handCall(true);
                             }}
                         ></FontAwesomeIcon>
-                    </div>
+                    </div> */}
                 </div>
                 <FontAwesomeIcon
                     icon={faXmark}
@@ -598,6 +602,9 @@ const ChatPopup = ({ friend, index }) => {
                                 const diff = date1 - date2;
                                 minDiff = diff / (1000 * 60);
                             }
+
+                            console.log(friend);
+
                             return (
                                 <div className={clsx(styles['chat-item-wrapper'])} key={`chat-${index}`}>
                                     {(index === 0 || minDiff >= 10) && (
@@ -618,7 +625,7 @@ const ChatPopup = ({ friend, index }) => {
                                                 message?.sender === friend?.id && (
                                                     <img
                                                         className={clsx(styles['message-avatar'])}
-                                                        src={friend?.avatar || defaultAvatar}
+                                                        src={friend?.avatarUrl || defaultAvatar}
                                                     />
                                                 )}
                                             {message?.message && (
@@ -654,153 +661,223 @@ const ChatPopup = ({ friend, index }) => {
                                                     [styles['display-my-expand']]: message?.sender === userInfo?.id,
                                                 })}
                                             >
-                                                <div className={clsx(styles['message-expand'])}>
-                                                    <svg
-                                                        viewBox="0 0 20 20"
-                                                        width="16"
-                                                        height="16"
-                                                        fill="currentColor"
-                                                        className="xfx01vb x1lliihq x1tzjh5l x1k90msu x2h7rmj x1qfuztq"
-                                                        style={{ color: '#65676b' }}
-                                                    >
-                                                        <path
-                                                            d="M6.062 11.548c.596 1.376 2.234 2.453 3.955 2.452 1.694 0 3.327-1.08 3.921-2.452a.75.75 0 1 0-1.376-.596c-.357.825-1.451 1.548-2.545 1.548-1.123 0-2.22-.72-2.579-1.548a.75.75 0 1 0-1.376.596z"
-                                                            fillRule="nonzero"
-                                                        ></path>
-                                                        <ellipse cx="13.6" cy="6.8" rx="1.2" ry="1.2"></ellipse>
-                                                        <ellipse cx="6.4" cy="6.8" rx="1.2" ry="1.2"></ellipse>
-                                                        <ellipse
-                                                            stroke="currentColor"
-                                                            strokeWidth="1.5"
-                                                            fill="none"
-                                                            cx="10"
-                                                            cy="10"
-                                                            rx="9"
-                                                            ry="9"
-                                                        ></ellipse>
-                                                    </svg>
-                                                    <ul
-                                                        className={clsx(styles['emotion-list'], {
-                                                            [[styles['left--9']]]: message?.message?.length < 4,
-                                                        })}
-                                                    >
-                                                        <li
-                                                            className={clsx(styles['emotion'])}
-                                                            onClick={() =>
-                                                                handleEmotionMessage({
-                                                                    messageId: message?.id,
-                                                                    emotionType: '0',
-                                                                })
-                                                            }
+                                                {message?.sender === userInfo?.id && (
+                                                    <div className={clsx(styles['more-popup'])}>
+                                                        <svg
+                                                            viewBox="6 6 24 24"
+                                                            fill="currentColor"
+                                                            width="16"
+                                                            height="16"
+                                                            className="xfx01vb x1lliihq x1tzjh5l x1k90msu x2h7rmj x1qfuztq"
+                                                            overflow="visible"
+                                                            style={{ color: '#65676b' }}
                                                         >
-                                                            <LikeIcon width={20} height={20} />
-                                                        </li>
-                                                        <li
-                                                            className={clsx(styles['emotion'])}
-                                                            onClick={() =>
-                                                                handleEmotionMessage({
-                                                                    messageId: message?.id,
-                                                                    emotionType: '1',
-                                                                })
-                                                            }
-                                                        >
-                                                            <LoveIcon width={20} height={20} />
-                                                        </li>
-                                                        <li
-                                                            className={clsx(styles['emotion'])}
-                                                            onClick={() =>
-                                                                handleEmotionMessage({
-                                                                    messageId: message?.id,
-                                                                    emotionType: '2',
-                                                                })
-                                                            }
-                                                        >
-                                                            <HaHaIcon width={20} height={20} />
-                                                        </li>
-                                                        <li
-                                                            className={clsx(styles['emotion'])}
-                                                            onClick={() =>
-                                                                handleEmotionMessage({
-                                                                    messageId: message?.id,
-                                                                    emotionType: '3',
-                                                                })
-                                                            }
-                                                        >
-                                                            <WowIcon width={20} height={20} />
-                                                        </li>
-                                                        <li
-                                                            className={clsx(styles['emotion'])}
-                                                            onClick={() =>
-                                                                handleEmotionMessage({
-                                                                    messageId: message?.id,
-                                                                    emotionType: '4',
-                                                                })
-                                                            }
-                                                        >
-                                                            <SadIcon width={20} height={20} />
-                                                        </li>
-                                                        <li
-                                                            className={clsx(styles['emotion'])}
-                                                            onClick={() =>
-                                                                handleEmotionMessage({
-                                                                    messageId: message?.id,
-                                                                    emotionType: '5',
-                                                                })
-                                                            }
-                                                        >
-                                                            <AngryIcon width={20} height={20} />
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                                <div className={clsx(styles['more-popup'])}>
-                                                    <svg
-                                                        viewBox="6 6 24 24"
-                                                        fill="currentColor"
-                                                        width="16"
-                                                        height="16"
-                                                        className="xfx01vb x1lliihq x1tzjh5l x1k90msu x2h7rmj x1qfuztq"
-                                                        overflow="visible"
-                                                        style={{ color: '#65676b' }}
-                                                    >
-                                                        <path d="M18 12.5A2.25 2.25 0 1 1 18 8a2.25 2.25 0 0 1 0 4.5zM18 20.25a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5zM15.75 25.75a2.25 2.25 0 1 0 4.5 0 2.25 2.25 0 0 0-4.5 0z"></path>
-                                                    </svg>
+                                                            <path d="M18 12.5A2.25 2.25 0 1 1 18 8a2.25 2.25 0 0 1 0 4.5zM18 20.25a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5zM15.75 25.75a2.25 2.25 0 1 0 4.5 0 2.25 2.25 0 0 0-4.5 0z"></path>
+                                                        </svg>
 
-                                                    <ul
-                                                        className={clsx(styles['more-popup-list'], {
-                                                            [styles['display-my-expand']]:
-                                                                message?.sender === userInfo?.id,
-                                                        })}
+                                                        <ul
+                                                            className={clsx(styles['more-popup-list'], {
+                                                                [styles['display-my-expand']]:
+                                                                    message?.sender === userInfo?.id,
+                                                            })}
+                                                        >
+                                                            <li className={clsx(styles['more-popup-item'])}>
+                                                                Phản hồi
+                                                            </li>
+                                                            {message?.sender === userInfo?.id && (
+                                                                <li
+                                                                    className={clsx(styles['more-popup-item'])}
+                                                                    onClick={() => {
+                                                                        handleUpdateMessage(
+                                                                            message.id,
+                                                                            message.sender,
+                                                                            message.reactionByUser,
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    Chỉnh sửa
+                                                                </li>
+                                                            )}
+                                                            {message?.sender === userInfo?.id && (
+                                                                <li
+                                                                    className={clsx(styles['more-popup-item'])}
+                                                                    onClick={() =>
+                                                                        handleReamoveMessage(message.id, message.sender)
+                                                                    }
+                                                                >
+                                                                    Gỡ
+                                                                </li>
+                                                            )}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                <div className={clsx(styles['message-expand'])}>
+                                                    <Tippy
+                                                        interactive={true}
+                                                        trigger="mouseenter"
+                                                        render={(attrs) => (
+                                                            <ul
+                                                                className={clsx('box', styles['emotion-list'], {
+                                                                    [[styles['left--9']]]: message?.message?.length < 4,
+                                                                })}
+                                                                tabIndex="-1"
+                                                                {...attrs}
+                                                            >
+                                                                <li
+                                                                    className={clsx(styles['emotion'])}
+                                                                    onClick={() =>
+                                                                        handleEmotionMessage({
+                                                                            messageId: message?.id,
+                                                                            emotionType: '0',
+                                                                        })
+                                                                    }
+                                                                >
+                                                                    <LikeIcon width={20} height={20} />
+                                                                </li>
+                                                                <li
+                                                                    className={clsx(styles['emotion'])}
+                                                                    onClick={() =>
+                                                                        handleEmotionMessage({
+                                                                            messageId: message?.id,
+                                                                            emotionType: '1',
+                                                                        })
+                                                                    }
+                                                                >
+                                                                    <LoveIcon width={20} height={20} />
+                                                                </li>
+                                                                <li
+                                                                    className={clsx(styles['emotion'])}
+                                                                    onClick={() =>
+                                                                        handleEmotionMessage({
+                                                                            messageId: message?.id,
+                                                                            emotionType: '2',
+                                                                        })
+                                                                    }
+                                                                >
+                                                                    <HaHaIcon width={20} height={20} />
+                                                                </li>
+                                                                <li
+                                                                    className={clsx(styles['emotion'])}
+                                                                    onClick={() =>
+                                                                        handleEmotionMessage({
+                                                                            messageId: message?.id,
+                                                                            emotionType: '3',
+                                                                        })
+                                                                    }
+                                                                >
+                                                                    <WowIcon width={20} height={20} />
+                                                                </li>
+                                                                <li
+                                                                    className={clsx(styles['emotion'])}
+                                                                    onClick={() =>
+                                                                        handleEmotionMessage({
+                                                                            messageId: message?.id,
+                                                                            emotionType: '4',
+                                                                        })
+                                                                    }
+                                                                >
+                                                                    <SadIcon width={20} height={20} />
+                                                                </li>
+                                                                <li
+                                                                    className={clsx(styles['emotion'])}
+                                                                    onClick={() =>
+                                                                        handleEmotionMessage({
+                                                                            messageId: message?.id,
+                                                                            emotionType: '5',
+                                                                        })
+                                                                    }
+                                                                >
+                                                                    <AngryIcon width={20} height={20} />
+                                                                </li>
+                                                            </ul>
+                                                        )}
                                                     >
-                                                        <li className={clsx(styles['more-popup-item'])}>Phản hồi</li>
-                                                        {message?.sender === userInfo?.id && (
-                                                            <li
-                                                                className={clsx(styles['more-popup-item'])}
-                                                                onClick={() => {
-                                                                    handleUpdateMessage(
-                                                                        message.id,
-                                                                        message.sender,
-                                                                        message.reactionByUser,
-                                                                    );
-                                                                }}
+                                                        <div style={{ padding: '1rem' }}>
+                                                            <svg
+                                                                viewBox="0 0 20 20"
+                                                                width="16"
+                                                                height="16"
+                                                                fill="currentColor"
+                                                                className="xfx01vb x1lliihq x1tzjh5l x1k90msu x2h7rmj x1qfuztq"
+                                                                style={{ color: '#65676b' }}
                                                             >
-                                                                Chỉnh sửa
-                                                            </li>
-                                                        )}
-                                                        {message?.sender === userInfo?.id && (
-                                                            <li
-                                                                className={clsx(styles['more-popup-item'])}
-                                                                onClick={() =>
-                                                                    handleReamoveMessage(message.id, message.sender)
-                                                                }
-                                                            >
-                                                                Gỡ
-                                                            </li>
-                                                        )}
-                                                    </ul>
+                                                                <path
+                                                                    d="M6.062 11.548c.596 1.376 2.234 2.453 3.955 2.452 1.694 0 3.327-1.08 3.921-2.452a.75.75 0 1 0-1.376-.596c-.357.825-1.451 1.548-2.545 1.548-1.123 0-2.22-.72-2.579-1.548a.75.75 0 1 0-1.376.596z"
+                                                                    fillRule="nonzero"
+                                                                ></path>
+                                                                <ellipse cx="13.6" cy="6.8" rx="1.2" ry="1.2"></ellipse>
+                                                                <ellipse cx="6.4" cy="6.8" rx="1.2" ry="1.2"></ellipse>
+                                                                <ellipse
+                                                                    stroke="currentColor"
+                                                                    strokeWidth="1.5"
+                                                                    fill="none"
+                                                                    cx="10"
+                                                                    cy="10"
+                                                                    rx="9"
+                                                                    ry="9"
+                                                                ></ellipse>
+                                                            </svg>
+                                                        </div>
+                                                    </Tippy>
                                                 </div>
+                                                {message?.sender !== userInfo?.id && (
+                                                    <div className={clsx(styles['more-popup'])}>
+                                                        <svg
+                                                            viewBox="6 6 24 24"
+                                                            fill="currentColor"
+                                                            width="16"
+                                                            height="16"
+                                                            className="xfx01vb x1lliihq x1tzjh5l x1k90msu x2h7rmj x1qfuztq"
+                                                            overflow="visible"
+                                                            style={{ color: '#65676b' }}
+                                                        >
+                                                            <path d="M18 12.5A2.25 2.25 0 1 1 18 8a2.25 2.25 0 0 1 0 4.5zM18 20.25a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5zM15.75 25.75a2.25 2.25 0 1 0 4.5 0 2.25 2.25 0 0 0-4.5 0z"></path>
+                                                        </svg>
+
+                                                        <ul
+                                                            className={clsx(styles['more-popup-list'], {
+                                                                [styles['display-my-expand']]:
+                                                                    message?.sender === userInfo?.id,
+                                                            })}
+                                                        >
+                                                            <li className={clsx(styles['more-popup-item'])}>
+                                                                Phản hồi
+                                                            </li>
+                                                            {message?.sender === userInfo?.id && (
+                                                                <li
+                                                                    className={clsx(styles['more-popup-item'])}
+                                                                    onClick={() => {
+                                                                        handleUpdateMessage(
+                                                                            message.id,
+                                                                            message.sender,
+                                                                            message.reactionByUser,
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    Chỉnh sửa
+                                                                </li>
+                                                            )}
+                                                            {message?.sender === userInfo?.id && (
+                                                                <li
+                                                                    className={clsx(styles['more-popup-item'])}
+                                                                    onClick={() =>
+                                                                        handleReamoveMessage(message.id, message.sender)
+                                                                    }
+                                                                >
+                                                                    Gỡ
+                                                                </li>
+                                                            )}
+                                                        </ul>
+                                                    </div>
+                                                )}
                                             </div>
                                             {message.reactionByUser.length > 0 && (
-                                                <div className={clsx(styles['reaction-wrapper'])}>
+                                                <div
+                                                    className={clsx(styles['reaction-wrapper'], {
+                                                        [[styles['reaction-current-user']]]:
+                                                            message?.sender === userInfo?.id,
+                                                    })}
+                                                >
                                                     {message.reactionByUser !== null &&
                                                         message.reactionByUser.map((emotion, index) => (
                                                             <Fragment key={index}>
@@ -908,7 +985,7 @@ const ChatPopup = ({ friend, index }) => {
                         })}
                         {isDisplayTyping && (
                             <div className={clsx(styles['typing-wrapper'])}>
-                                <img className={clsx(styles['message-avatar'])} src={friend?.avatar || defaultAvatar} />
+                                <img className={clsx(styles['messaged'])} src={friend?.avatar || defaultAvatar} />
                                 <div className={clsx(styles['typing-indicator'])}>
                                     <span></span>
                                     <span></span>

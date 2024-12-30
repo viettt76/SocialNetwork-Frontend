@@ -264,6 +264,10 @@ const ChatGroupPopup = ({ index, group }) => {
 
     const [messages, setMessages] = useState([]);
 
+    useEffect(() => {
+        endOfMessagesRef.current.scrollTop = endOfMessagesRef.current.scrollHeight;
+    }, [messages]);
+
     const [sendMessage, setSendMessage] = useState('');
     const [processingMessage, setProcessingMessage] = useState('');
     const [currentMessageSelect, setcurrentMessageSelect] = useState({});

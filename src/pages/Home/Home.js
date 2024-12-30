@@ -59,7 +59,7 @@ const Home = () => {
             try {
                 const res = await getAllPostsService();
                 setPosts(
-                    res.data.map((post) => {
+                    res.map((post) => {
                         return {
                             id: post.postID,
                             posterId: post.userID,
@@ -170,6 +170,20 @@ const Home = () => {
                 )}
             </div>
         </div>
+        // <div style={{ position: 'relative', backgroundColor: 'blue' }}>
+        //     <div style={{ backgroundColor: 'red', width: '300px', height: '300px' }}>
+        //         <div
+        //             style={{
+        //                 position: 'absolute',
+        //                 backgroundColor: 'green',
+        //                 width: '30px',
+        //                 height: '30px',
+        //                 top: '-20px',
+        //                 left: '-20px',
+        //             }}
+        //         ></div>
+        //     </div>
+        // </div>
     );
 };
 

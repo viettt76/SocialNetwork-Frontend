@@ -82,6 +82,8 @@ const WritePost = () => {
         } catch (error) {
             console.log(error);
             dispatch(actions.stopLoading('writePost'));
+        } finally {
+            location.reload();
         }
     };
 

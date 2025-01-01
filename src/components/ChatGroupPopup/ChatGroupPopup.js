@@ -324,6 +324,8 @@ const ChatGroupPopup = ({ index, group }) => {
             e.target.value = null;
         } catch (error) {
             console.log(error);
+        } finally {
+            location.reload();
         }
     };
 
@@ -365,6 +367,7 @@ const ChatGroupPopup = ({ index, group }) => {
             console.log(error);
         } finally {
             handleHideModalLeaveGroup();
+            location.reload();
         }
     };
 
@@ -906,7 +909,7 @@ const ChatGroupPopup = ({ index, group }) => {
             >
                 <div className={clsx(styles['chat-receiver'])}>
                     <div className={clsx(styles['avatar'])}>
-                        <img src={group?.avatarUrl || defaultAvatar} />
+                        <img src={group?.avatarUrl || group?.avatar || defaultAvatar} />
                     </div>
                     {group?.name && <div className={clsx(styles['name'])}>{`${group?.name}`}</div>}
                     <FontAwesomeIcon

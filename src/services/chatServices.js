@@ -54,8 +54,8 @@ export const getGroupMembersService = ({ groupId, textSearch, pageIndex, isTotal
         params: { TextSearch: textSearch, GroupChatId: groupId, PageIndex: pageIndex, IsTotalCount: isTotalCount },
     });
 };
-export const leaveGroupChatService = (groupChatId) => {
-    return axios.delete(`/chat/group-chat/member/${groupChatId}`);
+export const leaveGroupChatService = (groupId) => {
+    return axios.put(`/chat/leaveGroupChat?groupId=${groupId}`);
 };
 
 export const getLatestConversationsService = ({ textSearch, pageIndex, isTotalCount }) => {

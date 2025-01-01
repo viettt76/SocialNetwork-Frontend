@@ -544,7 +544,7 @@ const ChatPopup = ({ friend, index }) => {
                             [[styles['is-online']]]: friend?.isOnline,
                         })}
                     >
-                        <img src={friend?.avatarUrl || defaultAvatar} />
+                        <img src={friend?.avatarUrl || friend?.avatar || defaultAvatar} />
                     </div>
                     {friend?.lastName && friend?.firstName && (
                         <div className={clsx(styles['name'])}>{`${friend?.lastName} ${friend?.firstName}`}</div>
@@ -1010,7 +1010,7 @@ const ChatPopup = ({ friend, index }) => {
                     <input
                         value={sendMessage}
                         className={clsx(styles['send-message'])}
-                        placeholder="Dien dep trai"
+                        placeholder="Aa"
                         onChange={(e) => {
                             setSendMessage(e.target.value);
                             handlerTyping();

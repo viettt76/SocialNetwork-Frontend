@@ -74,6 +74,8 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger, notification
             });
         } catch (error) {
             console.log(error);
+        } finally {
+            location.reload();
         }
     };
 
@@ -81,6 +83,7 @@ const Messenger = ({ messengerRef, showMessenger, setShowMessenger, notification
         var param = {
             recieverId: chat.isGroupChat ? null : chat?.id,
             groupId: chat.isGroupChat ? chat?.id : null,
+            avatarUrl: chat.avatar,
         };
         await notificationConnection.invoke('ReadMessageNotification', param);
 

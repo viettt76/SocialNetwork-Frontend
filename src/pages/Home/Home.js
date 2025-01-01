@@ -20,7 +20,7 @@ const Home = () => {
 
                 setPosts((prevPosts) => [
                     ...prevPosts,
-                    ...res.data.map((post) => ({
+                    ...res.map((post) => ({
                         id: post.postID,
                         posterId: post.userID,
                         firstName: post.firstName,

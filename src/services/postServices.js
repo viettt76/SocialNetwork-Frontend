@@ -23,7 +23,7 @@ export const getAllUserPostsService = async (userId, pageIndex, pageSize) => {
             pageSize,
         },
     });
-    return postUser.data;
+    return postUser;
 };
 
 export const getAllEmotionsService = () => {

@@ -64,6 +64,7 @@ const UserProfile = () => {
                     gender: res?.gender,
                     isPrivate: res?.isPrivate,
                     totalOfFirend: res?.totalOfFirend,
+                    role: res?.role,
                 };
 
                 setUserInfo(value);

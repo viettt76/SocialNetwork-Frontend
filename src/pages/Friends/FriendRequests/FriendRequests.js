@@ -32,22 +32,6 @@ const FriendRequests = () => {
         fetchFriendRequest();
     }, []);
 
-    useEffect(() => {
-        handleRefuseFriendRequest();
-        handleAcceptFriendship();
-        signalRClient.on('CancelUser', handleAcceptFriendship);
-        signalRClient.on('CancelUser', handleRefuseFriendRequest);
-
-        // signalRClient.on('cancelFriendRequest', handleCancelFriendRequest);
-
-        return () => {
-            signalRClient.off('CancelUser', handleAcceptFriendship);
-            signalRClient.off('CancelUser', handleRefuseFriendRequest);
-
-            // signalRClient.off('cancelFriendRequest', handleCancelFriendRequest);
-        };
-    }, []);
-
     const handleAcceptFriendship = async (id) => {
         try {
             await acceptFriendshipService(id);
@@ -55,7 +39,6 @@ const FriendRequests = () => {
                 const frs = filter(prev, (f) => f.id !== id);
                 return frs;
             });
-            dispatch(actions.removeNotificationOther(notification));
         } catch (error) {
             console.log(error);
         }

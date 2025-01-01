@@ -15,8 +15,15 @@ export const getAllPostsService = (pageIndex, pageSize) => {
         },
     });
 };
-export const getAllUserPostsService = ({ userId }) => {
-    return axios.get(`/Post/User`, { params: { userId } });
+export const getAllUserPostsService = async (userId, pageIndex, pageSize) => {
+    var postUser = await axios.get(`/Post/User`, {
+        params: {
+            userId,
+            pageIndex,
+            pageSize,
+        },
+    });
+    return postUser.data;
 };
 
 export const getAllEmotionsService = () => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from './Profile.module.scss';
 // import { getProfileService, getUserPostsService } from '~/services/userServices';
@@ -30,7 +30,9 @@ const UserProfile = () => {
     const handleCloseModal = () => setShowModal(false);
 
     const [posts, setPosts] = useState([]);
-
+    const [hasMore, setHasMore] = useState(true);
+    const [page, setPage] = useState(1);
+    const observer = useRef();
     const [totalOfFriend, setTotalOfFriend] = useState(0);
 
     const [userInfo, setUserInfo] = useState({
@@ -78,9 +80,10 @@ const UserProfile = () => {
                 if (userId === null) {
                     return;
                 }
-                const res = await getAllUserPostsService({ userId: userId });
+                const res = await getAllUserPostsService(userId, page, 10);
+
                 setPosts(
-                    res.map((post) => {
+                    res.data.map((post) => {
                         return {
                             id: post.postID,
                             posterId: post.userID,
@@ -96,10 +99,9 @@ const UserProfile = () => {
                                         pictureUrl: image?.imgUrl,
                                     };
                                 }),
-                            currentEmotionId: post.userReaction?.emotionTypeID || null, // Emotion của user hiện tại
+                            currentEmotionId: post.userReaction?.emotionTypeID || null,
                             currentEmotionName: post.userReaction?.emotionName || null,
-                            // currentEmotionId: post.reactions?.emotionTypeID || null, // Emotion của user hiện tại
-                            // currentEmotionName: post.reactions?.emotionName || null,
+
                             emotions: post?.reactions?.map((emo) => {
                                 return {
                                     id: emo?.reactionID,
@@ -115,13 +117,14 @@ const UserProfile = () => {
                         };
                     }),
                 );
+                setHasMore(res.data.length > 0);
                 setLoading(false);
             } catch (error) {
                 console.error(error);
             }
         };
 
-        // signalRClient.on('ReceivePost', fetchAllPosts());
+        signalRClient.on('ReceivePost', fetchAllPosts());
         fetchUserInfo();
         fetchAllPosts();
         const startSignalR = () => {
@@ -163,6 +166,17 @@ const UserProfile = () => {
         };
     }, [userId]);
 
+    const lastPostRef = (node) => {
+        if (observer.current) observer.current.disconnect();
+
+        observer.current = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage((prevPage) => prevPage + 1);
+            }
+        });
+
+        if (node) observer.current.observe(node);
+    };
     const [updateAvatar, setUpdateAvatar] = useState(null);
     const [showModalUpdateAvatar, setShowModalUpdateAvatar] = useState(false);
 
@@ -232,7 +246,6 @@ const UserProfile = () => {
 
     return (
         <div className={styles.profileContainer}>
-            {/* Phần header hồ sơ */}
             <div className={styles.profileHeader}>
                 <img
                     src={userInfo.avatar || defaultAvatar}
@@ -319,7 +332,17 @@ const UserProfile = () => {
             </div>
             <div className={styles.postsContainer}>
                 {posts.length > 0
-                    ? posts.map((post) => <Post className={clsx(styles['post-item'])} key={post.id} postInfo={post} />)
+                    ? posts.map((post, index) => {
+                          // Kiểm tra nếu là bài viết cuối cùng
+                          return (
+                              <Post
+                                  styles={{ width: `80%` }}
+                                  key={post.id}
+                                  postInfo={post}
+                                  ref={index === posts.length - 1 ? lastPostRef : null}
+                              />
+                          );
+                      })
                     : loading === false && <p className="fz-16">Người dùng này chưa có bài viết nào.</p>}
             </div>
             {showModal && (

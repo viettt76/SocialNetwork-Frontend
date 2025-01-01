@@ -47,9 +47,9 @@ const SearchInput = () => {
             fetchUsers();
             signalRClient.on('CancelUser', fetchUsers);
         } else {
-            // signalRClient.on('seedSearUser', (users) => {
-            //     setUsers(users);
-            // });
+            signalRClient.on('seedSearUser', (users) => {
+                setUsers(users);
+            });
             setUsers([]);
         }
     }, [keywordDebounced, pageIndex]);

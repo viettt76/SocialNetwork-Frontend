@@ -45,10 +45,19 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
         }
 
         return () => {
-            signalRClient.off('CancelUser');
             signalRClient.off('FriendRequestNotification');
         };
     }, [dispatch]);
+
+    useEffect(() => {
+        signalRClient.on('CancelUser', (notificationId) => {
+            dispatch(actions.removeNotificationOther(notificationId));
+        });
+
+        return () => {
+            signalRClient.off('CancelUser');
+        };
+    }, []);
 
     const handleAcceptFriendship = async ({ notificationId, senderId }) => {
         try {

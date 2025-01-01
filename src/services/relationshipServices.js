@@ -33,6 +33,10 @@ export const refuseFriendRequestService = (senderId) => {
     return axios.post(`/User/decline/${senderId}`);
 };
 
+export const readNotidicationService = (notificationId) => {
+    return axios.put(`/User/readNotification?notificationId=${notificationId}`);
+};
+
 export const acceptFriendshipService = (friendId) => {
     return axios.post('/User/accept', friendId, {
         headers: { 'Content-Type': 'application/json' },

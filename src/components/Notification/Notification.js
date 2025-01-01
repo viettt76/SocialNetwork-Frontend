@@ -12,7 +12,11 @@ import defaultAvatar from '~/assets/imgs/default-avatar.png';
 import { Button } from 'react-bootstrap';
 import { timeDifferenceFromNow } from '~/utils/commonUtils';
 import { Link } from 'react-router-dom';
-import { acceptFriendshipService, refuseFriendRequestService } from '~/services/relationshipServices';
+import {
+    acceptFriendshipService,
+    refuseFriendRequestService,
+    readNotidicationService,
+} from '~/services/relationshipServices';
 import * as actions from '~/redux/actions';
 import signalRClient from '../Post/signalRClient';
 
@@ -77,6 +81,14 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
         }
     };
 
+    const handleReadNotification = async (notificationId) => {
+        try {
+            await readNotidicationService(notificationId);
+            dispatch(actions.removeNotificationOther(notificationId));
+        } catch (error) {
+            console.error('Error reading notification:', error);
+        }
+    };
     return (
         <div
             ref={notificationRef}
@@ -94,7 +106,10 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
                                     src={notification?.avatarUrl || defaultAvatar}
                                 />
                             </Link>
-                            <div className={clsx(styles['notification-content-time'])}>
+                            <div
+                                className={clsx(styles['notification-content-time'])}
+                                onClick={() => handleReadNotification(notification?.id)}
+                            >
                                 <div
                                     className={clsx(styles['notification-content'])}
                                     dangerouslySetInnerHTML={{ __html: notification?.message }}
@@ -103,7 +118,7 @@ const Notification = ({ notificationRef, showNotification, setShowNotification }
                                     {timeDifferenceFromNow(notification?.createdAt)}
                                 </div>
 
-                                {notification?.type === 1 && (
+                                {notification?.type === 2 && (
                                     <div className="mt-2">
                                         <Button
                                             className="fz-16 me-3"

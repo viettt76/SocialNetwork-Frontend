@@ -83,7 +83,7 @@ const UserProfile = () => {
                 const res = await getAllUserPostsService(userId, page, 10);
 
                 setPosts(
-                    res.map((post) => {
+                    res.data.data.map((post) => {
                         return {
                             id: post.postID,
                             posterId: post.userID,
